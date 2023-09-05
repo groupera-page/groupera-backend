@@ -1,0 +1,24 @@
+{
+  "name": "we.together",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/we-together-page/wt-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/we-together-page/wt-backend/issues"
+  },
+  "homepage": "https://github.com/we-together-page/wt-backend#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
