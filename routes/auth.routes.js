@@ -16,13 +16,15 @@ const { isAuthenticated } = require("../middleware/jwt.middleware.js");
 // How many rounds should bcrypt run the salt (default - 10 rounds)
 const saltRounds = 10;
 
+const randomNumber = Math.floor(1000 + Math.random() * 9000);
+
 // POST /auth/signup  - Creates a new user in the database
 router.post("/signup", (req, res, next) => {
-  const { username, password} = req.body;
+  const { username, email, password, gender } = req.body;
 
   // Check if email or password or name are provided as empty strings
-  if (username === "" || password === "") {
-    res.status(400).json({ message: "Provide username and password" });
+  if (username === "" || email === "" || password === "") {
+    res.status(400).json({ message: "Please provide name, email, and password" });
     return;
   }
 
@@ -37,7 +39,7 @@ router.post("/signup", (req, res, next) => {
   }
 
   // Check the users collection if a user with the same email already exists
-  User.findOne({ username })
+  User.findOne({ email })
     .then((foundUser) => {
       // If the user with the same email already exists, send an error response
       if (foundUser) {
@@ -51,15 +53,15 @@ router.post("/signup", (req, res, next) => {
 
       // Create the new user in the database
       // We return a pending promise, which allows us to chain another `then`
-      return User.create({ username, password: hashedPassword });
+      return User.create({ username, email, password: hashedPassword, gender, emailToken: randomNumber });
     })
     .then((createdUser) => {
       // Deconstruct the newly created user object to omit the password
       // We should never expose passwords publicly
-      const { username, _id } = createdUser;
+      const { email, _id } = createdUser;
 
       // Create a new object that doesn't expose the password
-      const user = { username, _id };
+      const user = { email, _id };
 
       // Send a json response containing the user object
       res.status(201).json({ user: user });
@@ -69,17 +71,17 @@ router.post("/signup", (req, res, next) => {
 
 // POST  /auth/login - Verifies email and password and returns a JWT
 router.post("/login", (req, res, next) => {
-  const { username, password } = req.body;
-  console.log(username);
+  const { email, password } = req.body;
+  console.log(email);
 
   // Check if email or password are provided as empty string
-  if (username === "" || password === "") {
-    res.status(400).json({ message: "Provide username and password." });
+  if (email === "" || password === "") {
+    res.status(400).json({ message: "Provide email and password." });
     return;
   }
 
   // Check the users collection if a user with the same email exists
-  User.findOne({ username })
+  User.findOne({ email })
     .then((foundUser) => {
       console.log(foundUser);
       if (!foundUser) {
@@ -93,10 +95,10 @@ router.post("/login", (req, res, next) => {
 
       if (passwordCorrect) {
         // Deconstruct the user object to omit the password
-        const { _id, username } = foundUser;
+        const { _id, email } = foundUser;
 
         // Create an object that will be set as the token payload
-        const payload = { _id, username };
+        const payload = { _id, email };
 
         // Create a JSON Web Token and sign it
         const authToken = jwt.sign(payload, process.env.TOKEN_SECRET, {
