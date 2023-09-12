@@ -16,15 +16,15 @@ const { isAuthenticated } = require("../middleware/jwt.middleware.js");
 // How many rounds should bcrypt run the salt (default - 10 rounds)
 const saltRounds = 10;
 
-const randomNumber = Math.floor(1000 + Math.random() * 9000);
-
 // POST /auth/signup  - Creates a new user in the database
 router.post("/signup", (req, res, next) => {
-  const { username, email, password, gender } = req.body;
+  const { username, email, password, gender, goals } = req.body;
 
   // Check if email or password or name are provided as empty strings
   if (username === "" || email === "" || password === "") {
-    res.status(400).json({ message: "Please provide name, email, and password" });
+    res
+      .status(400)
+      .json({ message: "Please provide name, email, and password" });
     return;
   }
 
@@ -53,7 +53,13 @@ router.post("/signup", (req, res, next) => {
 
       // Create the new user in the database
       // We return a pending promise, which allows us to chain another `then`
-      return User.create({ username, email, password: hashedPassword, gender, emailToken: randomNumber });
+      return User.create({
+        username,
+        email,
+        password: hashedPassword,
+        gender,
+        goals
+      });
     })
     .then((createdUser) => {
       // Deconstruct the newly created user object to omit the password
@@ -72,7 +78,6 @@ router.post("/signup", (req, res, next) => {
 // POST  /auth/login - Verifies email and password and returns a JWT
 router.post("/login", (req, res, next) => {
   const { email, password } = req.body;
-  console.log(email);
 
   // Check if email or password are provided as empty string
   if (email === "" || password === "") {
@@ -83,7 +88,7 @@ router.post("/login", (req, res, next) => {
   // Check the users collection if a user with the same email exists
   User.findOne({ email })
     .then((foundUser) => {
-      console.log(foundUser);
+      // console.log(foundUser);
       if (!foundUser) {
         // If the user is not found, send an error response
         res.status(401).json({ message: "User not found." });
@@ -107,7 +112,12 @@ router.post("/login", (req, res, next) => {
         });
 
         // Send the token as the response
-        res.status(200).json({ authToken: authToken });
+
+        User.findById({_id})
+        .then((result) => {
+        res.status(200).json({ authToken: authToken, goals: result.goals });
+        });
+
       } else {
         res.status(401).json({ message: "Unable to authenticate the user" });
       }

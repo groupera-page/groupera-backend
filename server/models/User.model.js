@@ -25,7 +25,6 @@ const userSchema = new Schema(
       type: Boolean,
       default: false
     },
-    emailToken: String,
     gender: String,
     goals: String,
     illness: String,
