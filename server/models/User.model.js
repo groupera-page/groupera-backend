@@ -28,7 +28,10 @@ const userSchema = new Schema(
       type: Boolean,
       default: false
     },
-    gender: String,
+    gender: {
+      type: String,
+      // required: true
+    },
     goals: {
       type: [String],
       default: ""
