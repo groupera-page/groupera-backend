@@ -46,13 +46,13 @@ router.get('/:id/verify/:token', async (req, res) => {
 		});
 		if(!token) return res.status(400).send({message: "Invalid Link"});
 
-		await User.updateOne({_id: user._id, verified: true });
+		await User.updateOne({_id: user._id}, { verified: true });
 		await token.remove();
 		res.status(200).send({message: "Email verified successfully"});
 
 
 	} catch (error) {
-		res.status(400).send({message: "fack"})
+		res.status(400).send({message: `${error}`})
 	}
 })
 
