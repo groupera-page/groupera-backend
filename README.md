@@ -1,1 +1,1 @@
-# wt-backend
+# groupera-backend
