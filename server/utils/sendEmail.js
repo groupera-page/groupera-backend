@@ -1,6 +1,9 @@
 const nodemailer = require("nodemailer");
 
 module.exports = async (email, subject, text) => {
+
+  let button = `<a href=${text}>Click here to validate</a>`
+
   try {
     let transporter = nodemailer.createTransport({
       host: "smtp-relay.brevo.com",
@@ -16,7 +19,7 @@ module.exports = async (email, subject, text) => {
       from: "jayblez@gmail.com",
       to: email,
       subject: subject,
-      text: text
+      html: button
     });
     console.log("Email sent")
   } catch (error) {
