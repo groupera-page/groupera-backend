@@ -26,7 +26,7 @@ router.get("/groups", async (req, res) => {
     catch (error) {
         res.status(500).send(`${error}`)    }
 
-})
+});
 
 router.get("/:groupId", async (req, res) => {
     try {
@@ -34,6 +34,36 @@ router.get("/:groupId", async (req, res) => {
 		if(!group) return res.status(400).send({message: "Invalid Link"});
 
         res.status(200).send({ group })
+    }
+    catch (error) {
+        res.status(500).send({ message: `${error}` });
+
+    }
+});
+
+router.put("/:groupId", async (req, res) => {
+    try {
+        let group = await Group.findOne({_id: req.params.groupId});
+		if(!group) return res.status(400).send({message: "Invalid Link"});
+
+        group = await Group.updateOne({_id: req.params.groupId}, {...req.body})
+        res.status(200).send({message: "Group updated successfully"});
+
+    }
+    catch (error) {
+        res.status(500).send({ message: `${error}` });
+
+    }
+});
+
+router.delete("/:groupId", async (req, res) => {
+    try {
+        let group = await Group.findOne({_id: req.params.groupId});
+		if(!group) return res.status(400).send({message: "Invalid Link"});
+
+        group = await Group.deleteOne({_id: req.params.groupId});
+        res.status(200).send({message: "Group deleted successfully"});
+
     }
     catch (error) {
         res.status(500).send({ message: `${error}` });
