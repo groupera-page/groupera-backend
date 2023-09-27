@@ -28,6 +28,8 @@ const userSchema = new Schema(
       type: Boolean,
       default: false
     },
+    code:
+    {type: String},
     gender: {
       type: String,
       // required: true
@@ -71,6 +73,7 @@ const validate = (data) => {
 		password: passwordComplexity().required().label("Password"),
     goals: Joi.string().label("GoalJoi."),
 		experience: Joi.string().label("Experience"),
+    code: Joi.string().label("code")
 	});
 	return schema.validate(data);
 };
