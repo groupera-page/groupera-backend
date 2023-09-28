@@ -20,7 +20,7 @@ router.post("/signup", async (req, res) => {
 	  const hashPassword = await bcrypt.hash(req.body.password, salt);
   
 	  user = await new User({ ...req.body, password: hashPassword }).save();
-	  await sendEmail(user.email, "Verify Email", user.code);
+	//   await sendEmail(user.email, "Verify Email", user.code);
   
 	  res
 		.status(201)
@@ -33,16 +33,29 @@ router.post("/signup", async (req, res) => {
   });
 
 router.get("/verified/:id", async (req, res) => {
+	// User.findOne({code: req.params.id})
+    //       .then(user => res.json(user))
+    //       .catch(err => console.log(err))
 	try {
 	  const user = await User.findOne({ code: req.params.id });
 	  if (!user) return res.status(400).send({ message: "Invalid code" });
-	  console.log(user)
 	  await User.updateOne({_id: user._id}, { verified: true });
-	  res.status(200).send({ message: "Email verified successfully" });
+	  res.status(200).json(user);
   
 	} catch (error) {
-	  res.status(400).send({ message: `${error}` });
+		res.status(200).send({ message: "Email verified successfully" });
 	}
   });
+
+  router.get("/:id", async (req, res) => {
+	try {
+		const user = await User.findOne({ _id: req.params.id })
+		.populate('groups')
+		res.status(200).send({ user });
+	} catch (error) {
+		res.status(200).send({ message: "Email verified successfully" });
+
+	}
+  })
 
 module.exports = router;

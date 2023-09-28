@@ -1,5 +1,7 @@
 const router = require("express").Router();
 const Group = require("../models/Group.model");
+const { User } = require("../models/User.model");
+
 
 router.post("/create", async (req, res) => {
   try {
@@ -10,6 +12,7 @@ router.post("/create", async (req, res) => {
         .send({ message: "Group with given name already exists" });
 
     group = await new Group({ ...req.body }).save();
+    let user = await User.updateOne({_id: group.users[0]._id}, {$push: {groups: group._id}})
 
     res.status(201).send({ message: "Group successfully created" });
   } catch (error) {

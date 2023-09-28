@@ -53,7 +53,19 @@ const userSchema = new Schema(
     terms: {
       type: Boolean,
       date_agreed: Date
-    }
+    },
+    groups: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Group'
+      }
+    ],
+    // meetings: [
+    //   {
+    //     type: Schema.Types.ObjectId,
+    //     ref: 'Meeting'
+    //   }
+    // ]
   }
 );
 
