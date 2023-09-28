@@ -3,6 +3,8 @@ const { User, validate } = require("../models/User.model");
 const bcrypt = require("bcryptjs");
 const sendEmail = require("../utils/sendEmail");
 const Group = require("../models/Group.model");
+const Statistics = require("../models/Statistics.model");
+
 
 router.post("/signup", async (req, res) => {
   try {
@@ -22,8 +24,10 @@ router.post("/signup", async (req, res) => {
     user = await new User({ ...req.body, password: hashPassword }).save();
     //   await sendEmail(user.email, "Verify Email", user.code);
 
+	statistics = await Statistics.updateOne({_id: "6515618090c090fefcd887ac"}, {$push: {gender: user.gender}}, {$push: {themen: user.themen}})
+
     res.status(201).send({
-      message: "A verification code has been sent to your email account",
+      message: "A verification code has been sent to your email account", statistics
     });
   } catch (error) {
     res.status(500).send({ message: "Internal Server Error" });
