@@ -32,6 +32,9 @@ const userSchema = new Schema({
     type: String,
     // required: true
   },
+  birthday: {
+    type: Date
+  },
   goals: [
     {
       type: String,
