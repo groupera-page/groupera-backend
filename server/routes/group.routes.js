@@ -64,8 +64,21 @@ router.delete("/:groupId", async (req, res) => {
         let group = await Group.findOne({_id: req.params.groupId});
 		if(!group) return res.status(400).send({message: "Invalid Link"});
 
+        const data = await User.updateMany(
+            {
+              groups: {
+                $in: [req.params.groupId],
+              },
+            },
+            {
+              $pull: {
+                groups: req.params.groupId,
+              },
+            }
+          );
+
         group = await Group.deleteOne({_id: req.params.groupId});
-        res.status(200).send({message: "Group deleted successfully"});
+        res.status(200).send({message: "Group deleted successfully", data});
 
     }
     catch (error) {
