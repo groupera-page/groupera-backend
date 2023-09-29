@@ -30,6 +30,7 @@ const userSchema = new Schema({
   code: { type: String },
   gender: {
     type: String,
+    enum: ["Weiblich", "Mannlich", "Divers"]
     // required: true
   },
   birthday: {

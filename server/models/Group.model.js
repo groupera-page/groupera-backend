@@ -14,8 +14,8 @@ const groupSchema = new Schema({
     minLength: 3,
     maxlength: 250,
   },
-  imgUrl: {
-    type: String,
+  img: {
+    type: Object
   },
   topic: {
     type: String,
