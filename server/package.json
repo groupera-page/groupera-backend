@@ -28,6 +28,7 @@
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "express-jwt": "^8.3.0",
+    "googleapis": "^126.0.1",
     "joi": "^17.10.1",
     "joi-password-complexity": "^5.2.0",
     "jsonwebtoken": "^9.0.0",

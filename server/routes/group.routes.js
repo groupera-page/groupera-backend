@@ -2,9 +2,26 @@ const router = require("express").Router();
 const Group = require("../models/Group.model");
 const { User } = require("../models/User.model");
 const cloudinary = require("../utils/cloudinary");
+const { dateTimeForCalender, insertEvent } = require("../utils/googleCalendar");
 
 router.post("/create", async (req, res) => {
-  const { img } = req.body;
+  const { img, date, time } = req.body;
+
+  let dateTime = dateTimeForCalender(date, time);
+
+      // Event for Google Calendar
+      let event = {
+        summary: `This is the summary.`,
+        description: `This is the description.`,
+        start: {
+          dateTime: dateTime["start"],
+          timeZone: "Asia/Kolkata",
+        },
+        end: {
+          dateTime: dateTime["end"],
+          timeZone: "Asia/Kolkata",
+        },
+      };
 
   try {
     let group = await Group.findOne({ name: req.body.name });
@@ -17,11 +34,16 @@ router.post("/create", async (req, res) => {
         upload_preset: "groupera-test",
       });
       if (uploadRes) {
-        group = await new Group({ ...req.body, img: uploadRes }).save();
-        let user = await User.updateOne(
-          { _id: group.users[0]._id },
-          { $push: { groups: group._id } }
-        );
+        const newEvent = await insertEvent(event);
+        if(newEvent) {
+          group = await new Group({ ...req.body, img: uploadRes, events: newEvent.id }).save();
+          let user = await User.updateOne(
+            { _id: group.users[0]._id },
+            { $push: { groups: group._id } }
+          );
+        }
+
+        console.log(newEvent)
         res.status(201).send({ message: "Group successfully created" });
       }
     }

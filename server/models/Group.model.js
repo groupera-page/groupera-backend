@@ -23,11 +23,14 @@ const groupSchema = new Schema({
   frenquency: {
     type: String,
   },
-  day: {
+  date: {
     type: String,
   },
   time: {
     type: String,
+  },
+  events: {
+    type: String
   },
   // moderator: {
   //     type: Schema.Types.ObjectId,
