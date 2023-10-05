@@ -1,5 +1,5 @@
 const { Schema, model } = require("mongoose");
-const jwt = require("jsonwebtoken");
+// const jwt = require("jsonwebtoken");
 const Joi = require("joi");
 const passwordComplexity = require("joi-password-complexity");
 
@@ -74,12 +74,14 @@ const userSchema = new Schema({
   // ]
 });
 
-userSchema.methods.generateAuthToken = function () {
-  const token = jwt.sign({ _id: this._id }, process.env.TOKEN_SECRET, {
-    expiresIn: "7d",
-  });
-  return token;
-};
+// userSchema.methods.generateAuthToken = function () {
+//   const token = jwt.sign({ _id: this._id }, process.env.TOKEN_SECRET, {
+//     algorithm: "HS256",
+//     expiresIn: "7d",
+//   });
+//   console.log(token);
+//   return token;
+// };
 
 const User = model("User", userSchema);
 

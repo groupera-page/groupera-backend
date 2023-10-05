@@ -3,7 +3,10 @@ const { User, validate } = require("../models/User.model");
 const bcrypt = require("bcryptjs");
 const sendEmail = require("../utils/sendEmail");
 const Group = require("../models/Group.model");
-const Statistics = require("../models/Statistics.model");
+const jwt = require("jsonwebtoken");
+const { isAuthenticated } = require("../middleware/jwt.middleware.js");
+
+
 
 
 router.post("/signup", async (req, res) => {
@@ -24,13 +27,24 @@ router.post("/signup", async (req, res) => {
     user = await new User({ ...req.body, password: hashPassword }).save();
     //   await sendEmail(user.email, "Verify Email", user.code);
 
-	const statistics = await Statistics.updateOne({_id: "6515618090c090fefcd887ac"}, {$push: {gender: user.gender}}, {$push: {themen: user.themen}})
+    const { _id, email } = user;
+    const payload = { _id, email };
 
-    res.status(201).send({
-      message: "A verification code has been sent to your email account", statistics
+
+    const authToken = jwt.sign(payload, process.env.TOKEN_SECRET, {
+			algorithm: "HS256",
+			expiresIn: "6h",
+		  });
+
+
+    res.status(201).send({ authToken: authToken,
+      message: "A verification code has been sent to your email account"
     });
+
+    console.log(authToken)
+
   } catch (error) {
-    res.status(500).send({ message: "Internal Server Error" });
+    res.status(500).send({ message: `${error}` });
   }
 });
 
@@ -60,6 +74,7 @@ router.put("/:id", async (req, res) => {
     if (!user) return res.status(400).send({ message: "Invalid Link" });
 
     user = await User.updateOne({ _id: req.params.id }, { ...req.body });
+    
     res.status(200).send({ message: "User updated successfully" });
   } catch (error) {
     res.status(500).send({ message: `${error}` });
@@ -91,5 +106,14 @@ router.delete("/:id", async (req, res) => {
     res.status(500).send({ message: `${error}` });
   }
 });
+
+router.get("/verify", isAuthenticated, (req, res) => {
+	// If JWT token is valid the payload gets decoded by the
+	// isAuthenticated middleware and is made available on `req.payload`
+	console.log(`req.payload`, req.payload);
+  
+	// Send back the token payload object containing the user data
+	res.status(200).json(req.payload);
+  });
 
 module.exports = router;

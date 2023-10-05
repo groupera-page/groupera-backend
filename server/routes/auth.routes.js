@@ -2,6 +2,8 @@ const router = require("express").Router();
 const { User } = require("../models/User.model");
 const bcrypt = require("bcryptjs");
 const Joi = require("joi");
+// const jwt = require("jsonwebtoken");
+
 
 
 router.post("/login", async (req, res) => {
@@ -25,12 +27,21 @@ router.post("/login", async (req, res) => {
 			return res.status(400).send({message: "Please validate email"})
 		}	
 
-		const token = user.generateAuthToken();
-		res.status(200).send({ data: token, message: "logged in successfully" });
+		// const { _id, u } = user;
+        // const payload = { _id, username };
+
+		// const authToken = jwt.sign({_id: user._id}, process.env.TOKEN_SECRET, {
+		// 	algorithm: "HS256",
+		// 	expiresIn: "6h",
+		//   });
+
+		// const token = user.generateAuthToken();
+		res.status(200).send({ message: "logged in successfully" });
 	} catch (error) {
-		res.status(500).send({ message: "Internal Server Error" });
+		res.status(500).send({ message: `${error}` });
 	}
 });
+
 
 const validate = (data) => {
 	const schema = Joi.object({
