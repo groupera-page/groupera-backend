@@ -29,7 +29,7 @@ const groupSchema = new Schema({
   time: {
     type: String,
   },
-  events: {
+  meetingId: {
     type: String
   },
   // moderator: {

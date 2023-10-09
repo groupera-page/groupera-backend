@@ -10,15 +10,15 @@ exports.create = async (req, res, next) => {
 
       // Event for Google Calendar
       let event = {
-        summary: `This is the summary.`,
-        description: `This is the description.`,
+        summary: `${req.body.name}`,
+        description: `${req.body.description}`,
         start: {
           dateTime: dateTime["start"],
-          timeZone: "Asia/Kolkata",
+          timeZone: "Europe/Berlin",
         },
         end: {
           dateTime: dateTime["end"],
-          timeZone: "Asia/Kolkata",
+          timeZone: "Europe/Berlin",
         },
       };
 
@@ -35,7 +35,7 @@ exports.create = async (req, res, next) => {
       if (uploadRes) {
         const newEvent = await insertEvent(event);
         if(newEvent) {
-          group = await new Group({ ...req.body, img: uploadRes, events: newEvent.id }).save();
+          group = await new Group({ ...req.body, img: uploadRes, meetingId: newEvent.id }).save();
           let user = await User.updateOne(
             { _id: group.users[0]._id },
             { $push: { groups: group._id } }
