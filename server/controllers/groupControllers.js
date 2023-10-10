@@ -4,9 +4,9 @@ const cloudinary = require("../utils/cloudinary");
 const { dateTimeForCalender, insertEvent } = require("../utils/googleCalendar");
 
 exports.create = async (req, res, next) => {
-    const { img, date, time } = req.body;
+    const { img, date, time, length } = req.body;
 
-  let dateTime = dateTimeForCalender(date, time);
+  let dateTime = dateTimeForCalender(date, time, length);
 
       // Event for Google Calendar
       let event = {

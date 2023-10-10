@@ -20,7 +20,7 @@ const auth = new google.auth.JWT(
 const TIMEOFFSET = '+02:00';
 
 // Get date-time string for calender
-const dateTimeForCalender = (date, time) => {
+const dateTimeForCalender = (date, time, length) => {
 
     // let date = new Date();
 
@@ -50,7 +50,7 @@ const dateTimeForCalender = (date, time) => {
 
     let startDate = event;
     // Delay in end time is 1
-    let endDate = new Date(new Date(startDate).setHours(startDate.getHours()+1));
+    let endDate = new Date(new Date(startDate).setMinutes(startDate.getMinutes() + length/10 * 10));
 
     return {
         'start': startDate,
