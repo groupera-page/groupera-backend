@@ -25,19 +25,17 @@ exports.signup = async (req, res, next) => {
     const { _id, email } = user;
     const payload = { _id, email };
 
-    const authToken = jwt.sign(payload, process.env.TOKEN_SECRET, {
+    const options = {
       algorithm: "HS256",
       expiresIn: "6h",
+    };
+
+    const authToken = jwt.sign(payload, process.env.TOKEN_SECRET, options);
+
+    res.status(201).send({
+      authtoken: authToken,
     });
 
-    res
-      .status(201)
-      .send({
-        authtoken: authToken,
-        message: "A verification code has been sent to your email account",
-      });
-
-    console.log(authToken);
   } catch (error) {
     res.status(500).send({ message: `${error}` });
   }
@@ -48,6 +46,7 @@ exports.verified = async (req, res, next) => {
     const user = await User.findOne({ code: req.params.id });
     if (!user) return res.status(400).send({ message: "Invalid code" });
     await User.updateOne({ _id: user._id }, { verified: true, code: "" });
+
     res.status(200).json(user);
   } catch (error) {
     res.status(400).send({ message: `${error}` });
