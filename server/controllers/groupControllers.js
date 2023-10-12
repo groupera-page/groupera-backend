@@ -6,7 +6,7 @@ const { dateTimeForCalender, insertEvent } = require("../utils/googleCalendar");
 const generateRoom = require("../utils/videoSDK");
 
 exports.create = async (req, res, next) => {
-  const { img, date, time, length, token, region } = req.body;
+  const { img, date, time, length, token } = req.body;
 
   let dateTime = dateTimeForCalender(date, time, length);
 
@@ -47,7 +47,7 @@ exports.create = async (req, res, next) => {
             { $push: { groups: group._id } }
           );
         }
-        generateRoom(region, token, group._id, res, length);
+        generateRoom(token, group._id, length);
       }
     }
   } catch (error) {
