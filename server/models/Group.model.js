@@ -32,10 +32,10 @@ const groupSchema = new Schema({
   // meetingId: {
   //   type: String
   // },
-  // moderator: {
-  //     type: Schema.Types.ObjectId,
-  //     ref: 'Moderator'
-  // },
+  moderator: {
+      type: Schema.Types.ObjectId,
+      ref: 'Moderator'
+  },
   users: [
     {
       type: Schema.Types.ObjectId,

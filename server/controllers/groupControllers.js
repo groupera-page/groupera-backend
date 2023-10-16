@@ -29,7 +29,7 @@ exports.create = async (req, res, next) => {
           img: uploadRes
         }).save();
         let user = await User.updateOne(
-          { _id: group.users[0]._id },
+          { _id: group.moderator._id },
           { $push: { groups: group._id } }
         );
         if (user) {
@@ -134,6 +134,37 @@ exports.groupId = async (req, res, next) => {
   }
 };
 
+exports.joinGroup = async (req, res, next) => {
+  const { currentUser } = req.body;
+  try {
+    let group = await Group.findOne({ _id: req.params.groupId });
+    if (!group) return res.status(400).send({ message: "Invalid Link" });
+
+    group = await Group.updateOne({ _id: req.params.groupId }, { $push: { users: currentUser } });
+    let user = await User.updateOne({_id: currentUser}, {$push: { groups: req.params.groupId }})
+    res.status(200).send({ message: "Group joined successfully" });
+
+  } catch (error) {
+    res.status(500).send({ message: `${error}` });
+  }
+};
+
+exports.leaveGroup = async (req, res, next) => {
+  const { currentUser } = req.body;
+
+  try {
+    let group = await Group.findOne({ _id: req.params.groupId });
+    if (!group) return res.status(400).send({ message: "Invalid Link" });
+
+    group = await Group.updateOne({ _id: req.params.groupId }, { $pull: { users: currentUser } });
+    let user = await User.updateOne({_id: currentUser}, {$pull: { groups: req.params.groupId }})
+    res.status(200).send({ message: "Group left successfully" });
+  }
+  catch (error) {
+    res.status(500).send({ message: `${error}` });
+  }
+};
+
 exports.editGroup = async (req, res, next) => {
   try {
     let group = await Group.findOne({ _id: req.params.groupId });
@@ -146,11 +177,6 @@ exports.editGroup = async (req, res, next) => {
   }
 };
 
-// exports.leaveGroup = async (req, res, next) => {
-//   try {
-
-//   }
-// }
 
 exports.deleteGroup = async (req, res, next) => {
   try {

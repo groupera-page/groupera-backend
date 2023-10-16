@@ -8,7 +8,11 @@ router.get("/groups", groupControllers.viewAll);
 
 router.get("/:groupId", groupControllers.groupId);
 
-router.put("/:groupId", groupControllers.editGroup);
+router.put("/:groupId/join", groupControllers.joinGroup);
+
+router.put("/:groupId/leave", groupControllers.leaveGroup);
+
+router.put("/:groupId/edit", groupControllers.editGroup);
 
 router.delete("/:groupId", groupControllers.deleteGroup);
 
