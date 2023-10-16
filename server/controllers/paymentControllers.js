@@ -13,7 +13,7 @@ exports.payment = async (req, res, next) => {
             confirm: true
         })
         res.json({
-            message: "Payment successful".
+            message: "Payment successful",
             success: true
         })
     } catch (error) {
