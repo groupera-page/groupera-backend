@@ -56,6 +56,11 @@ const userSchema = new Schema({
     type: Boolean,
     default: false,
   },
+  paid: {
+    type: Boolean,
+    date_paid: Date,
+    default: false
+  },
   terms: {
     type: Boolean,
     date_agreed: Date,
@@ -71,7 +76,7 @@ const userSchema = new Schema({
   //     type: Schema.Types.ObjectId,
   //     ref: 'Meeting'
   //   }
-  // ]
+  // ],
 });
 
 // userSchema.methods.generateAuthToken = function () {
