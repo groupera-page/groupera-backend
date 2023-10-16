@@ -20,36 +20,43 @@ const auth = new google.auth.JWT(
 const TIMEOFFSET = '+02:00';
 
 // Get date-time string for calender
-const dateTimeForCalender = (date, time, length) => {
+// const dateTimeForCalender = (date, time, length) => {
 
-    // let date = new Date();
+//     let newDateTime = `${date}T${time}:00.000${TIMEOFFSET}`;
 
-    // let year = date.getFullYear();
-    // let month = date.getMonth() + 1;
-    // if (month < 10) {
-    //     month = `0${month}`;
-    // }
-    // let day = date.getDate();
-    // if (day < 10) {
-    //     day = `0${day}`;
-    // }
-    // let hour = date.getHours();
-    // if (hour < 10) {
-    //     hour = `0${hour}`;
-    // }
-    // let minute = date.getMinutes();
-    // if (minute < 10) {
-    //     minute = `0${minute}`;
-    // }
+//     let event = new Date(Date.parse(newDateTime));
 
-    // let newDateTime = `${year}-${month}-${day}T${hour}:${minute}:00.000${TIMEOFFSET}`;
+//     let startDate = event;
 
-    let newDateTime = `${date}T${time}:00.000${TIMEOFFSET}`;
+//     let endDate = new Date(new Date(startDate).setMinutes(startDate.getMinutes() + length/10 * 10));
+
+//     return {
+//         'start': startDate,
+//         'end': endDate
+//     }
+// };
+
+
+const dateTimeForCalender = (when, time, length) => {
+
+    let date = new Date();
+
+    let year = date.getFullYear();
+    let month = date.getMonth() + 1;
+    if (month < 10) {
+        month = `0${month}`;
+    }
+    let day = date.getDate() + +when;
+    if (day < 10) {
+        day = `0${day}`;
+    }
+
+    let newDateTime = `${year}-${month}-${day}T${time}:00.000${TIMEOFFSET}`;
 
     let event = new Date(Date.parse(newDateTime));
 
     let startDate = event;
-    // Delay in end time is 1
+
     let endDate = new Date(new Date(startDate).setMinutes(startDate.getMinutes() + length/10 * 10));
 
     return {
@@ -105,27 +112,28 @@ const insertEvent = async (event) => {
 //     });
 
 // Get all the events between two dates
-// const getEvents = async (dateTimeStart, dateTimeEnd) => {
+const getEvents = async (dateTimeStart, dateTimeEnd) => {
 
-//     try {
-//         let response = await calendar.events.list({
-//             auth: auth,
-//             calendarId: calendarId,
-//             timeMin: dateTimeStart,
-//             timeMax: dateTimeEnd,
-//             timeZone: 'Asia/Kolkata'
-//         });
+    try {
+        let response = await calendar.events.list({
+            auth: auth,
+            calendarId: calendarId,
+            timeMin: dateTimeStart,
+            timeMax: dateTimeEnd,
+            timeZone: "Europe/Berlin",
+            singleEvents: true
+        });
     
-//         let items = response['data']['items'];
-//         return items;
-//     } catch (error) {
-//         console.log(`Error at getEvents --> ${error}`);
-//         return 0;
-//     }
-// };
+        let items = response['data']['items'];
+        return items;
+    } catch (error) {
+        console.log(`Error at getEvents --> ${error}`);
+        return 0;
+    }
+};
 
-// let start = '2023-10-03T00:00:00.000Z';
-// let end = '2023-10-06T00:00:00.000Z';
+let start = '2023-10-03T00:00:00.000Z';
+let end = '2024-10-06T00:00:00.000Z';
 
 // getEvents(start, end)
 //     .then((res) => {
@@ -166,4 +174,4 @@ const deleteEvent = async (eventId) => {
 //         console.log(err);
 //     });
 
-    module.exports = {deleteEvent, dateTimeForCalender, insertEvent}
+    module.exports = { deleteEvent, dateTimeForCalender, insertEvent, getEvents }
