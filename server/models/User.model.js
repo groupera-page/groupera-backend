@@ -38,19 +38,16 @@ const userSchema = new Schema({
   },
   goals: [
     {
-      type: String,
-      default: "",
+      type: String
     },
   ],
   themen: [
     {
-      type: String,
-      default: "",
+      type: String
     },
   ],
   experience: {
-    type: String,
-    default: "",
+    type: String
   },
   moderator: {
     type: Boolean,
