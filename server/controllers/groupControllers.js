@@ -1,7 +1,7 @@
 const Group = require("../models/Group.model");
 const { User } = require("../models/User.model");
 const cloudinary = require("../utils/cloudinary");
-const { dateTimeForCalender, insertEvent, getEvents } = require("../utils/googleCalendar");
+const { dateTimeForCalender, insertEvent, getEvents, deleteEvent, getEvent } = require("../utils/googleCalendar");
 // const fetch = require("node-fetch");
 const generateRoom = require("../utils/videoSDK");
 
@@ -28,27 +28,28 @@ exports.create = async (req, res, next) => {
           ...req.body,
           img: uploadRes
         }).save();
+        let event = {
+          "summary": `${req.body.name}`,
+          "description": `Join code: ${group._id}`,
+          "start": {
+            "dateTime": dateTime["start"],
+            "timeZone": "Europe/Berlin",
+          },
+          "end": {
+            "dateTime": dateTime["end"],
+            "timeZone": "Europe/Berlin",
+          },
+          "recurrence": [
+           `RRULE:FREQ=WEEKLY;INTERVAL=${+freq};COUNT=2;BYDAY=${day}`
+          ]
+        };        
+        const newEvent = await insertEvent(event);
         let user = await User.updateOne(
           { _id: group.moderator._id },
-          { $push: { groups: group._id } }
+          { $push: { groups: group._id }, $push: { meetings: newEvent.recurringEventId }, moderator: true }
         );
-        if (user) {
-          let event = {
-            "summary": `${req.body.name}`,
-            "description": `Join code: ${group._id}`,
-            "start": {
-              "dateTime": dateTime["start"],
-              "timeZone": "Europe/Berlin",
-            },
-            "end": {
-              "dateTime": dateTime["end"],
-              "timeZone": "Europe/Berlin",
-            },
-            "recurrence": [
-             `RRULE:FREQ=WEEKLY;INTERVAL=${+freq};COUNT=2;BYDAY=${day}`
-            ]
-          };        
-          const newEvent = await insertEvent(event);
+        if (newEvent) {
+          group = await Group.updateOne({ _id: group._id }, { meeting: newEvent.recurringEventId } )
         }
         // generateRoom(token, group._id, length);
       }
@@ -110,14 +111,14 @@ exports.create = async (req, res, next) => {
 //   }
 // };
 
-exports.viewAll = async (req, res, next) => {
+exports.viewMeetings = async (req, res, next) => {
   try {
-    // let group = await Group.find();
+    let group = await Group.findOne({ _id: req.params.groupId });
     let start = '2023-10-03T00:00:00.000Z';
     let end = '2024-10-06T00:00:00.000Z';
-    let group = await getEvents(start, end)
-    console.log(group);
-    res.status(200).send(group);
+    let event = await getEvents(start, end)
+    let filteredEvent = event.filter((events) => events.recurringEventId === group.meeting)
+    res.status(200).send(filteredEvent);
   } catch (error) {
     res.status(500).send(`${error}`);
   }
@@ -127,6 +128,9 @@ exports.groupId = async (req, res, next) => {
   try {
     let group = await Group.findOne({ _id: req.params.groupId });
     if (!group) return res.status(400).send({ message: "Invalid Link" });
+
+    let event = await getEvent(group.meeting)
+    console.log(event)
 
     res.status(200).send({ group });
   } catch (error) {
@@ -195,6 +199,10 @@ exports.deleteGroup = async (req, res, next) => {
         },
       }
     );
+
+    const deleteThisEvent = await deleteEvent(group.meeting)
+
+    const mod = await User.updateOne({ _id: group.moderator }, { moderator: false })
 
     group = await Group.deleteOne({ _id: req.params.groupId });
     res.status(200).send({ message: "Group deleted successfully", data });

@@ -29,8 +29,7 @@ const userSchema = new Schema({
   },
   code: { type: String },
   gender: {
-    type: String,
-    enum: ["Weiblich", "Mannlich", "Divers"]
+    type: String
     // required: true
   },
   birthday: {
@@ -61,6 +60,7 @@ const userSchema = new Schema({
   terms: {
     type: Boolean,
     date_agreed: Date,
+    default: false
   },
   groups: [
     {
@@ -68,12 +68,11 @@ const userSchema = new Schema({
       ref: "Group",
     },
   ],
-  // meetings: [
-  //   {
-  //     type: Schema.Types.ObjectId,
-  //     ref: 'Meeting'
-  //   }
-  // ],
+  meetings: [
+    {
+      type: String
+    }
+  ],
 });
 
 // userSchema.methods.generateAuthToken = function () {

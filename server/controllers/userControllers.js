@@ -20,7 +20,7 @@ exports.signup = async (req, res, next) => {
     const hashPassword = await bcrypt.hash(req.body.password, salt);
 
     user = await new User({ ...req.body, password: hashPassword }).save();
-    //   await sendEmail(user.email, "Verify Email", user.code);
+      // await sendEmail(user.email, "Verify Email", user.code);
 
     const { _id, email } = user;
     const payload = { _id, email };

@@ -29,9 +29,9 @@ const groupSchema = new Schema({
   time: {
     type: String,
   },
-  // meetingId: {
-  //   type: String
-  // },
+  meeting: {
+    type: String
+  },
   moderator: {
       type: Schema.Types.ObjectId,
       ref: 'Moderator'

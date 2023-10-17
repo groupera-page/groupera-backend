@@ -7,13 +7,13 @@ module.exports = async (email, subject, text) => {
       port: 587,
       secure: false, // true for 465, false for other ports
       auth: {
-        user: "jayblez@gmail.com", // generated brevo user
-        pass: "xsmtpsib-cf3d6c1fb0a05fd2fa520fca55bbdafcf6d6a9986eed65eb670a8345116b018b-NxbFy1mnsTrA6fIE", // generated brevo password
+        user: "marketing@groupera.de", // generated brevo user
+        pass: "xsmtpsib-d2d655697ef4d6b0bb03a049113139c55f0671a4b43ae97de74dff3df1c6d4b4-rbsm901IjWX532UR", // generated brevo password
       },
     });
 
     await transporter.sendMail({
-      from: "jayblez@gmail.com",
+      from: "verification@groupera.de",
       to: email,
       subject: subject,
       text: text

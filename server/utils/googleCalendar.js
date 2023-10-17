@@ -135,6 +135,23 @@ const getEvents = async (dateTimeStart, dateTimeEnd) => {
 let start = '2023-10-03T00:00:00.000Z';
 let end = '2024-10-06T00:00:00.000Z';
 
+const getEvent = async (eventId) => {
+
+    try {
+        let response = await calendar.events.get({
+            auth: auth,
+            calendarId: calendarId,
+            eventId: eventId,
+            singleEvents: true
+        });
+
+        return response;
+    } catch (error) {
+        console.log(`Error at getEvents --> ${error}`);
+        return 0;
+    }
+}
+
 // getEvents(start, end)
 //     .then((res) => {
 //         console.log(res);
@@ -174,4 +191,4 @@ const deleteEvent = async (eventId) => {
 //         console.log(err);
 //     });
 
-    module.exports = { deleteEvent, dateTimeForCalender, insertEvent, getEvents }
+    module.exports = { deleteEvent, dateTimeForCalender, insertEvent, getEvents, getEvent }
