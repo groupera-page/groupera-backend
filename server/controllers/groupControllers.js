@@ -21,7 +21,7 @@ exports.create = async (req, res, next) => {
         .send({ message: "Group with given name already exists" });
     if (img) {
       const uploadRes = await cloudinary.uploader.upload(img, {
-        upload_preset: "groupera-test",
+        folder: "test",
       });
       if (uploadRes) {
         group = await new Group({
@@ -40,7 +40,7 @@ exports.create = async (req, res, next) => {
             "timeZone": "Europe/Berlin",
           },
           "recurrence": [
-           `RRULE:FREQ=WEEKLY;INTERVAL=${+freq};COUNT=2;BYDAY=${day}`
+           `RRULE:FREQ=WEEKLY;INTERVAL=${+freq};COUNT=1;BYDAY=${day}`
           ]
         };        
         const newEvent = await insertEvent(event);
@@ -120,7 +120,7 @@ exports.allGroups = async (req, res, next) => {
   }
 };
 
-exports.viewMeetings = async (req, res, next) => {
+exports.viewGroupMeetings = async (req, res, next) => {
   try {
     let group = await Group.findOne({ _id: req.params.groupId });
     let start = '2023-10-03T00:00:00.000Z';
@@ -153,8 +153,10 @@ exports.joinGroup = async (req, res, next) => {
     let group = await Group.findOne({ _id: req.params.groupId });
     if (!group) return res.status(400).send({ message: "Invalid Link" });
 
+    let user = await User.updateOne({_id: currentUser}, {$push: { joinedGroups: req.params.groupId, meetings: group.meeting }});
+
     group = await Group.updateOne({ _id: req.params.groupId }, { $push: { users: currentUser } });
-    let user = await User.updateOne({_id: currentUser}, {$push: { joinedGroups: req.params.groupId }})
+
     res.status(200).send({ message: "Group joined successfully" });
 
   } catch (error) {
@@ -208,7 +210,7 @@ exports.deleteGroup = async (req, res, next) => {
       {
         $pull: {
           joinedGroups: req.params.groupId,
-          meeting: group.meeting
+          meetings: group.meeting
         },
       }
     );

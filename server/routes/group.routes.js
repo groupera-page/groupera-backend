@@ -8,7 +8,7 @@ router.get("/groups", groupControllers.allGroups);
 
 router.get("/:groupId", groupControllers.groupId);
 
-router.get("/meetings/:groupId", groupControllers.viewMeetings);
+router.get("/meetings/:groupId", groupControllers.viewGroupMeetings);
 
 router.put("/join/:groupId", groupControllers.joinGroup);
 

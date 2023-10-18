@@ -8,6 +8,8 @@ router.get("/verified/:id", userControllers.verified);
 
 router.get("/:id", userControllers.userId);
 
+router.get("/meetings/:id", userControllers.viewUserMeetings);
+
 router.put("/edit/:id", userControllers.userEdit);
 
 router.delete("/delete/:id", userControllers.userDelete);

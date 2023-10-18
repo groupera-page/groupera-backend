@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const sendEmail = require("../utils/sendEmail");
 const Group = require("../models/Group.model");
 const jwt = require("jsonwebtoken");
+const { getEvents } = require("../utils/googleCalendar");
 
 exports.signup = async (req, res, next) => {
   try {
@@ -59,6 +60,19 @@ exports.userId = async (req, res, next) => {
     res.status(200).send({ user });
   } catch (error) {
     res.status(200).send({ message: "Email verified successfully" });
+  }
+};
+
+exports.viewUserMeetings = async (req, res, next) => {
+  try {
+    let user = await User.findOne({ _id: req.params.id });
+    let start = '2023-10-03T00:00:00.000Z';
+    let end = '2024-10-06T00:00:00.000Z';
+    let event = await getEvents(start, end)
+    let mappedEvent = user.meetings.map((meetings) => event.filter((events) => events.id.includes(meetings)))
+    res.status(200).send(mappedEvent);
+  } catch (error) {
+    res.status(500).send(`${error}`);
   }
 };
 
