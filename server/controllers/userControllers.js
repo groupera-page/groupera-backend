@@ -85,10 +85,12 @@ exports.userDelete = async (req, res, next) => {
         users: {
           $in: [req.params.id],
         },
+        moderator: req.params.id
       },
       {
         $pull: {
           users: req.params.id,
+          moderator: req.params.id
         },
       }
     );

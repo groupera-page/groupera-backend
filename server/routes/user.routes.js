@@ -8,9 +8,9 @@ router.get("/verified/:id", userControllers.verified);
 
 router.get("/:id", userControllers.userId);
 
-router.put("/:id", userControllers.userEdit);
+router.put("/edit/:id", userControllers.userEdit);
 
-router.delete("/:id", userControllers.userDelete);
+router.delete("/delete/:id", userControllers.userDelete);
 
 router.get("/verify", isAuthenticated, userControllers.verifyToken);
 

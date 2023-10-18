@@ -62,7 +62,13 @@ const userSchema = new Schema({
     date_agreed: Date,
     default: false
   },
-  groups: [
+  moderatedGroups: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Group",
+    }
+  ],
+  joinedGroups: [
     {
       type: Schema.Types.ObjectId,
       ref: "Group",

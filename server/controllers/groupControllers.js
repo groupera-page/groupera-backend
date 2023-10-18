@@ -44,12 +44,12 @@ exports.create = async (req, res, next) => {
           ]
         };        
         const newEvent = await insertEvent(event);
-        let user = await User.updateOne(
-          { _id: group.moderator._id },
-          { $push: { groups: group._id }, $push: { meetings: newEvent.recurringEventId }, moderator: true }
-        );
         if (newEvent) {
-          group = await Group.updateOne({ _id: group._id }, { meeting: newEvent.recurringEventId } )
+          let user = await User.updateOne(
+            { _id: group.moderator._id },
+            { $push: { moderatedGroups: group._id, meetings: newEvent.id }, moderator: true }
+          );
+          group = await Group.updateOne({ _id: group._id }, { meeting: newEvent.id } )
         }
         // generateRoom(token, group._id, length);
       }
@@ -111,13 +111,22 @@ exports.create = async (req, res, next) => {
 //   }
 // };
 
+exports.allGroups = async (req, res, next) => {
+  try {
+    let group = await Group.find();
+    res.status(200).send(group);
+  } catch (error) {
+    res.status(500).send(`${error}`);
+  }
+};
+
 exports.viewMeetings = async (req, res, next) => {
   try {
     let group = await Group.findOne({ _id: req.params.groupId });
     let start = '2023-10-03T00:00:00.000Z';
     let end = '2024-10-06T00:00:00.000Z';
     let event = await getEvents(start, end)
-    let filteredEvent = event.filter((events) => events.recurringEventId === group.meeting)
+    let filteredEvent = event.filter((events) => events.id.includes(group.meeting))
     res.status(200).send(filteredEvent);
   } catch (error) {
     res.status(500).send(`${error}`);
@@ -145,7 +154,7 @@ exports.joinGroup = async (req, res, next) => {
     if (!group) return res.status(400).send({ message: "Invalid Link" });
 
     group = await Group.updateOne({ _id: req.params.groupId }, { $push: { users: currentUser } });
-    let user = await User.updateOne({_id: currentUser}, {$push: { groups: req.params.groupId }})
+    let user = await User.updateOne({_id: currentUser}, {$push: { joinedGroups: req.params.groupId }})
     res.status(200).send({ message: "Group joined successfully" });
 
   } catch (error) {
@@ -161,7 +170,7 @@ exports.leaveGroup = async (req, res, next) => {
     if (!group) return res.status(400).send({ message: "Invalid Link" });
 
     group = await Group.updateOne({ _id: req.params.groupId }, { $pull: { users: currentUser } });
-    let user = await User.updateOne({_id: currentUser}, {$pull: { groups: req.params.groupId }})
+    let user = await User.updateOne({_id: currentUser}, {$pull: { joinedGroups: req.params.groupId }})
     res.status(200).send({ message: "Group left successfully" });
   }
   catch (error) {
@@ -189,20 +198,36 @@ exports.deleteGroup = async (req, res, next) => {
 
     const data = await User.updateMany(
       {
-        groups: {
+        joinedGroups: {
           $in: [req.params.groupId],
         },
+        meetings: {
+          $in: [group.meeting]
+        }
       },
       {
         $pull: {
-          groups: req.params.groupId,
+          joinedGroups: req.params.groupId,
+          meeting: group.meeting
         },
       }
     );
 
-    const deleteThisEvent = await deleteEvent(group.meeting)
+    await User.updateOne({ _id: group.moderator }, {
+        $pull: {
+          moderatedGroups: req.params.groupId,
+          meetings: group.meeting
+        }
+    });
 
-    const mod = await User.updateOne({ _id: group.moderator }, { moderator: false })
+    const user = await User.findOne({ _id: group.moderator })
+
+    if(user.moderatedGroups.length === 0){
+      await User.updateOne({ _id: group.moderator }, { moderator: false } )
+    };
+
+
+    await deleteEvent(group.meeting)
 
     group = await Group.deleteOne({ _id: req.params.groupId });
     res.status(200).send({ message: "Group deleted successfully", data });
