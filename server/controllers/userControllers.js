@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const { getEvents } = require("../utils/googleCalendar");
 
 exports.signup = async (req, res, next) => {
+
   try {
     const { error } = validate(req.body);
     if (error)
