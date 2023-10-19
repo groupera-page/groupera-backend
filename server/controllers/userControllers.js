@@ -22,7 +22,7 @@ exports.signup = async (req, res, next) => {
     const hashPassword = await bcrypt.hash(req.body.password, salt);
 
     user = await new User({ ...req.body, password: hashPassword }).save();
-      // await sendEmail(user.email, "Verify Email", user.code);
+      await sendEmail(user.email, "Verify Email", user.code);
 
     const { _id, email } = user;
     const payload = { _id, email };
@@ -47,8 +47,20 @@ exports.verified = async (req, res, next) => {
   try {
     const user = await User.findOne({ code: req.params.id });
     if (!user) return res.status(400).send({ message: "Invalid code" });
+
     await User.updateOne({ _id: user._id }, { verified: true, code: "" });
 
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(400).send({ message: `${error}` });
+  }
+};
+
+exports.notVerified = async (req, res, next) => {
+  try {
+    const user = await User.findOne({ email: req.params.id });
+    if (!user) return res.status(400).send({ message: "Invalid code" });
+  
     res.status(200).json(user);
   } catch (error) {
     res.status(400).send({ message: `${error}` });
@@ -84,10 +96,10 @@ exports.userEdit = async (req, res, next) => {
 
     let newUser = await User.updateOne({ _id: req.params.id }, { ...req.body });
 
-    let newNewUser = await User.findOne({ _id: req.params.id })
+    let newNewUser = await User.findOne({ _id: req.params.id });
 
-    if(user.email !== newnewUser.email){
-      await sendEmail(newnewUser.email, "Verify Email", user.code);
+    if(user.email !== newNewUser.email){
+      await sendEmail(newNewUser.email, "Verify Email", user.code);
 
     }
 

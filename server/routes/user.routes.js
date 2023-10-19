@@ -6,6 +6,8 @@ router.post("/signup", userControllers.signup);
 
 router.get("/verified/:id", userControllers.verified);
 
+router.get("/notverified/:id", userControllers.notVerified);
+
 router.get("/:id", userControllers.userId);
 
 router.get("/meetings/:id", userControllers.viewUserMeetings);
