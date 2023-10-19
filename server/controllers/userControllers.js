@@ -16,7 +16,7 @@ exports.signup = async (req, res, next) => {
     if (user)
       return res
         .status(409)
-        .send({ message: "User with given email already exists!" });
+        .send({ message: "E-Mail bereits in Gebrauch" });
 
     const salt = await bcrypt.genSalt(Number(process.env.SALT));
     const hashPassword = await bcrypt.hash(req.body.password, salt);
@@ -60,7 +60,7 @@ exports.userId = async (req, res, next) => {
     const user = await User.findOne({ _id: req.params.id }).populate("groups");
     res.status(200).send({ user });
   } catch (error) {
-    res.status(200).send({ message: "Email verified successfully" });
+    res.status(200).send({ message: "E-Mail erfolgreich verifiziert" });
   }
 };
 
@@ -84,7 +84,7 @@ exports.userEdit = async (req, res, next) => {
 
     user = await User.updateOne({ _id: req.params.id }, { ...req.body });
 
-    res.status(200).send({ message: "User updated successfully" });
+    res.status(200).send({ message: "Benutzer erfolgreich aktualisiert" });
   } catch (error) {
     res.status(500).send({ message: `${error}` });
   }
@@ -112,7 +112,7 @@ exports.userDelete = async (req, res, next) => {
 
     user = await User.deleteOne({ _id: req.params.id });
 
-    res.status(200).send({ message: "User deleted successfully", data });
+    res.status(200).send({ message: "Benutzer erfolgreich gelöscht", data });
   } catch (error) {
     res.status(500).send({ message: `${error}` });
   }

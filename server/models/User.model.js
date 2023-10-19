@@ -1,5 +1,6 @@
 const { Schema, model } = require("mongoose");
 // const jwt = require("jsonwebtoken");
+
 const Joi = require("joi");
 const passwordComplexity = require("joi-password-complexity");
 const { language } = require("googleapis/build/src/apis/language");
@@ -10,7 +11,7 @@ const userSchema = new Schema({
   },
   email: {
     type: String,
-    unique: true,
+    unique: [true, 'E-Mail bereits in Gebrauch']
   },
   password: {
     type: String
