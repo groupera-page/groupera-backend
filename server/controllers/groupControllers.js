@@ -18,7 +18,7 @@ exports.create = async (req, res, next) => {
     if (group)
       return res
         .status(409)
-        .send({ message: "Group with given name already exists" });
+        .send({ message: "Gruppe mit dem angegebenen Namen existiert bereits" });
     if (img) {
       const uploadRes = await cloudinary.uploader.upload(img, {
         folder: "test",
@@ -157,7 +157,7 @@ exports.joinGroup = async (req, res, next) => {
 
     group = await Group.updateOne({ _id: req.params.groupId }, { $push: { users: currentUser } });
 
-    res.status(200).send({ message: "Group joined successfully" });
+    res.status(200).send({ message: "Gruppe erfolgreich beigetreten" });
 
   } catch (error) {
     res.status(500).send({ message: `${error}` });
@@ -173,7 +173,7 @@ exports.leaveGroup = async (req, res, next) => {
 
     group = await Group.updateOne({ _id: req.params.groupId }, { $pull: { users: currentUser } });
     let user = await User.updateOne({_id: currentUser}, {$pull: { joinedGroups: req.params.groupId }})
-    res.status(200).send({ message: "Group left successfully" });
+    res.status(200).send({ message: "Gruppe erfolgreich verlassen" });
   }
   catch (error) {
     res.status(500).send({ message: `${error}` });
@@ -186,7 +186,7 @@ exports.editGroup = async (req, res, next) => {
     if (!group) return res.status(400).send({ message: "Invalid Link" });
 
     group = await Group.updateOne({ _id: req.params.groupId }, { ...req.body });
-    res.status(200).send({ message: "Group updated successfully" });
+    res.status(200).send({ message: "Gruppe erfolgreich aktualisiert" });
   } catch (error) {
     res.status(500).send({ message: `${error}` });
   }
@@ -232,7 +232,7 @@ exports.deleteGroup = async (req, res, next) => {
     await deleteEvent(group.meeting)
 
     group = await Group.deleteOne({ _id: req.params.groupId });
-    res.status(200).send({ message: "Group deleted successfully", data });
+    res.status(200).send({ message: "Gruppe erfolgreich gelöscht", data });
   } catch (error) {
     res.status(500).send({ message: `${error}` });
   }

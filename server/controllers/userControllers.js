@@ -82,7 +82,14 @@ exports.userEdit = async (req, res, next) => {
     let user = await User.findOne({ _id: req.params.id });
     if (!user) return res.status(400).send({ message: "Invalid Link" });
 
-    user = await User.updateOne({ _id: req.params.id }, { ...req.body });
+    let newUser = await User.updateOne({ _id: req.params.id }, { ...req.body });
+
+    let newNewUser = await User.findOne({ _id: req.params.id })
+
+    if(user.email !== newnewUser.email){
+      await sendEmail(newnewUser.email, "Verify Email", user.code);
+
+    }
 
     res.status(200).send({ message: "Benutzer erfolgreich aktualisiert" });
   } catch (error) {

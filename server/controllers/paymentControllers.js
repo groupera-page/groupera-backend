@@ -14,7 +14,7 @@ exports.payment = async (req, res, next) => {
         })
           await User.updateOne({ _id: req.params.id }, { paid: true })
         res.json({
-            message: "Payment successful",
+            message: "Zahlung erfolgreich",
             success: true
         })
     } catch (error) {

@@ -12,17 +12,17 @@ exports.login = async (req, res, next) => {
 
 		const user = await User.findOne({ email: req.body.email });
 		if (!user)
-			return res.status(401).send({ message: "Invalid Email or Password" });
+			return res.status(401).send({ message: "Ungültige E-Mail oder Passwort" });
 
 		const validPassword = await bcrypt.compare(
 			req.body.password,
 			user.password
 		);
 		if (!validPassword)
-			return res.status(401).send({ message: "Invalid Email or Password" });
+			return res.status(401).send({ message: "Ungültige E-Mail oder Passwort" });
 
 		if(!user.verified) {
-			return res.status(400).send({message: "Please validate email"})
+			return res.status(400).send({message: "Bitte bestätigen Sie Ihre E-Mail"})
 		}	
 		// const token = user.generateAuthToken();
 
@@ -35,7 +35,7 @@ exports.login = async (req, res, next) => {
                 expiresIn: "6h",
               });
   
-		res.status(200).send({authToken: authToken, message: "logged in successfully" });
+		res.status(200).send({authToken: authToken, message: "Erfolgreich eingeloggt" });
 	} catch (error) {
 		res.status(500).send({ message: `${error}` });
 	}
