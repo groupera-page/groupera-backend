@@ -1,7 +1,7 @@
 const Group = require("../models/Group.model");
 const { User } = require("../models/User.model");
 const cloudinary = require("../utils/cloudinary");
-const { dateTimeForCalender, insertEvent, getEvents, deleteEvent, getEvent } = require("../utils/googleCalendar");
+const { dateTimeForCalender, insertEvent, getEvents, deleteEvent, getEvent, editEvent } = require("../utils/googleCalendar");
 // const fetch = require("node-fetch");
 const generateRoom = require("../utils/videoSDK");
 
@@ -40,7 +40,7 @@ exports.create = async (req, res, next) => {
             "timeZone": "Europe/Berlin",
           },
           "recurrence": [
-           `RRULE:FREQ=WEEKLY;INTERVAL=${+freq};COUNT=1;BYDAY=${day}`
+           `RRULE:FREQ=WEEKLY;INTERVAL=${+freq};COUNT=2;BYDAY=${day}`
           ]
         };        
         const newEvent = await insertEvent(event);
@@ -138,9 +138,6 @@ exports.groupId = async (req, res, next) => {
     let group = await Group.findOne({ _id: req.params.groupId });
     if (!group) return res.status(400).send({ message: "Invalid Link" });
 
-    let event = await getEvent(group.meeting)
-    console.log(event)
-
     res.status(200).send({ group });
   } catch (error) {
     res.status(500).send({ message: `${error}` });
@@ -181,11 +178,40 @@ exports.leaveGroup = async (req, res, next) => {
 };
 
 exports.editGroup = async (req, res, next) => {
+  const { when, length, freq, day } = req.body;
   try {
     let group = await Group.findOne({ _id: req.params.groupId });
     if (!group) return res.status(400).send({ message: "Invalid Link" });
 
-    group = await Group.updateOne({ _id: req.params.groupId }, { ...req.body });
+    group = await Group.updateOne({ _id: req.params.groupId }, { ...req.body })
+   
+    group = await Group.findOne({ _id: req.params.groupId });
+
+    let dateTime = dateTimeForCalender(when, group.time, length);
+
+    let event = {
+      "summary": `${group.name}`,
+      "description": `Join code: ${group._id}`,
+      "start": {
+        "dateTime": dateTime["start"],
+        "timeZone": "Europe/Berlin",
+      },
+      "end": {
+        "dateTime": dateTime["end"],
+        "timeZone": "Europe/Berlin",
+      },
+      "recurrence": [
+       `RRULE:FREQ=WEEKLY;INTERVAL=${+freq};COUNT=2;BYDAY=${day}`
+      ]
+    };        
+
+    console.log(event)
+
+    if(group) {
+      let updatedEvent = await editEvent(group.meeting, event);
+    }
+
+
     res.status(200).send({ message: "Gruppe erfolgreich aktualisiert" });
   } catch (error) {
     res.status(500).send({ message: `${error}` });

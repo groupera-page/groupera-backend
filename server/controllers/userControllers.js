@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 const sendEmail = require("../utils/sendEmail");
 const Group = require("../models/Group.model");
 const jwt = require("jsonwebtoken");
-const { getEvents } = require("../utils/googleCalendar");
+const { getEvents, deleteEvent } = require("../utils/googleCalendar");
 
 exports.signup = async (req, res, next) => {
 
@@ -22,7 +22,7 @@ exports.signup = async (req, res, next) => {
     const hashPassword = await bcrypt.hash(req.body.password, salt);
 
     user = await new User({ ...req.body, password: hashPassword }).save();
-      await sendEmail(user.email, "Verify Email", user.code);
+      // await sendEmail(user.email, "Verify Email", user.code);
 
     const { _id, email } = user;
     const payload = { _id, email };
@@ -31,6 +31,7 @@ exports.signup = async (req, res, next) => {
       algorithm: "HS256",
       expiresIn: "6h",
     };
+    
 
     const authToken = jwt.sign(payload, process.env.TOKEN_SECRET, options);
 
@@ -119,15 +120,34 @@ exports.userDelete = async (req, res, next) => {
         users: {
           $in: [req.params.id],
         },
-        moderator: req.params.id
+        // moderator: req.params.id
       },
       {
         $pull: {
           users: req.params.id,
-          moderator: req.params.id
+          // moderator: req.params.id
         },
       }
     );
+
+      let deletedGroups = await Group.deleteMany({moderator: req.params.id});
+
+      user.meetings.map((meetings) => deleteEvent(meetings));
+
+      user.meetings.map((deleteMeetings) => User.updateMany(
+        {
+          meetings: {
+            $in: [deleteMeetings]
+          }
+        }, 
+        {
+          $pull: {
+            meetings: deleteMeetings
+          }
+        }
+        )
+        )
+
 
     user = await User.deleteOne({ _id: req.params.id });
 

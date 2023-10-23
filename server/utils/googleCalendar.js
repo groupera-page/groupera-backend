@@ -19,24 +19,6 @@ const auth = new google.auth.JWT(
 // Your TIMEOFFSET Offset
 const TIMEOFFSET = '+02:00';
 
-// Get date-time string for calender
-// const dateTimeForCalender = (date, time, length) => {
-
-//     let newDateTime = `${date}T${time}:00.000${TIMEOFFSET}`;
-
-//     let event = new Date(Date.parse(newDateTime));
-
-//     let startDate = event;
-
-//     let endDate = new Date(new Date(startDate).setMinutes(startDate.getMinutes() + length/10 * 10));
-
-//     return {
-//         'start': startDate,
-//         'end': endDate
-//     }
-// };
-
-
 const dateTimeForCalender = (when, time, length) => {
 
     let date = new Date();
@@ -66,7 +48,6 @@ const dateTimeForCalender = (when, time, length) => {
 };
 
 
-// Insert new event to Google Calendar
 const insertEvent = async (event) => {
 
     try {
@@ -87,31 +68,7 @@ const insertEvent = async (event) => {
     }
 };
 
-// let dateTime = dateTimeForCalender();
 
-// // Event for Google Calendar
-// let event = {
-//     'summary': `This is the summary.`,
-//     'description': `This is the description.`,
-//     'start': {
-//         'dateTime': dateTime['start'],
-//         'timeZone': 'Asia/Kolkata'
-//     },
-//     'end': {
-//         'dateTime': dateTime['end'],
-//         'timeZone': 'Asia/Kolkata'
-//     }
-// };
-
-// insertEvent(event)
-//     .then((res) => {
-//         console.log(res);
-//     })
-//     .catch((err) => {
-//         console.log(err);
-//     });
-
-// Get all the events between two dates
 const getEvents = async (dateTimeStart, dateTimeEnd) => {
 
     try {
@@ -132,9 +89,6 @@ const getEvents = async (dateTimeStart, dateTimeEnd) => {
     }
 };
 
-let start = '2023-10-03T00:00:00.000Z';
-let end = '2024-10-06T00:00:00.000Z';
-
 const getEvent = async (eventId) => {
 
     try {
@@ -152,15 +106,27 @@ const getEvent = async (eventId) => {
     }
 }
 
-// getEvents(start, end)
-//     .then((res) => {
-//         console.log(res);
-//     })
-//     .catch((err) => {
-//         console.log(err);
-//     });
+const editEvent = async (eventId, event) => {
+    
+    try {
+        let response = await calendar.events.update({
+            auth: auth,
+            calendarId: calendarId,
+            eventId: eventId,
+            resource: event
+        });
 
-// Delete an event from eventID
+        if (response['status'] == 200 && response['statusText'] === 'OK') {
+            return response.data;
+        } else {
+            return 0;
+        }
+    } catch (error) {
+        console.log(`Error at editEvents --> ${error}`);
+        return 0;
+    }
+};
+
 const deleteEvent = async (eventId) => {
 
     try {
@@ -181,14 +147,4 @@ const deleteEvent = async (eventId) => {
     }
 };
 
-// let eventId = '180oh2qqkvn9shtrb4hf4kh4g8';
-
-// deleteEvent(eventId)
-//     .then((res) => {
-//         console.log(res);
-//     })
-//     .catch((err) => {
-//         console.log(err);
-//     });
-
-    module.exports = { deleteEvent, dateTimeForCalender, insertEvent, getEvents, getEvent }
+    module.exports = { deleteEvent, dateTimeForCalender, insertEvent, getEvents, getEvent, editEvent }
