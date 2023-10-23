@@ -111,7 +111,7 @@ exports.create = async (req, res, next) => {
 //   }
 // };
 
-exports.allGroups = async (req, res, next) => {
+exports.all = async (req, res, next) => {
   try {
     let group = await Group.find();
     res.status(200).send(group);
@@ -120,7 +120,7 @@ exports.allGroups = async (req, res, next) => {
   }
 };
 
-exports.viewGroupMeetings = async (req, res, next) => {
+exports.meetings = async (req, res, next) => {
   try {
     let group = await Group.findOne({ _id: req.params.groupId });
     let start = '2023-10-03T00:00:00.000Z';
@@ -133,7 +133,7 @@ exports.viewGroupMeetings = async (req, res, next) => {
   }
 };
 
-exports.groupId = async (req, res, next) => {
+exports.id = async (req, res, next) => {
   try {
     let group = await Group.findOne({ _id: req.params.groupId });
     if (!group) return res.status(400).send({ message: "Invalid Link" });
@@ -144,7 +144,7 @@ exports.groupId = async (req, res, next) => {
   }
 };
 
-exports.joinGroup = async (req, res, next) => {
+exports.join = async (req, res, next) => {
   const { currentUser } = req.body;
   try {
     let group = await Group.findOne({ _id: req.params.groupId });
@@ -161,7 +161,7 @@ exports.joinGroup = async (req, res, next) => {
   }
 };
 
-exports.leaveGroup = async (req, res, next) => {
+exports.leave = async (req, res, next) => {
   const { currentUser } = req.body;
 
   try {
@@ -177,7 +177,7 @@ exports.leaveGroup = async (req, res, next) => {
   }
 };
 
-exports.editGroup = async (req, res, next) => {
+exports.edit = async (req, res, next) => {
   const { when, length, freq, day } = req.body;
   try {
     let group = await Group.findOne({ _id: req.params.groupId });
@@ -219,7 +219,7 @@ exports.editGroup = async (req, res, next) => {
 };
 
 
-exports.deleteGroup = async (req, res, next) => {
+exports.delete = async (req, res, next) => {
   try {
     let group = await Group.findOne({ _id: req.params.groupId });
     if (!group) return res.status(400).send({ message: "Invalid Link" });

@@ -4,18 +4,18 @@ const groupControllers = require('../controllers/groupControllers')
 
 router.post("/create", groupControllers.create);
 
-router.get("/groups", groupControllers.allGroups);
+router.get("/groups", groupControllers.all);
 
-router.get("/:groupId", groupControllers.groupId);
+router.get("/meetings/:groupId", groupControllers.meetings);
 
-router.get("/meetings/:groupId", groupControllers.viewGroupMeetings);
+router.get("/:groupId", groupControllers.id);
 
-router.put("/join/:groupId", groupControllers.joinGroup);
+router.put("/join/:groupId", groupControllers.join);
 
-router.put("/leave/:groupId", groupControllers.leaveGroup);
+router.put("/leave/:groupId", groupControllers.leave);
 
-router.put("/edit/:groupId", groupControllers.editGroup);
+router.put("/edit/:groupId", groupControllers.edit);
 
-router.delete("/delete/:groupId", groupControllers.deleteGroup);
+router.delete("/delete/:groupId", groupControllers.delete);
 
 module.exports = router;

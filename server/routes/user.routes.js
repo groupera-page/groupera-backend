@@ -8,13 +8,13 @@ router.get("/verified/:id", userControllers.verified);
 
 router.get("/notverified/:id", userControllers.notVerified);
 
-router.get("/:id", userControllers.userId);
+router.get("/:id", userControllers.id);
 
-router.get("/meetings/:id", userControllers.viewUserMeetings);
+router.get("/meetings/:id", userControllers.meetings);
 
-router.put("/edit/:id", userControllers.userEdit);
+router.put("/edit/:id", userControllers.edit);
 
-router.delete("/delete/:id", userControllers.userDelete);
+router.delete("/delete/:id", userControllers.delete);
 
 router.get("/verify", isAuthenticated, userControllers.verifyToken);
 

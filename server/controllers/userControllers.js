@@ -68,7 +68,7 @@ exports.notVerified = async (req, res, next) => {
   }
 };
 
-exports.userId = async (req, res, next) => {
+exports.id = async (req, res, next) => {
   try {
     const user = await User.findOne({ _id: req.params.id }).populate("groups");
     res.status(200).send({ user });
@@ -77,7 +77,7 @@ exports.userId = async (req, res, next) => {
   }
 };
 
-exports.viewUserMeetings = async (req, res, next) => {
+exports.meetings = async (req, res, next) => {
   try {
     let user = await User.findOne({ _id: req.params.id });
     let start = '2023-10-03T00:00:00.000Z';
@@ -90,7 +90,7 @@ exports.viewUserMeetings = async (req, res, next) => {
   }
 };
 
-exports.userEdit = async (req, res, next) => {
+exports.edit = async (req, res, next) => {
   try {
     let user = await User.findOne({ _id: req.params.id });
     if (!user) return res.status(400).send({ message: "Invalid Link" });
@@ -110,7 +110,7 @@ exports.userEdit = async (req, res, next) => {
   }
 };
 
-exports.userDelete = async (req, res, next) => {
+exports.delete = async (req, res, next) => {
   try {
     let user = await User.findOne({ _id: req.params.id });
     if (!user) return res.status(400).send({ message: "Invalid Link" });
@@ -130,23 +130,29 @@ exports.userDelete = async (req, res, next) => {
       }
     );
 
-      let deletedGroups = await Group.deleteMany({moderator: req.params.id});
 
-      user.meetings.map((meetings) => deleteEvent(meetings));
+      user.moderatedGroups.map(async (groups)  => {
 
-      user.meetings.map((deleteMeetings) => User.updateMany(
+      const specGroup = await Group.findOne({ _id: groups });
+      
+      await User.updateMany(
         {
-          meetings: {
-            $in: [deleteMeetings]
+          joinedGroups: {
+            $in: [groups]
           }
         }, 
         {
           $pull: {
-            meetings: deleteMeetings
+            joinedGroups: groups,
+            meetings: specGroup.meeting
           }
         }
         )
-        )
+      });
+
+      user.meetings.map((meetings) => deleteEvent(meetings));
+
+    let deletedGroups = await Group.deleteMany({moderator: req.params.id});
 
 
     user = await User.deleteOne({ _id: req.params.id });
