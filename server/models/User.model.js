@@ -72,6 +72,20 @@ const userSchema = new Schema({
       type: String
     }
   ],
+  subscription: {
+    type: Object
+  }
+  // subscription: {
+  //   sessionId: {
+  //     type: String
+  //   },
+  //   startDate: {
+  //     type: Date
+  //   },
+  //   endDate: {
+  //     type: Date
+  //   }
+  // }
 });
 
 // userSchema.methods.generateAuthToken = function () {

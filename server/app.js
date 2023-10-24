@@ -25,7 +25,10 @@ app.use("/user", userRoutes);
 const groupRoutes = require("./routes/group.routes");
 app.use("/group", groupRoutes);
 const videoRoutes = require('./routes/video.routes');
-app.use("/video", videoRoutes)
+app.use("/video", videoRoutes);
+const paymentRoutes = require('./routes/payment.routes');
+app.use("/payment", paymentRoutes)
+
 
 // ❗ To handle errors. Routes that don't exist or errors that you handle in specific routes
 require("./error-handling")(app);

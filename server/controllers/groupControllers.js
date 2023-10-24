@@ -1,6 +1,6 @@
 const Group = require("../models/Group.model");
 const { User } = require("../models/User.model");
-const cloudinary = require("../utils/cloudinary");
+// const cloudinary = require("../utils/cloudinary");
 const { dateTimeForCalender, insertEvent, getEvents, deleteEvent, getEvent, editEvent } = require("../utils/googleCalendar");
 // const fetch = require("node-fetch");
 const generateRoom = require("../utils/videoSDK");
@@ -26,7 +26,7 @@ exports.create = async (req, res, next) => {
     //   if (uploadRes) {
         group = await new Group({
           ...req.body,
-          img: uploadRes
+          // img: uploadRes
         }).save();
         let event = {
           "summary": `${req.body.name}`,
@@ -252,7 +252,7 @@ exports.delete = async (req, res, next) => {
 
     if(user.moderatedGroups.length === 0){
       await User.updateOne({ _id: group.moderator }, { moderator: false } )
-    };
+        };
 
 
     await deleteEvent(group.meeting)
