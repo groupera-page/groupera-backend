@@ -3,6 +3,8 @@ const bcrypt = require("bcryptjs");
 const sendEmail = require("../utils/sendEmail");
 const Group = require("../models/Group.model");
 const jwt = require("jsonwebtoken");
+const Joi = require("joi");
+const passwordComplexity = require("joi-password-complexity");
 const { getEvents, deleteEvent } = require("../utils/googleCalendar");
 
 exports.signup = async (req, res, next) => {
@@ -67,6 +69,59 @@ exports.notVerified = async (req, res, next) => {
     res.status(400).send({ message: `${error}` });
   }
 };
+
+exports.reset = async (req, res, next) => {
+  try {
+    let user = await User.findOne({ email: req.body.email });
+    if(!user)
+      return res.status(409).send({message: "Der Benutzer mit der angegebenen E-Mail-Adresse existiert nicht"});
+
+    const url = `${process.env.BASE_URL}password-reset/${user._id}`
+    await sendEmail(user.email, "Password Reset", url);
+
+    res.status(200).send({message: "Der Link zum Zurücksetzen des Passworts wurde an Ihre E-Mail-Adresse gesendet"})
+  } catch (error) {
+    res.status(500).send({ message: `${error}`})
+  }
+};
+
+exports.verifyReset = async (req, res, next) => {
+  try {
+    const user = await User.findOne({ _id: req.params.id });
+    if (!user)
+      return res.status(400).send({ message: "Invalid link" });
+
+      res.status(200).send({ message: "Valid url "})
+  } catch (error) {
+    res.status(500).send({ message: `${error}`})
+  }
+};
+
+exports.resetPassword = async (req, res, next) => {
+  try {
+    const passwordSchema = Joi.object({
+      password: passwordComplexity().required().label("Password")
+    });
+    const { error } = passwordSchema.validate(req.body);
+    if (error)
+      return res.status(400).send({ message: error.details[0].message} );
+
+    const user = await User.findOne({ _id: req.params.id });
+    if (!user)
+      return res.status(400).send({ message: "Invalid link" });
+
+    const salt = await bcrypt.genSalt(Number(process.env.SALT));
+    const hashPassword = await bcrypt.hash(req.body.password, salt);
+
+    user.password = hashPassword;
+    await user.save();
+  
+    res.status(200).send({ message: "Passwort erfolgreich zurückgesetzt" })
+  } catch (error) {
+    res.status(500).send({ message: `${error}`})
+  }
+};
+
 
 exports.id = async (req, res, next) => {
   try {

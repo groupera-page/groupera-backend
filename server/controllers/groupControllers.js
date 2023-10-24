@@ -1,6 +1,6 @@
 const Group = require("../models/Group.model");
 const { User } = require("../models/User.model");
-const cloudinary = require("../utils/cloudinary");
+// const cloudinary = require("../utils/cloudinary");
 const { dateTimeForCalender, insertEvent, getEvents, deleteEvent, getEvent, editEvent } = require("../utils/googleCalendar");
 // const fetch = require("node-fetch");
 const generateRoom = require("../utils/videoSDK");
@@ -19,14 +19,14 @@ exports.create = async (req, res, next) => {
       return res
         .status(409)
         .send({ message: "Gruppe mit dem angegebenen Namen existiert bereits" });
-    if (img) {
-      const uploadRes = await cloudinary.uploader.upload(img, {
-        folder: "test",
-      });
-      if (uploadRes) {
+    // if (img) {
+    //   const uploadRes = await cloudinary.uploader.upload(img, {
+    //     folder: "test",
+    //   });
+      // if (uploadRes) {
         group = await new Group({
           ...req.body,
-          img: uploadRes
+          // img: uploadRes
         }).save();
         let event = {
           "summary": `${req.body.name}`,
@@ -52,7 +52,7 @@ exports.create = async (req, res, next) => {
           group = await Group.updateOne({ _id: group._id }, { meeting: newEvent.id } )
         }
         // generateRoom(token, group._id, length);
-      }
+      // }
       res.status(200).send({message: "all good here, boss"})
     }
   } catch (error) {
