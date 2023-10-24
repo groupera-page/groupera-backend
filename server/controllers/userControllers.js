@@ -49,7 +49,7 @@ exports.signup = async (req, res, next) => {
 exports.verified = async (req, res, next) => {
   try {
     const user = await User.findOne({ code: req.params.id });
-    if (!user) return res.status(400).send({ message: "Invalid code" });
+    if (!user) return res.status(400).send({ message: "Ungültiger Code" });
 
     await User.updateOne({ _id: user._id }, { verified: true, code: "" });
 
@@ -62,7 +62,7 @@ exports.verified = async (req, res, next) => {
 exports.notVerified = async (req, res, next) => {
   try {
     const user = await User.findOne({ email: req.params.id });
-    if (!user) return res.status(400).send({ message: "Invalid code" });
+    if (!user) return res.status(400).send({ message: "Ungültiger Code" });
   
     res.status(200).json(user);
   } catch (error) {
