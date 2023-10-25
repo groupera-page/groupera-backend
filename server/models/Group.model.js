@@ -2,6 +2,10 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const groupSchema = new Schema({
+  verified: {
+    type: Boolean,
+    default: false
+  },
   name: {
     type: String,
     required: true,
@@ -20,11 +24,17 @@ const groupSchema = new Schema({
   topic: {
     type: String,
   },
-  frenquency: {
+  frequency: {
     type: String,
   },
-  date: {
+  day: {
     type: String,
+  },
+  when: {
+    type: String
+  },
+  length: {
+    type: String
   },
   time: {
     type: String,

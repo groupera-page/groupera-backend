@@ -4,6 +4,8 @@ const groupControllers = require('../controllers/groupControllers')
 
 router.post("/create", groupControllers.create);
 
+router.put("/verified/:groupId", groupControllers.verified)
+
 router.get("/groups", groupControllers.all);
 
 router.get("/meetings/:groupId", groupControllers.meetings);

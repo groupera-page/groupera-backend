@@ -59,7 +59,8 @@ exports.checkout = async (req, res, next) => {
                         sessionId: null,
                         startDate: subscription.current_period_start,
                         endDate: subscription.current_period_end
-                    }
+                    },
+                    paid: true
                 })
             } catch (error) {
                 console.log(error)

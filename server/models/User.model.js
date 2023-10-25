@@ -16,6 +16,9 @@ const userSchema = new Schema({
   password: {
     type: String
   },
+  age: {
+    type: Date
+  },
   verified: {
     type: Boolean,
     default: false,
@@ -42,12 +45,14 @@ const userSchema = new Schema({
     type: String
   },
   moderator: {
-    type: Boolean,
-    default: false,
+    type: String
+    // 'One' can be moderate, 'Two' can be need help, 'Three' can be don't want to
+    // type: Boolean,
+    // default: false,
   },
   paid: {
     type: Boolean,
-    date_paid: Date,
+    // date_paid: Date,
     default: false
   },
   terms: {
@@ -75,17 +80,6 @@ const userSchema = new Schema({
   subscription: {
     type: Object
   }
-  // subscription: {
-  //   sessionId: {
-  //     type: String
-  //   },
-  //   startDate: {
-  //     type: Date
-  //   },
-  //   endDate: {
-  //     type: Date
-  //   }
-  // }
 });
 
 // userSchema.methods.generateAuthToken = function () {
@@ -106,6 +100,7 @@ const validate = (data) => {
     username: Joi.string().min(1).max(120).required().label("Username").messages({'string.max': 'Bitte halten Sie den Namen auf weniger als 120 Zeichen', 'string.empty': 'Bitte Name eingeben'}),
     email: Joi.string().email().required().label("Email").messages({'string.email': 'Bitte geben Sie eine gültige E-Mail Adresse ein', 'string.empty': 'Bitte geben Sie eine E-Mail Adresse ein'}),
     password: passwordComplexity().required().label("Password").messages({'any.required': 'Erforderliches Feld'}),
+    moderator: Joi.string().label("Moderator"),
     goals: Joi.string().label("GoalJoi."),
     gender: Joi.string().label("Gender"),
     code: Joi.string().label("code"),
