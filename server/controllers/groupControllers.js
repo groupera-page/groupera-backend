@@ -37,7 +37,7 @@ exports.create = async (req, res, next) => {
     }).save();
     let user = await User.findOne({ _id: group.moderator._id });
     if (user.moderator == "One") {
-      let dateTime = dateTimeForCalender(group.when, group.time, group.length);
+      let dateTime = dateTimeForCalender(group.date, group.time, group.length);
       let event = {
         summary: `${group.name}`,
         description: `Join code: ${group._id}`,
@@ -50,7 +50,7 @@ exports.create = async (req, res, next) => {
           timeZone: "Europe/Berlin",
         },
         recurrence: [
-          `RRULE:FREQ=WEEKLY;INTERVAL=${+group.frequency};COUNT=2;BYDAY=${group.day}`,
+          `RRULE:FREQ=WEEKLY;INTERVAL=${+group.frequency}`,
         ],
       };
       const newEvent = await insertEvent(event);
@@ -80,7 +80,7 @@ exports.verified = async (req, res, next) => {
   try {
     let group = await Group.findOne({ _id: groupId });
     if (group) {
-      let dateTime = dateTimeForCalender(group.when, group.time, group.length);
+      let dateTime = dateTimeForCalender(group.date, group.time, group.length);
       let user = await User.findOne({ _id: group.moderator._id });
       if (user.moderator == "Two" || user.moderator == "Three") {
         let event = {
@@ -95,9 +95,7 @@ exports.verified = async (req, res, next) => {
             timeZone: "Europe/Berlin",
           },
           recurrence: [
-            `RRULE:FREQ=WEEKLY;INTERVAL=${+group.frequency};COUNT=2;BYDAY=${
-              group.day
-            }`,
+            `RRULE:FREQ=WEEKLY;INTERVAL=${+group.frequency}`,
           ],
         };
         const newEvent = await insertEvent(event);
@@ -181,7 +179,7 @@ exports.meetings = async (req, res, next) => {
   try {
     let group = await Group.findOne({ _id: req.params.groupId });
     let start = "2023-10-03T00:00:00.000Z";
-    let end = "2024-10-06T00:00:00.000Z";
+    let end = "2026-10-06T00:00:00.000Z";
     let event = await getEvents(start, end);
     let filteredEvent = event.filter((events) =>
       events.id.includes(group.meeting)
@@ -247,7 +245,6 @@ exports.leave = async (req, res, next) => {
 };
 
 exports.edit = async (req, res, next) => {
-  const { when, length, freq, day } = req.body;
   try {
     let group = await Group.findOne({ _id: req.params.groupId });
     if (!group) return res.status(400).send({ message: "Invalid Link" });
@@ -256,7 +253,7 @@ exports.edit = async (req, res, next) => {
 
     group = await Group.findOne({ _id: req.params.groupId });
 
-    let dateTime = dateTimeForCalender(when, group.time, length);
+    let dateTime = dateTimeForCalender(group.date, group.time, group.length);
 
     let event = {
       summary: `${group.name}`,
@@ -269,10 +266,8 @@ exports.edit = async (req, res, next) => {
         dateTime: dateTime["end"],
         timeZone: "Europe/Berlin",
       },
-      recurrence: [`RRULE:FREQ=WEEKLY;INTERVAL=${+freq};COUNT=2;BYDAY=${day}`],
+      recurrence: [`RRULE:FREQ=WEEKLY;INTERVAL=${+group.frequency}`],
     };
-
-    console.log(event);
 
     if (group) {
       let updatedEvent = await editEvent(group.meeting, event);

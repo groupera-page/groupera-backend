@@ -27,11 +27,8 @@ const groupSchema = new Schema({
   frequency: {
     type: String,
   },
-  day: {
+  date: {
     type: String,
-  },
-  when: {
-    type: String
   },
   length: {
     type: String

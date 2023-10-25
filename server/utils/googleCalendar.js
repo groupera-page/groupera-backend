@@ -19,21 +19,21 @@ const auth = new google.auth.JWT(
 // Your TIMEOFFSET Offset
 const TIMEOFFSET = '+02:00';
 
-const dateTimeForCalender = (when, time, length) => {
+const dateTimeForCalender = (date, time, length) => {
 
-    let date = new Date();
+    // let date = new Date();
 
-    let year = date.getFullYear();
-    let month = date.getMonth() + 1;
-    if (month < 10) {
-        month = `0${month}`;
-    }
-    let day = date.getDate() + +when;
-    if (day < 10) {
-        day = `0${day}`;
-    }
+    // let year = +whenYear;
+    // let month = +whenMonth;
+    // if (month < 10) {
+    //     month = `0${month}`;
+    // }
+    // let day = +whenDay;
+    // if (day < 10) {
+    //     day = `0${day}`;
+    // }
 
-    let newDateTime = `${year}-${month}-${day}T${time}:00.000${TIMEOFFSET}`;
+    let newDateTime = `${date}T${time}:00.000${TIMEOFFSET}`;
 
     let event = new Date(Date.parse(newDateTime));
 
@@ -148,3 +148,31 @@ const deleteEvent = async (eventId) => {
 };
 
     module.exports = { deleteEvent, dateTimeForCalender, insertEvent, getEvents, getEvent, editEvent }
+
+    // const dateTimeForCalender = (when, time, length) => {
+
+    //     let date = new Date();
+    
+    //     let year = date.getFullYear();
+    //     let month = date.getMonth() + 1;
+    //     if (month < 10) {
+    //         month = `0${month}`;
+    //     }
+    //     let day = date.getDate() + +when;
+    //     if (day < 10) {
+    //         day = `0${day}`;
+    //     }
+    
+    //     let newDateTime = `${year}-${month}-${day}T${time}:00.000${TIMEOFFSET}`;
+    
+    //     let event = new Date(Date.parse(newDateTime));
+    
+    //     let startDate = event;
+    
+    //     let endDate = new Date(new Date(startDate).setMinutes(startDate.getMinutes() + length/10 * 10));
+    
+    //     return {
+    //         'start': startDate,
+    //         'end': endDate
+    //     }
+    // };
