@@ -14,6 +14,8 @@ router.get("/reset/:id", userControllers.verifyReset);
 
 router.post("/reset/:id", userControllers.resetPassword);
 
+// router.post("/reset/:id", userExists, passwordValid, userControllers.create, emailController.sendWelcomeMail)
+
 router.get("/:id", userControllers.id);
 
 router.get("/meetings/:id", userControllers.meetings);

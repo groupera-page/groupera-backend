@@ -13,7 +13,7 @@ const {
 const generateRoom = require("../utils/videoSDK");
 
 exports.create = async (req, res, next) => {
-  // const { img, when, frequency, day, time, length, token } = req.body;
+  const { img, when, frequency, date, time, length, token } = req.body;
 
 
   // Event for Google Calendar
@@ -37,7 +37,7 @@ exports.create = async (req, res, next) => {
     }).save();
     let user = await User.findOne({ _id: group.moderator._id });
     if (user.moderator == "One") {
-      let dateTime = dateTimeForCalender(group.date, group.time, group.length);
+      let dateTime = dateTimeForCalender(date, time, length);
       let event = {
         summary: `${group.name}`,
         description: `Join code: ${group._id}`,
@@ -74,6 +74,9 @@ exports.create = async (req, res, next) => {
   }
 };
 
+
+// HERE is where trouble begins with not keeping meeting info in our database: when a group needs to be verified, the event shouldn't be made yet,
+// in which case the user's selections have to be stored somewhere so that the group can be created.
 exports.verified = async (req, res, next) => {
   const { groupId } = req.params;
 
@@ -245,6 +248,8 @@ exports.leave = async (req, res, next) => {
 };
 
 exports.edit = async (req, res, next) => {
+  const { date, time, length, frequency } = req.body;
+
   try {
     let group = await Group.findOne({ _id: req.params.groupId });
     if (!group) return res.status(400).send({ message: "Invalid Link" });
@@ -253,7 +258,7 @@ exports.edit = async (req, res, next) => {
 
     group = await Group.findOne({ _id: req.params.groupId });
 
-    let dateTime = dateTimeForCalender(group.date, group.time, group.length);
+    let dateTime = dateTimeForCalender(date, time, length);
 
     let event = {
       summary: `${group.name}`,
@@ -266,7 +271,7 @@ exports.edit = async (req, res, next) => {
         dateTime: dateTime["end"],
         timeZone: "Europe/Berlin",
       },
-      recurrence: [`RRULE:FREQ=WEEKLY;INTERVAL=${+group.frequency}`],
+      recurrence: [`RRULE:FREQ=WEEKLY;INTERVAL=${+frequency}`],
     };
 
     if (group) {

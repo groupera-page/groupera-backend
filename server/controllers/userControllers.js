@@ -22,8 +22,9 @@ exports.signup = async (req, res, next) => {
 
     const salt = await bcrypt.genSalt(Number(process.env.SALT));
     const hashPassword = await bcrypt.hash(req.body.password, salt);
+    const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
 
-    user = await new User({ ...req.body, password: hashPassword }).save();
+    user = await new User({ ...req.body, password: hashPassword, code: randomCode }).save();
       // await sendEmail(user.email, "Verify Email", user.code);
 
     const { _id, email } = user;
