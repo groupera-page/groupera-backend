@@ -1,7 +1,10 @@
-const { Schema } = require("mongoose");
+const { Schema, SchemaTypeOptions } = require("mongoose");
 const Joi = require("joi");
 
 const questionsSchema = new Schema({
+  user: {
+    type: Schema.Types.ObjectId
+  },
   goals: [
     {
       type: String,

@@ -6,6 +6,7 @@ const userSchema = new Schema({
   username: {
     type: String,
   },
+  // Gotta look into this too for privacy
   email: {
     type: String,
     unique: [true, "E-Mail bereits in Gebrauch"],
@@ -24,7 +25,6 @@ const userSchema = new Schema({
   code: { type: String },
   gender: {
     type: String,
-    // required: true
   },
   // And this
   moderator: {
@@ -95,10 +95,10 @@ const validate = (data) => {
       .required()
       .label("Password")
       .messages({ "any.required": "Erforderliches Feld" }),
-    age: Joi.string().label("Age"),
-    code: Joi.string().label("code"),
-    gender: Joi.string().label("Gender"),
-    moderator: Joi.string().label("Moderator"),
+    age: Joi.date().label("Age"),
+    code: Joi.string().label("Code"),
+    gender: Joi.string().valid('Männlich', 'Weiblich', 'Divers').label("Gender"),
+    moderator: Joi.string().valid('One', 'Two', 'Three').label("Moderator"),
   });
   return schema.validate(data);
 };

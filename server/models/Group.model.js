@@ -73,7 +73,7 @@ const validate = (data) => {
           "Bitte halten Sie den Description auf weniger als 500 Zeichen",
         "string.empty": "Bitte Description eingeben",
       }),
-    topic: Joi.string().require().label("Topic"),
+    topic: Joi.string().required().label("Topic"),
     // moderator: Joi.string().label("Moderator"),
   });
   return schema.validate(data);
