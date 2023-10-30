@@ -56,7 +56,7 @@ exports.create = async (req, res, next) => {
       };
       const newEvent = await insertEvent(event);
       if (newEvent) {
-        user = await User.updateOne(
+        await User.updateOne(
           { email: user.email },
           { $push: { moderatedGroups: group._id, meetings: newEvent.id } }
         );
