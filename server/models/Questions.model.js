@@ -1,4 +1,4 @@
-const { Schema, SchemaTypeOptions } = require("mongoose");
+const { Schema, model } = require("mongoose");
 const Joi = require("joi");
 
 const questionsSchema = new Schema({
