@@ -30,6 +30,10 @@ const userSchema = new Schema({
   experience: {
     type: String,
   },
+  verificationExpires: {
+    type: Date,
+    default: () => new Date(+new Date() + 15 * 60 * 1000) //3 minutes
+  },
   // Also potentially problematic
   verified: {
     type: Boolean,
@@ -79,9 +83,21 @@ const userSchema = new Schema({
   subscription: {
     type: Object,
   },
-});
+},
+// {
+//   timestamps: true
+// }
+);
 
 const User = model("User", userSchema);
+
+userSchema.index(
+  { 'verificationExpires': 1 },
+  {
+    expireAfterSeconds: 0,
+    partialFilterExpression: { 'verified': false }
+  }
+);
 
 // https://github.com/hapijs/joi/blob/master/API.md#list-of-errors
 
@@ -116,5 +132,6 @@ const validate = (data) => {
   });
   return schema.validate(data);
 };
+
 
 module.exports = { User, validate };
