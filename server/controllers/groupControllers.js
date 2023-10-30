@@ -1,4 +1,4 @@
-const Group = require("../models/Group.model");
+const {Group} = require("../models/Group.model");
 const { User } = require("../models/User.model");
 // const cloudinary = require("../utils/cloudinary");
 const {
@@ -13,7 +13,7 @@ const {
 const generateRoom = require("../utils/videoSDK");
 
 exports.create = async (req, res, next) => {
-  const { img, when, frequency, date, time, length, token } = req.body;
+  const { img, frequency, date, time, length, token } = req.body;
 
 
   // Event for Google Calendar
@@ -35,7 +35,8 @@ exports.create = async (req, res, next) => {
       ...req.body,
       // img: uploadRes
     }).save();
-    let user = await User.findOne({ _id: group.moderator._id });
+    // let user = await User.findOne({ _id: group.moderator._id });
+    let user = await User.findOne({ email: req.params.email });
     if (user.moderator == "One") {
       let dateTime = dateTimeForCalender(date, time, length);
       let event = {
@@ -50,18 +51,18 @@ exports.create = async (req, res, next) => {
           timeZone: "Europe/Berlin",
         },
         recurrence: [
-          `RRULE:FREQ=WEEKLY;INTERVAL=${+group.frequency}`,
+          `RRULE:FREQ=WEEKLY;INTERVAL=${+frequency}`,
         ],
       };
       const newEvent = await insertEvent(event);
       if (newEvent) {
         user = await User.updateOne(
-          { _id: group.moderator._id },
+          { email: user.email },
           { $push: { moderatedGroups: group._id, meetings: newEvent.id } }
         );
         group = await Group.updateOne(
           { _id: group._id },
-          { meeting: newEvent.id, verified: true }
+          { meeting: newEvent.id, verified: true, moderator: user._id }
         );
       }
     }
@@ -119,56 +120,6 @@ exports.verified = async (req, res, next) => {
   }
 };
 
-// exports.create = async (req, res, next) => {
-//   const { img, date, time, length, token } = req.body;
-
-//   let dateTime = dateTimeForCalender(date, time, length);
-
-//   // Event for Google Calendar
-//   let event = {
-//     summary: `${req.body.name}`,
-//     description: `${req.body.description}`,
-//     start: {
-//       dateTime: dateTime["start"],
-//       timeZone: "Europe/Berlin",
-//     },
-//     end: {
-//       dateTime: dateTime["end"],
-//       timeZone: "Europe/Berlin",
-//     },
-//   };
-
-//   try {
-//     let group = await Group.findOne({ name: req.body.name });
-//     if (group)
-//       return res
-//         .status(409)
-//         .send({ message: "Group with given name already exists" });
-//     if (img) {
-//       const uploadRes = await cloudinary.uploader.upload(img, {
-//         upload_preset: "groupera-test",
-//       });
-//       if (uploadRes) {
-//         const newEvent = await insertEvent(event);
-//         if (newEvent) {
-//           group = await new Group({
-//             ...req.body,
-//             img: uploadRes,
-//             meetingId: newEvent.id,
-//           }).save();
-//           let user = await User.updateOne(
-//             { _id: group.users[0]._id },
-//             { $push: { groups: group._id } }
-//           );
-//         }
-//         generateRoom(token, group._id, length);
-//       }
-//     }
-//   } catch (error) {
-//     res.status(500).send({ message: `${error}` });
-//   }
-// };
-
 exports.all = async (req, res, next) => {
   try {
     let group = await Group.find();
@@ -182,7 +133,7 @@ exports.meetings = async (req, res, next) => {
   try {
     let group = await Group.findOne({ _id: req.params.groupId });
     let start = "2023-10-03T00:00:00.000Z";
-    let end = "2026-10-06T00:00:00.000Z";
+    let end = "2036-10-06T00:00:00.000Z";
     let event = await getEvents(start, end);
     let filteredEvent = event.filter((events) =>
       events.id.includes(group.meeting)

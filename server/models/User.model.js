@@ -17,6 +17,19 @@ const userSchema = new Schema({
   age: {
     type: Date,
   },
+  goals: [
+    {
+      type: String,
+    },
+  ],
+  themes: [
+    {
+      type: String,
+    },
+  ],
+  experience: {
+    type: String,
+  },
   // Also potentially problematic
   verified: {
     type: Boolean,
@@ -57,7 +70,7 @@ const userSchema = new Schema({
       ref: "Group",
     },
   ],
-  // Also problematic 
+  // Also problematic
   meetings: [
     {
       type: String,
@@ -83,22 +96,23 @@ const validate = (data) => {
         "string.max": "Bitte halten Sie den Namen auf weniger als 70 Zeichen",
         "string.empty": "Bitte Name eingeben",
       }),
-    email: Joi.string()
-      .email()
-      .required()
-      .label("Email")
-      .messages({
-        "string.email": "Bitte geben Sie eine gültige E-Mail Adresse ein",
-        "string.empty": "Bitte geben Sie eine E-Mail Adresse ein",
-      }),
+    email: Joi.string().email().required().label("Email").messages({
+      "string.email": "Bitte geben Sie eine gültige E-Mail Adresse ein",
+      "string.empty": "Bitte geben Sie eine E-Mail Adresse ein",
+    }),
     password: passwordComplexity()
       .required()
       .label("Password")
       .messages({ "any.required": "Erforderliches Feld" }),
     age: Joi.date().label("Age"),
     code: Joi.string().label("Code"),
-    gender: Joi.string().valid('Männlich', 'Weiblich', 'Divers').label("Gender"),
-    moderator: Joi.string().valid('One', 'Two', 'Three').label("Moderator"),
+    gender: Joi.string()
+      .valid("Männlich", "Weiblich", "Divers")
+      .label("Gender"),
+    moderator: Joi.string().valid("One", "Two", "Three").label("Moderator"),
+    goals: Joi.array().items(Joi.string()).label("Goals"),
+    themes: Joi.array().items(Joi.string()).label("Themes"),
+    experience: Joi.string().label("Experience"),
   });
   return schema.validate(data);
 };

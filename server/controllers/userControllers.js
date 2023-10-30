@@ -51,33 +51,21 @@ exports.verified = async (req, res, next) => {
     const user = await User.findOne({ code: req.body.code });
     if (!user) return res.status(400).send({ message: "Ungültiger Code" });
 
-    await User.updateOne({ _id: user._id }, { verified: true, code: "" });
-
-    res.status(200).json(user);
+    // res.status(200).json(user);
+    res.redirect(`/group/create/${user._id}`)
   } catch (error) {
     res.status(400).send({ message: `${error}` });
   }
 };
 
-// exports.verified = async (req, res, next) => {
-//   try {
-//     const user = await User.findOne({ code: req.params.id });
-//     if (!user) return res.status(400).send({ message: "Ungültiger Code" });
-
-//     await User.updateOne({ _id: user._id }, { verified: true, code: "" });
-
-//     res.status(200).json(user);
-//   } catch (error) {
-//     res.status(400).send({ message: `${error}` });
-//   }
-// };
-
-exports.notVerified = async (req, res, next) => {
+exports.verified = async (req, res, next) => {
   try {
-    const user = await User.findOne({ email: req.params.id });
+    const user = await User.findOne({ code: req.body.code });
     if (!user) return res.status(400).send({ message: "Ungültiger Code" });
 
-    res.status(200).json(user);
+    await User.updateOne({ _id: user._id }, { verified: true, code: "" });
+
+    res.status(200).send({message: "All gravy here, boss"});
   } catch (error) {
     res.status(400).send({ message: `${error}` });
   }

@@ -4,11 +4,9 @@ const { isAuthenticated } = require("../middleware/jwt.middleware.js");
 
 router.post("/signup", userControllers.signup);
 
+router.get("/verified", userControllers.verified);
+
 router.post("/verified", userControllers.verified);
-
-// router.get("/verified/:id", userControllers.verified);
-
-router.get("/notverified/:id", userControllers.notVerified);
 
 router.post("/reset", userControllers.reset);
 
