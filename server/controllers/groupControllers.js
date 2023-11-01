@@ -36,8 +36,8 @@ exports.create = async (req, res, next) => {
       // img: uploadRes
     }).save();
     // let user = await User.findOne({ _id: group.moderator._id });
+    console.log(req.user)
     let user = await User.findOne({ email: req.params.email });
-    if (user.moderator == "One") {
       let dateTime = dateTimeForCalender(date, time, length);
       let event = {
         summary: `${group.name}`,
@@ -65,7 +65,6 @@ exports.create = async (req, res, next) => {
           { meeting: newEvent.id, verified: true, moderator: user._id }
         );
       }
-    }
     // generateRoom(token, group._id, length);
     // }
     res.status(200).send({ message: "all good here, boss" });
@@ -76,54 +75,14 @@ exports.create = async (req, res, next) => {
 };
 
 
-// HERE is where trouble begins with not keeping meeting info in our database: when a group needs to be verified, the event shouldn't be made yet,
-// in which case the user's selections have to be stored somewhere so that the group can be created.
-exports.verified = async (req, res, next) => {
-  const { groupId } = req.params;
-
-  try {
-    let group = await Group.findOne({ _id: groupId });
-    if (group) {
-      let dateTime = dateTimeForCalender(group.date, group.time, group.length);
-      let user = await User.findOne({ _id: group.moderator._id });
-      if (user.moderator == "Two" || user.moderator == "Three") {
-        let event = {
-          summary: `${group.name}`,
-          description: `Join code: ${group._id}`,
-          start: {
-            dateTime: dateTime["start"],
-            timeZone: "Europe/Berlin",
-          },
-          end: {
-            dateTime: dateTime["end"],
-            timeZone: "Europe/Berlin",
-          },
-          recurrence: [
-            `RRULE:FREQ=WEEKLY;INTERVAL=${+group.frequency}`,
-          ],
-        };
-        const newEvent = await insertEvent(event);
-        if (newEvent) {
-          user = await User.updateOne(
-            { _id: group.moderator._id },
-            { $push: { moderatedGroups: group._id, meetings: newEvent.id } }
-          );
-          group = await Group.updateOne(
-            { _id: group._id },
-            { meeting: newEvent.id, verified: true }
-          );
-        }
-      }
-    }
-  } catch (error) {
-    res.status(500).send(`${error}`);
-  }
-};
-
 exports.all = async (req, res, next) => {
   try {
     let group = await Group.find();
-    res.status(200).send(group);
+
+    let filteredGroup = group.map(group => group.name && group.description)
+
+
+    res.status(200).send(filteredGroup);
   } catch (error) {
     res.status(500).send(`${error}`);
   }
@@ -148,6 +107,7 @@ exports.id = async (req, res, next) => {
   try {
     let group = await Group.findOne({ _id: req.params.groupId });
     if (!group) return res.status(400).send({ message: "Invalid Link" });
+
 
     res.status(200).send({ group });
   } catch (error) {

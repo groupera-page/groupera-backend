@@ -1,4 +1,5 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+export default function emailTemplate(){
+  return(
 <html
   xmlns="http://www.w3.org/1999/xhtml"
   xmlns:v="urn:schemas-microsoft-com:vml"
@@ -346,13 +347,12 @@
         width: 0;
       }
     </style>
-    <!--[if mso
-      ]><xml>
+<xml>
         <o:OfficeDocumentSettings>
           <o:AllowPNG /> <o:PixelsPerInch>96</o:PixelsPerInch>
         </o:OfficeDocumentSettings>
-      </xml><!
-    [endif]-->
+      </xml>
+
     <style type="text/css">
       a:link {
         color: #0092ff;
@@ -523,9 +523,7 @@
                                                       "
                                                       >Danke, dass du dich bei
                                                       Groupera angemeldet
-                                                      hast!</span
-                                                    ></span
-                                                  >
+                                                      hast!</span></span>
                                                 </h2>
                                               </div>
                                             </td>
@@ -636,16 +634,7 @@
                                                         color: #000000;
                                                         font-family: Roboto;
                                                         font-size: 18px;
-                                                      "
-                                                      >Verwende bitte den
-                                                      Bestätigungscode unten, um
-                                                      deine E-Mail-Adresse zu
-                                                      bestätigen und die
-                                                      Registrierung deines
-                                                      Kontos bei Groupera
-                                                      abzuschließen</span
-                                                    ></span
-                                                  >
+                                                      ">Verwende bitte den Bestätigungscode unten, um deine E-Mail-Adresse zu bestätigen und die Registrierung deines Kontos bei Groupera abzuschließen</span></span>
                                                 </p>
                                               </div>
                                             </td>
@@ -986,9 +975,7 @@
                                                       color: #a64d79;
                                                       font-family: Roboto;
                                                       font-size: 26px;
-                                                    "
-                                                    >Unsere Vision</span
-                                                  >
+                                                    ">Unsere Vision</span>
                                                 </h2>
                                               </div>
                                             </td>
@@ -1757,3 +1744,5 @@
     </table>
   </body>
 </html>
+)
+}

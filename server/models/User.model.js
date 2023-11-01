@@ -6,13 +6,15 @@ const userSchema = new Schema({
   username: {
     type: String,
   },
-  // Gotta look into this too for privacy
   email: {
     type: String,
-    unique: [true, "E-Mail bereits in Gebrauch"],
+    unique: [true, "Die E-Mail Adresse ist ungültig"],
   },
   password: {
     type: String,
+  },
+  role: {
+    type: String
   },
   age: {
     type: Date,
@@ -34,7 +36,6 @@ const userSchema = new Schema({
     type: Date,
     default: () => new Date(+new Date() + 15 * 60 * 1000) //3 minutes
   },
-  // Also potentially problematic
   verified: {
     type: Boolean,
     default: false,
@@ -43,38 +44,33 @@ const userSchema = new Schema({
   gender: {
     type: String,
   },
-  // And this
   moderator: {
     type: String,
     // 'One' can be moderate, 'Two' can be need help, 'Three' can be don't want to
   },
-  // And this
+  // Hide this in requests
   paid: {
     type: Boolean,
     // date_paid: Date,
     default: false,
   },
-  // And this
   terms: {
     type: Boolean,
     date_agreed: Date,
     default: false,
   },
-  // This could be problematic
   moderatedGroups: [
     {
       type: Schema.Types.ObjectId,
       ref: "Group",
     },
   ],
-  // This could definitely be problematic
   joinedGroups: [
     {
       type: Schema.Types.ObjectId,
       ref: "Group",
     },
   ],
-  // Also problematic
   meetings: [
     {
       type: String,
@@ -120,6 +116,7 @@ const validate = (data) => {
       .required()
       .label("Password")
       .messages({ "any.required": "Erforderliches Feld" }),
+    role: Joi.string().label("Role"),
     age: Joi.date().label("Age"),
     code: Joi.string().label("Code"),
     gender: Joi.string()

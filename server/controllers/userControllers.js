@@ -25,6 +25,7 @@ exports.signup = async (req, res, next) => {
       ...req.body,
       password: hashPassword,
       code: randomCode,
+      role: "user"
     }).save();
     // await sendEmail(user.email, "Verify Email", user.code);
 
@@ -52,7 +53,7 @@ exports.verified = async (req, res, next) => {
     if (!user) return res.status(400).send({ message: "Ungültiger Code" });
 
     // res.status(200).json(user);
-    res.redirect(`/group/create/${user._id}`)
+    res.redirect(`/group/create/${user.email}`)
   } catch (error) {
     res.status(400).send({ message: `${error}` });
   }
@@ -63,7 +64,7 @@ exports.verified = async (req, res, next) => {
     const user = await User.findOne({ code: req.body.code });
     if (!user) return res.status(400).send({ message: "Ungültiger Code" });
 
-    await User.updateOne({ _id: user._id }, { verified: true, code: "" });
+    await User.updateOne({ _id: user._id }, { verified: true, code: "", verificationExpires: null });
 
     res.status(200).send({message: "All gravy here, boss"});
   } catch (error) {

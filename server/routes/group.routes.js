@@ -1,10 +1,8 @@
 const router = require("express").Router();
-const groupControllers = require('../controllers/groupControllers')
+const groupControllers = require('../controllers/groupControllers');
 
 
 router.post("/create/:email", groupControllers.create);
-
-router.put("/verified/:groupId", groupControllers.verified)
 
 router.get("/groups", groupControllers.all);
 

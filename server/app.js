@@ -3,7 +3,13 @@ require("./db");
 const express = require("express");
 const app = express();
 const schedule = require("node-schedule");
-const { User } = require("./models/User.model")
+const { User } = require("./models/User.model");
+const authRoutes = require("./routes/auth.routes");
+const userRoutes = require("./routes/user.routes");
+const groupRoutes = require("./routes/group.routes");
+const videoRoutes = require('./routes/video.routes');
+const paymentRoutes = require('./routes/payment.routes');
+
 app.use(express.json({limit: '50mb'}));
 
 
@@ -11,15 +17,10 @@ app.use(express.json({limit: '50mb'}));
 require("./config")(app);
 
 // 👇 Start handling routes here
-const authRoutes = require("./routes/auth.routes");
 app.use("/auth", authRoutes);
-const userRoutes = require("./routes/user.routes");
 app.use("/user", userRoutes);
-const groupRoutes = require("./routes/group.routes");
 app.use("/group", groupRoutes);
-const videoRoutes = require('./routes/video.routes');
 app.use("/video", videoRoutes);
-const paymentRoutes = require('./routes/payment.routes');
 app.use("/payment", paymentRoutes);
 
 // const job = schedule.scheduleJob("*/10 * * * * *", () => deleteOldUsers());
