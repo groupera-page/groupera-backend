@@ -26,11 +26,18 @@ exports.login = async (req, res, next) => {
 		}	
 		// const token = user.generateAuthToken();
 
+		const roles = Object.values(user.roles);
+
 		const { _id, email } = user;
         const payload = { _id, email };
     
     
-        const authToken = jwt.sign(payload, process.env.TOKEN_SECRET, {
+        const authToken = jwt.sign({
+			"UserInfo": {
+				"email": email,
+				"roles": roles
+			}
+		}, process.env.TOKEN_SECRET, {
                 algorithm: "HS256",
                 expiresIn: "10m",
               });

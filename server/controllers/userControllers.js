@@ -25,9 +25,12 @@ exports.signup = async (req, res, next) => {
       ...req.body,
       password: hashPassword,
       code: randomCode,
-      role: "user"
+      roles: { "User": 2001 }
     }).save();
     // await sendEmail(user.email, "Verify Email", user.code);
+
+    const roles = Object.values(user.roles);
+
 
     const { _id, email } = user;
     const payload = { _id, email };
@@ -37,7 +40,23 @@ exports.signup = async (req, res, next) => {
       expiresIn: "6h",
     };
 
-    const authToken = jwt.sign(payload, process.env.TOKEN_SECRET, options);
+    const authToken = jwt.sign({
+			"UserInfo": {
+				"_id": _id,
+				"email": email,
+				"roles": roles
+			}
+		}, process.env.TOKEN_SECRET, options);
+    const refreshToken = jwt.sign(payload, process.env.REFRESH_SECRET, {
+			algorithm: "HS256",
+			expiresIn: "1d",
+		});
+
+    const currentUser = { ...user, refreshToken };
+
+		let newUser = await User.updateOne({ _id: user._id }, { currentUser });
+
+		res.cookie('jwt', refreshToken, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000})
 
     res.status(201).send({
       authtoken: authToken,
@@ -225,7 +244,7 @@ exports.delete = async (req, res, next) => {
   }
 };
 
-exports.verifyToken = (req, res, next) => {
-  console.log(`req.payload`, req.payload);
-  res.status(200).json(req.payload);
-};
+// exports.verifyToken = (req, res, next) => {
+//   console.log(`req.payload`, req.payload);
+//   res.status(200).json(req.payload);
+// };

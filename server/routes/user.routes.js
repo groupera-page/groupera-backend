@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const userControllers = require("../controllers/userControllers")
-const { isAuthenticated, verifyJWT } = require("../middleware/jwt.middleware.js");
+const { isAuthenticated, verifyJWT, verifyRoles } = require("../middleware/jwt.middleware.js");
+const ROLES_LIST = require('../config/roles_list');
 
 router.post("/signup", userControllers.signup);
 
@@ -20,10 +21,10 @@ router.get("/one/:id", verifyJWT, userControllers.id);
 
 router.get("/meetings/:id", verifyJWT, userControllers.meetings);
 
-router.put("/edit/:id", userControllers.edit);
+router.put("/edit/:id", verifyJWT, verifyRoles(ROLES_LIST.Admin), userControllers.edit);
 
 router.delete("/delete/:id", userControllers.delete);
 
-router.get("/verify", isAuthenticated, userControllers.verifyToken);
+// router.get("/verify", isAuthenticated, userControllers.verifyToken);
 
 module.exports = router;
