@@ -134,10 +134,10 @@ exports.resetPassword = async (req, res, next) => {
 
 exports.id = async (req, res, next) => {
   try {
-    const user = await User.findOne({ _id: req.params.id }).populate("groups");
+    const user = await User.findOne({ _id: req.params.id })
     res.status(200).send({ user });
   } catch (error) {
-    res.status(200).send({ message: "E-Mail erfolgreich verifiziert" });
+    res.status(500).send({ message: `${error}` });
   }
 };
 

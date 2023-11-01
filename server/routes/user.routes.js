@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const userControllers = require("../controllers/userControllers")
-const { isAuthenticated } = require("../middleware/jwt.middleware.js");
+const { isAuthenticated, verifyJWT } = require("../middleware/jwt.middleware.js");
 
 router.post("/signup", userControllers.signup);
 
@@ -16,9 +16,9 @@ router.post("/reset/:id", userControllers.resetPassword);
 
 // router.post("/reset/:id", userExists, passwordValid, userControllers.create, emailController.sendWelcomeMail)
 
-router.get("/:id", userControllers.id);
+router.get("/one/:id", verifyJWT, userControllers.id);
 
-router.get("/meetings/:id", userControllers.meetings);
+router.get("/meetings/:id", verifyJWT, userControllers.meetings);
 
 router.put("/edit/:id", userControllers.edit);
 
