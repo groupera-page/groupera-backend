@@ -47,13 +47,13 @@ exports.signup = async (req, res, next) => {
   }
 };
 
-exports.verified = async (req, res, next) => {
+exports.forFred = async (req, res, next) => {
   try {
-    const user = await User.findOne({ code: req.body.code });
-    if (!user) return res.status(400).send({ message: "Ungültiger Code" });
+    const user = await User.findOne({ email: req.params.email });
+    if (!user) return res.status(400).send({ message: "Ungültiger Email" });
 
-    // res.status(200).json(user);
-    res.redirect(`/group/create/${user.email}`)
+    res.status(200).json(user);
+    // res.redirect(`/group/create/${user.email}`)
   } catch (error) {
     res.status(400).send({ message: `${error}` });
   }
