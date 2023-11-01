@@ -1,6 +1,8 @@
 // const { expressjwt } = require("express-jwt");
 const jwt = require("jsonwebtoken");
 const { User } = require('../models/User.model')
+const { Group } = require('../models/Group.model')
+
 
 // // Instantiate the JWT token validation middleware
 // const isAuthenticated = expressjwt({
@@ -33,7 +35,7 @@ const verifyJWT = (req, res, next) => {
       process.env.TOKEN_SECRET,
       (err, decoded) => {
           if(err) return res.sendStatus(403);
-          req.user = decoded.UserInfo.email;
+          req.user = decoded.UserInfo._id;
           req.roles = decoded.UserInfo.roles
           next();
       }
@@ -47,9 +49,8 @@ const verifyRoles = (...allowedRoles) => {
       console.log(rolesArray);
       console.log(req.roles);
       const result = req.roles.map(role => rolesArray.includes(role)).find(val => val === true);
-      let foundUser = await User.findOne({ _id: req.params.id });
-      // if(!result) return res.sendStatus(401);
-      if(result || foundUser.email == req.user)
+      let group = await Group.findOne({_id: req.params.groupId})
+      if(result || req.params.id == req.user || req.user == group.moderator)
       next(); 
       else return res.sendStatus(401);
   }
