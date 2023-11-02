@@ -40,36 +40,38 @@ if(req.body.moderator == "One"){
   }
     // await sendEmail(user.email, "Verify Email", user.code);
 
-    const roles = Object.values(user.roles);
+    // const roles = Object.values(user.roles);
 
 
-    const { _id, email } = user;
-    const payload = { _id, email };
+    // const { _id, email } = user;
+    // const payload = { _id, email };
 
-    const authToken = jwt.sign({
-			"UserInfo": {
-				"_id": _id,
-				// "email": email,
-				"roles": roles
-			}
-		}, process.env.TOKEN_SECRET, {
-			algorithm: "HS256",
-			expiresIn: "10m",
-		});
-    const refreshToken = jwt.sign(payload, process.env.REFRESH_SECRET, {
-			algorithm: "HS256",
-			expiresIn: "1d",
-		});
+    // const authToken = jwt.sign({
+		// 	"UserInfo": {
+		// 		"_id": _id,
+		// 		// "email": email,
+		// 		"roles": roles
+		// 	}
+		// }, process.env.TOKEN_SECRET, {
+		// 	algorithm: "HS256",
+		// 	expiresIn: "10m",
+		// });
+    // const refreshToken = jwt.sign(payload, process.env.REFRESH_SECRET, {
+		// 	algorithm: "HS256",
+		// 	expiresIn: "1d",
+		// });
 
-    const currentUser = { ...user, refreshToken };
+    // const currentUser = { ...user, refreshToken };
 
-		let newUser = await User.updateOne({ _id: user._id }, { currentUser });
+		// let newUser = await User.updateOne({ _id: user._id }, { currentUser });
 
-		res.cookie('jwt', refreshToken, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000})
+		// res.cookie('jwt', refreshToken, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000})
 
-    res.status(201).send({
-      authtoken: authToken,
-    });
+    res.status(201).send(
+    //   {
+    //   authtoken: authToken,
+    // }
+    );
   } catch (error) {
     res.status(500).send({ message: `${error}` });
   }
@@ -86,16 +88,45 @@ exports.forFred = async (req, res, next) => {
     res.status(400).send({ message: `${error}` });
   }
 };
-
+// ADD TOKEN HERE INSTEAD OF AT SI
 exports.verified = async (req, res, next) => {
   try {
     if (req.body.code.length == 4) {
     const user = await User.findOne({ code: req.body.code });
     if (!user) return res.status(400).send({ message: "Ungültiger Code" });
 
-    await User.updateOne({ _id: user._id }, { verified: true, code: "", verificationExpires: null });
+    const roles = Object.values(user.roles);
 
-    res.status(200).send({message: "All gravy here, boss"});
+    const { _id, email } = user;
+    const payload = { _id, email };
+
+    const authToken = jwt.sign({
+			"UserInfo": {
+				"id": _id,
+				// "email": email,
+				"roles": roles
+			}
+		}, process.env.TOKEN_SECRET, {
+			algorithm: "HS256",
+			expiresIn: "10m",
+		});
+    const refreshToken = jwt.sign(payload, process.env.REFRESH_SECRET, {
+			algorithm: "HS256",
+			expiresIn: "1d",
+		});
+
+    const currentUser = { ...user, refreshToken };
+
+		// let newUser = await User.updateOne({ _id: user._id }, { currentUser });
+
+    await User.updateOne({ _id: user._id }, { currentUser, verified: true, code: "", verificationExpires: null });
+
+		res.cookie('jwt', refreshToken, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000})
+
+
+    res.status(200).send({
+      authtoken: authToken,
+    });
     }
     else {
       res.status(400).send({ message: `${error}` });

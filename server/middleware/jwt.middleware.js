@@ -35,7 +35,7 @@ const verifyJWT = (req, res, next) => {
       process.env.TOKEN_SECRET,
       (err, decoded) => {
           if(err) return res.sendStatus(403);
-          req.user = decoded.UserInfo.id;
+          req.user = decoded.UserInfo._id;
           req.roles = decoded.UserInfo.roles
           next();
       }
@@ -46,7 +46,6 @@ const verifyRoles = (...allowedRoles) => {
   return async (req, res, next) => {
       if(!req?.roles) return res.sendStatus(401); // unauthorized
       const rolesArray = [...allowedRoles];
-      console.log(req.user)
       console.log(rolesArray);
       console.log(req.roles);
       const result = req.roles.map(role => rolesArray.includes(role)).find(val => val === true);
