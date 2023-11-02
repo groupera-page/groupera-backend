@@ -89,12 +89,17 @@ exports.forFred = async (req, res, next) => {
 
 exports.verified = async (req, res, next) => {
   try {
+    if (req.body.code.length == 4) {
     const user = await User.findOne({ code: req.body.code });
     if (!user) return res.status(400).send({ message: "Ungültiger Code" });
 
     await User.updateOne({ _id: user._id }, { verified: true, code: "", verificationExpires: null });
 
     res.status(200).send({message: "All gravy here, boss"});
+    }
+    else {
+      res.status(400).send({ message: `${error}` });
+  }
   } catch (error) {
     res.status(400).send({ message: `${error}` });
   }
