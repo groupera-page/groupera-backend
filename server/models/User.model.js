@@ -19,18 +19,21 @@ const userSchema = new Schema({
   age: {
     type: Date,
   },
-  goals: [
-    {
-      type: String,
-    },
-  ],
-  themes: [
-    {
-      type: String,
-    },
-  ],
-  experience: {
-    type: String,
+  // goals: [
+  //   {
+  //     type: String,
+  //   },
+  // ],
+  // themes: [
+  //   {
+  //     type: String,
+  //   },
+  // ],
+  // experience: {
+  //   type: String,
+  // },
+  questions: {
+    type: Object
   },
   verificationExpires: {
     type: Date,
@@ -116,16 +119,16 @@ const validate = (data) => {
       .required()
       .label("Password")
       .messages({ "any.required": "Erforderliches Feld" }),
-    role: Joi.string().label("Role"),
     age: Joi.date().label("Age"),
     code: Joi.string().label("Code"),
     gender: Joi.string()
       .valid("Männlich", "Weiblich", "Divers")
       .label("Gender"),
     moderator: Joi.string().valid("One", "Two", "Three").label("Moderator"),
-    goals: Joi.array().items(Joi.string()).label("Goals"),
-    themes: Joi.array().items(Joi.string()).label("Themes"),
-    experience: Joi.string().label("Experience"),
+    // goals: Joi.array().items(Joi.string()).label("Goals"),
+    // themes: Joi.array().items(Joi.string()).label("Themes"),
+    // experience: Joi.string().label("Experience"),
+    questions: Joi.object().label("Questions")
   });
   return schema.validate(data);
 };

@@ -20,13 +20,24 @@ exports.signup = async (req, res, next) => {
     const salt = await bcrypt.genSalt(Number(process.env.SALT));
     const hashPassword = await bcrypt.hash(req.body.password, salt);
     const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
-
+if(req.body.moderator == "One"){
     user = await new User({
       ...req.body,
       password: hashPassword,
       code: randomCode,
-      roles: { "User": 2001 }
+      roles: { "User": 2001, "Moderator": 1984 },
+      questions: { "Themes": ["Depression", "Anxiety"], "Experience": "None"}
     }).save();
+  }
+  else {
+    user = await new User({
+      ...req.body,
+      password: hashPassword,
+      code: randomCode,
+      roles: { "User": 2001 },
+      questions: { "Themes": ["Depression", "Anxiety"], "Experience": "None"}
+    }).save();
+  }
     // await sendEmail(user.email, "Verify Email", user.code);
 
     const roles = Object.values(user.roles);
@@ -35,18 +46,16 @@ exports.signup = async (req, res, next) => {
     const { _id, email } = user;
     const payload = { _id, email };
 
-    const options = {
-      algorithm: "HS256",
-      expiresIn: "6h",
-    };
-
     const authToken = jwt.sign({
 			"UserInfo": {
 				"_id": _id,
 				"email": email,
 				"roles": roles
 			}
-		}, process.env.TOKEN_SECRET, options);
+		}, process.env.TOKEN_SECRET, {
+			algorithm: "HS256",
+			expiresIn: "10m",
+		});
     const refreshToken = jwt.sign(payload, process.env.REFRESH_SECRET, {
 			algorithm: "HS256",
 			expiresIn: "1d",
@@ -182,11 +191,11 @@ exports.edit = async (req, res, next) => {
 
     let newUser = await User.updateOne({ _id: req.params.id }, { ...req.body });
 
-    let newNewUser = await User.findOne({ _id: req.params.id });
+    // let newNewUser = await User.findOne({ _id: req.params.id });
 
-    if (user.email !== newNewUser.email) {
-      await sendEmail(newNewUser.email, "Verify Email", user.code);
-    }
+    // if (user.email !== newNewUser.email) {
+    //   await sendEmail(newNewUser.email, "Verify Email", user.code);
+    // }
 
     res.status(200).send({ message: "Benutzer erfolgreich aktualisiert" });
   } catch (error) {
