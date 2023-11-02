@@ -31,11 +31,10 @@ exports.login = async (req, res, next) => {
 		const { _id, email } = user;
         const payload = { _id, email };
     
-    
         const authToken = jwt.sign({
 			"UserInfo": {
 				"id": _id,
-				"email": email,
+				// "email": email,
 				"roles": roles
 			}
 		}, process.env.TOKEN_SECRET, {

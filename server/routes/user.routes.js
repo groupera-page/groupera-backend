@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const userControllers = require("../controllers/userControllers")
-const { isAuthenticated, verifyJWT, verifyRoles } = require("../middleware/jwt.middleware.js");
+const { verifyJWT, verifyRoles } = require("../middleware/jwt.middleware.js");
 const ROLES_LIST = require('../config/roles_list');
 
 router.post("/signup", userControllers.signup);

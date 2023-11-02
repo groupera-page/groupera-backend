@@ -49,7 +49,7 @@ if(req.body.moderator == "One"){
     const authToken = jwt.sign({
 			"UserInfo": {
 				"_id": _id,
-				"email": email,
+				// "email": email,
 				"roles": roles
 			}
 		}, process.env.TOKEN_SECRET, {
@@ -173,7 +173,7 @@ exports.meetings = async (req, res, next) => {
   try {
     let user = await User.findOne({ _id: req.params.id });
     let start = "2023-10-03T00:00:00.000Z";
-    let end = "2024-10-06T00:00:00.000Z";
+    let end = "2026-10-06T00:00:00.000Z";
     let event = await getEvents(start, end);
     let mappedEvent = user.meetings.map((meetings) =>
       event.filter((events) => events.id.includes(meetings))
@@ -190,14 +190,15 @@ exports.edit = async (req, res, next) => {
     if (!user) return res.status(400).send({ message: "Invalid Link" });
 
     let newUser = await User.updateOne({ _id: req.params.id }, { ...req.body });
-
+    
     // let newNewUser = await User.findOne({ _id: req.params.id });
 
     // if (user.email !== newNewUser.email) {
-    //   await sendEmail(newNewUser.email, "Verify Email", user.code);
+    //   res.status(500).send({ message: `${error}` });
     // }
 
     res.status(200).send({ message: "Benutzer erfolgreich aktualisiert" });
+
   } catch (error) {
     res.status(500).send({ message: `${error}` });
   }
