@@ -13,7 +13,7 @@ const {
 const generateRoom = require("../utils/videoSDK");
 
 exports.create = async (req, res, next) => {
-  const { img, frequency, date, time, length, token } = req.body;
+  const { img, frequency, date, time, length, token, currentUser } = req.body;
 
 
   // Event for Google Calendar
@@ -36,8 +36,7 @@ exports.create = async (req, res, next) => {
       // img: uploadRes
     }).save();
     // let user = await User.findOne({ _id: group.moderator._id });
-    console.log(req.user)
-    let user = await User.findOne({ email: req.params.email });
+    let user = await User.findOne({ _id: currentUser });
       let dateTime = dateTimeForCalender(date, time, length);
       let event = {
         summary: `${group.name}`,
@@ -57,7 +56,7 @@ exports.create = async (req, res, next) => {
       const newEvent = await insertEvent(event);
       if (newEvent) {
         await User.updateOne(
-          { email: user.email },
+          { _id: user._id },
           { $push: { moderatedGroups: group._id, meetings: newEvent.id } }
         );
         group = await Group.updateOne(

@@ -3,7 +3,7 @@ const groupControllers = require('../controllers/groupControllers');
 const { verifyJWT, verifyRoles } = require("../middleware/jwt.middleware.js");
 const ROLES_LIST = require('../config/roles_list');
 
-router.post("/create/:email", groupControllers.create);
+router.post("/create", groupControllers.create);
 
 router.get("/groups", groupControllers.all);
 

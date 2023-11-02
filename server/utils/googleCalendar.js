@@ -30,6 +30,8 @@ const dateTimeForCalender = (date, time, length) => {
 
     let endDate = new Date(new Date(startDate).setMinutes(startDate.getMinutes() + length/10 * 10));
 
+    console.log(endDate)
+
     return {
         'start': startDate,
         'end': endDate
