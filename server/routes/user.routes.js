@@ -19,7 +19,7 @@ router.post("/reset/:id", userControllers.resetPassword);
 
 router.get("/one/:id", verifyJWT, userControllers.id);
 
-router.get("/meetings/:id", verifyJWT, userControllers.meetings);
+router.get("/meetings/:id", verifyJWT, verifyRoles(ROLES_LIST.Admin), userControllers.meetings);
 
 router.put("/edit/:id", verifyJWT, verifyRoles(ROLES_LIST.Admin), userControllers.edit);
 

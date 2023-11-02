@@ -1,4 +1,5 @@
-const { expressjwt: jwt } = require("express-jwt");
+// const { expressjwt: jwt } = require("express-jwt");
+const { jwt } = require("jsonwebtoken");
 
 const handleRefreshToken = (req, res) => {
     const cookies = req.cookies

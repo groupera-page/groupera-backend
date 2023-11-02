@@ -92,13 +92,41 @@ exports.login = async (req, res, next) => {
             (err, decoded) => {
                 if(err || foundUser.username !== decoded.username) return res.sendStatus(403);
                 const accessToken = jwt.sign(
-                    { "username": decoded.username },
+                    // { "username": decoded.username },
+					{ "UserInfo": {
+						"id": decoded._id }
+					},
                     process.env.TOKEN_SECRET,
                     { expiresIn: '10m' }
                 );
                 res.json(accessToken)
             }
         )
+	// const cookies = req.cookies
+    // if (!cookies?.jwt) return res.sendStatus(401);
+    // const refreshToken = cookies.jwt;
+    // const foundUser = User.findOne({ refreshToken: refreshToken })
+    // if (!foundUser) return res.sendStatus(403); //Forbidden 
+    //     jwt.verify(
+    //         refreshToken,
+    //         process.env.REFRESH_SECRET,
+    //         (err, decoded) => {
+    //             if(err || foundUser.username !== decoded.username) return res.sendStatus(403);
+    //             const roles = Object.values(foundUser.roles)
+    //             const accessToken = jwt.sign(
+    //                 { 
+    //                     "UserInfo": {
+    //                         "id": decoded.id,
+    //                         "roles": roles 
+    //                     }
+    //                 },
+    //                 process.env.TOKEN_SECRET,
+    //                 { expiresIn: '10m' }
+    //             );
+	// 			console.log(decoded.id)
+    //             res.json(accessToken)
+    //         }
+    //     )
 	} catch (error) {
 		res.status(500).send({ message: `${error}` });
 	}

@@ -79,10 +79,10 @@ exports.all = async (req, res, next) => {
   try {
     let group = await Group.find();
 
-    let filteredGroup = group.map(group => group.name && group.description)
+    // let filteredGroup = group.map(group => group.name && group.description)
 
 
-    res.status(200).send(filteredGroup);
+    res.status(200).send(group);
   } catch (error) {
     res.status(500).send(`${error}`);
   }
