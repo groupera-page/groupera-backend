@@ -46,12 +46,12 @@ exports.login = async (req, res, next) => {
 			expiresIn: "1d",
 		});
 
-		const currentUser = { ...user, refreshToken };
+		let loggedInUser = await User.updateOne({ _id: user._id }, { refreshToken: refreshToken });
 
-		let newUser = await User.updateOne({ _id: user._id }, { currentUser });
 
-		res.cookie('jwt', refreshToken, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000})
-  
+		res.cookie('jwt', refreshToken, { httpOnly: true, sameSite: 'None', secure: true, maxAge: 24 * 60 * 60 * 1000})
+		console.log(authToken)
+
 		res.status(200).send({authToken: authToken, message: "Erfolgreich eingeloggt" });
 	} catch (error) {
 		res.status(500).send({ message: `${error}` });
@@ -64,7 +64,7 @@ exports.login = async (req, res, next) => {
 		if (!cookies?.jwt) return res.sendStatus(204); // successful, no content
 		const refreshToken = cookies.jwt;
 		// Is refreshToken in db?
-		const user = User.findOne({ refreshToken: refreshToken })
+		const user = await User.findOne({ refreshToken: refreshToken })
 		if (!user) {
 			res.clearCookie('jwt', { httpOnly: true });
 			return res.sendStatus(204);
@@ -72,33 +72,37 @@ exports.login = async (req, res, next) => {
 		// Delete refreshToken in db
 		let newUser = await User.updateOne({ _id: user._id }, { refreshToken: '' });
 	
-		res.clearCookie('jwt', { httpOnly: true }); // secure: true to serve https
+		res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true }); // secure: true to serve https
 		res.sendStatus(204)
 	} catch (error) {
 		res.status(500).send({ message: `${error}` });
 	}
   };
 
-  exports.refresh = (req, res, next) => {
+  exports.refresh = async (req, res, next) => {
 	try {
     const cookies = req.cookies
     if (!cookies?.jwt) return res.sendStatus(401);
     const refreshToken = cookies.jwt;
-    const foundUser = User.findOne({ refreshToken: refreshToken })
+    const foundUser = await User.findOne({ refreshToken: refreshToken })
     if (!foundUser) return res.sendStatus(403); //Forbidden 
         jwt.verify(
             refreshToken,
             process.env.REFRESH_SECRET,
             (err, decoded) => {
-                if(err || foundUser.username !== decoded.username) return res.sendStatus(403);
+                if(err || foundUser.email !== decoded.email) return res.sendStatus(403);
+				const roles = Object.values(foundUser.roles)
                 const accessToken = jwt.sign(
                     // { "username": decoded.username },
 					{ "UserInfo": {
-						"id": decoded._id }
+						"id": decoded._id,
+						"roles": roles
+					}
 					},
                     process.env.TOKEN_SECRET,
                     { expiresIn: '10m' }
                 );
+				console.log(decoded._id);
                 res.json(accessToken)
             }
         )

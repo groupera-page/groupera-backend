@@ -17,6 +17,6 @@ router.put("/leave/:groupId", groupControllers.leave);
 
 router.put("/edit/:groupId", verifyJWT, verifyRoles(ROLES_LIST.Admin), groupControllers.edit);
 
-router.delete("/delete/:groupId", groupControllers.delete);
+router.delete("/delete/:groupId", verifyJWT, verifyRoles(ROLES_LIST.Admin), groupControllers.delete);
 
 module.exports = router;

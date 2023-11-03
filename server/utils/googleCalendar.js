@@ -21,7 +21,6 @@ const TIMEOFFSET = '+01:00';
 
 const dateTimeForCalender = (date, time, length) => {
 
-
     let newDateTime = `${date}T${time}:00.000${TIMEOFFSET}`;
 
     let event = new Date(Date.parse(newDateTime));
@@ -29,8 +28,6 @@ const dateTimeForCalender = (date, time, length) => {
     let startDate = event;
 
     let endDate = new Date(new Date(startDate).setMinutes(startDate.getMinutes() + length/10 * 10));
-
-    console.log(endDate)
 
     return {
         'start': startDate,

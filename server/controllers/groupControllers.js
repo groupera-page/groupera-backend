@@ -80,8 +80,10 @@ exports.all = async (req, res, next) => {
 
     // let filteredGroup = group.map(group => group.name && group.description)
 
+    let newGroups = group.map(groups => new Group({name: groups.name, _id: groups._id, description: groups.description}))
 
-    res.status(200).send(group);
+
+    res.status(200).send(newGroups);
   } catch (error) {
     res.status(500).send(`${error}`);
   }

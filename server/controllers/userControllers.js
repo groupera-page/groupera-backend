@@ -67,11 +67,7 @@ if(req.body.moderator == "One"){
 
 		// res.cookie('jwt', refreshToken, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000})
 
-    res.status(201).send(
-    //   {
-    //   authtoken: authToken,
-    // }
-    );
+    res.sendStatus(201)
   } catch (error) {
     res.status(500).send({ message: `${error}` });
   }
@@ -92,7 +88,7 @@ exports.forFred = async (req, res, next) => {
 exports.verified = async (req, res, next) => {
   try {
     if (req.body.code.length == 4) {
-    const user = await User.findOne({ code: req.body.code });
+    let user = await User.findOne({ code: req.body.code });
     if (!user) return res.status(400).send({ message: "Ungültiger Code" });
 
     const roles = Object.values(user.roles);
@@ -115,17 +111,13 @@ exports.verified = async (req, res, next) => {
 			expiresIn: "1d",
 		});
 
-    const currentUser = { ...user, refreshToken };
+    user = await User.updateOne({ _id: user._id }, { verified: true, code: "", verificationExpires: null, refreshToken: refreshToken });
 
-		// let newUser = await User.updateOne({ _id: user._id }, { currentUser });
-
-    await User.updateOne({ _id: user._id }, { currentUser, verified: true, code: "", verificationExpires: null });
-
-		res.cookie('jwt', refreshToken, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000})
+		res.cookie('jwt', refreshToken, { httpOnly: true, sameSite: 'None', secure: true, maxAge: 24 * 60 * 60 * 1000})
 
 
     res.status(200).send({
-      authtoken: authToken,
+      authtoken: authToken
     });
     }
     else {

@@ -82,7 +82,11 @@ const userSchema = new Schema({
   subscription: {
     type: Object,
   },
+  refreshToken: {
+    type: String
+  }
 },
+
 // {
 //   timestamps: true
 // }
