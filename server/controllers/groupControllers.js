@@ -59,7 +59,7 @@ exports.create = async (req, res, next) => {
       );
       await Group.updateOne(
         { _id: group._id },
-        { meeting: newEvent.id, verified: true, moderator: user._id }
+        { meeting: newEvent.id, verified: true, moderatorId: user._id }
       );
     }
     // generateRoom(token, group._id, length);
