@@ -18,22 +18,10 @@ const groupSchema = new Schema({
   topic: {
     type: String,
   },
-  // frequency: {
-  //   type: String,
-  // },
-  // date: {
-  //   type: String,
-  // },
-  // length: {
-  //   type: String
-  // },
-  // time: {
-  //   type: String,
-  // },
   meeting: {
     type: String,
   },
-  moderator: {
+  moderatorId: {
     type: Schema.Types.ObjectId,
     ref: "Moderator",
   },
@@ -74,9 +62,13 @@ const validate = (data) => {
         "string.empty": "Bitte Description eingeben",
       }),
     topic: Joi.string().required().label("Topic"),
-    // moderator: Joi.string().label("Moderator"),
+    time: Joi.string().label("Time"),
+    date: Joi.date().label("Date"),
+    frequency: Joi.number().label("Frequency"),
+    length: Joi.number().label("Length"),
+    currentUserId: Joi.string().label("Currentuser")
   });
   return schema.validate(data);
 };
 
-module.exports = { Group };
+module.exports = { Group, validate };

@@ -1,4 +1,4 @@
-const {Group} = require("../models/Group.model");
+const { Group, validate } = require("../models/Group.model");
 const { User } = require("../models/User.model");
 // const cloudinary = require("../utils/cloudinary");
 const {
@@ -13,19 +13,19 @@ const {
 const generateRoom = require("../utils/videoSDK");
 
 exports.create = async (req, res, next) => {
-  const { img, frequency, date, time, length, token, currentUser } = req.body;
-
-
-  // Event for Google Calendar
+  const { img, frequency, date, time, length, token, currentUserId, name } =
+    req.body;
 
   try {
-    let group = await Group.findOne({ name: req.body.name });
+    const { error } = validate(req.body);
+    if (error)
+      return res.status(400).send({ message: error.details[0].message });
+
+    let group = await Group.findOne({ name: name });
     if (group)
-      return res
-        .status(409)
-        .send({
-          message: "Gruppe mit dem angegebenen Namen existiert bereits",
-        });
+      return res.status(409).send({
+        message: "Gruppe mit dem angegebenen Namen existiert bereits",
+      });
     // if (img) {
     //   const uploadRes = await cloudinary.uploader.upload(img, {
     //     folder: "test",
@@ -36,143 +36,105 @@ exports.create = async (req, res, next) => {
       // img: uploadRes
     }).save();
     // let user = await User.findOne({ _id: group.moderator._id });
-    let user = await User.findOne({ _id: currentUser });
-      let dateTime = dateTimeForCalender(date, time, length);
-      let event = {
-        summary: `${group.name}`,
-        description: `Join code: ${group._id}`,
-        start: {
-          dateTime: dateTime["start"],
-          timeZone: "Europe/Berlin",
-        },
-        end: {
-          dateTime: dateTime["end"],
-          timeZone: "Europe/Berlin",
-        },
-        recurrence: [
-          `RRULE:FREQ=WEEKLY;INTERVAL=${+frequency}`,
-        ],
-      };
-      const newEvent = await insertEvent(event);
-      if (newEvent) {
-        await User.updateOne(
-          { _id: user._id },
-          { $push: { moderatedGroups: group._id, meetings: newEvent.id } }
-        );
-        group = await Group.updateOne(
-          { _id: group._id },
-          { meeting: newEvent.id, verified: true, moderator: user._id }
-        );
-      }
+    const user = await User.findOne({ _id: currentUserId });
+    const dateTime = dateTimeForCalender(date, time, length);
+    const event = {
+      summary: group.name,
+      description: `Join code: ${group._id}`,
+      start: {
+        dateTime: dateTime["start"],
+        timeZone: "Europe/Berlin",
+      },
+      end: {
+        dateTime: dateTime["end"],
+        timeZone: "Europe/Berlin",
+      },
+      recurrence: [`RRULE:FREQ=WEEKLY;INTERVAL=${+frequency}`],
+    };
+    const newEvent = await insertEvent(event);
+    if (newEvent) {
+      await User.updateOne(
+        { _id: user._id },
+        { $push: { moderatedGroups: group._id, meetings: newEvent.id } }
+      );
+      await Group.updateOne(
+        { _id: group._id },
+        { meeting: newEvent.id, verified: true, moderator: user._id }
+      );
+    }
     // generateRoom(token, group._id, length);
     // }
     res.status(200).send({ message: "all good here, boss" });
     // }
   } catch (error) {
-    res.status(500).send({ message: `${error}` });
+    res.status(500).send({ message: error });
   }
 };
 
-
-exports.all = async (req, res, next) => {
+exports.findAll = async (req, res, next) => {
   try {
-    let group = await Group.find();
+    let groups = await Group.find();
 
-    // let filteredGroup = group.map(group => group.name && group.description)
+    groups = groups.map((group) => {
+      return {
+        _id: group._id,
+        name: group.name,
+        description: group.description,
+      };
+    });
 
-    let newGroups = group.map(groups => new Group({name: groups.name, _id: groups._id, description: groups.description}))
-
-
-    res.status(200).send(newGroups);
+    res.status(200).send(groups);
   } catch (error) {
     res.status(500).send(`${error}`);
   }
 };
 
 exports.meetings = async (req, res, next) => {
+  const { groupId } = req.params;
   try {
-    let group = await Group.findOne({ _id: req.params.groupId });
-    let start = "2023-10-03T00:00:00.000Z";
-    let end = "2036-10-06T00:00:00.000Z";
-    let event = await getEvents(start, end);
-    let filteredEvent = event.filter((events) =>
-      events.id.includes(group.meeting)
+    const group = await Group.findOne({ _id: groupId });
+    const start = "2023-10-03T00:00:00.000Z";
+    const end = "2036-10-06T00:00:00.000Z";
+    const events = await getEvents(start, end);
+    const filteredEvent = events.filter((event) =>
+      event.id.includes(group.meeting)
     );
     res.status(200).send(filteredEvent);
   } catch (error) {
-    res.status(500).send(`${error}`);
+    res.status(500).send(error);
   }
 };
 
-exports.id = async (req, res, next) => {
+exports.findOne = async (req, res, next) => {
+  const { groupId } = req.params;
   try {
-    let group = await Group.findOne({ _id: req.params.groupId });
-    if (!group) return res.status(400).send({ message: "Invalid Link" });
-
+    let group = await Group.findOne({ _id: groupId });
+    if (!group)
+      return res.status(400).send({ message: "Die Gruppe existiert nicht" });
 
     res.status(200).send({ group });
   } catch (error) {
-    res.status(500).send({ message: `${error}` });
-  }
-};
-
-exports.join = async (req, res, next) => {
-  const { currentUser } = req.body;
-  try {
-    let group = await Group.findOne({ _id: req.params.groupId });
-    if (!group) return res.status(400).send({ message: "Invalid Link" });
-
-    let user = await User.updateOne(
-      { _id: currentUser },
-      { $push: { joinedGroups: group._id, meetings: group.meeting } }
-    );
-
-    group = await Group.updateOne(
-      { _id: req.params.groupId },
-      { $push: { users: currentUser } }
-    );
-
-    res.status(200).send({ message: "Gruppe erfolgreich beigetreten" });
-  } catch (error) {
-    res.status(500).send({ message: `${error}` });
-  }
-};
-
-exports.leave = async (req, res, next) => {
-  const { currentUser } = req.body;
-
-  try {
-    let group = await Group.updateOne(
-      { _id: req.params.groupId },
-      { $pull: { users: currentUser } }
-    );
-    if (!group) return res.status(400).send({ message: "Invalid Link" });
-
-    group = await Group.findOne({_id: req.params.groupId});
-
-    let user = await User.updateOne(
-      { _id: currentUser },
-      { $pull: { joinedGroups: req.params.groupId, meetings: group.meeting} }
-    );
-    res.status(200).send({ message: "Gruppe erfolgreich verlassen" });
-  } catch (error) {
-    res.status(500).send({ message: `${error}` });
+    res.status(500).send({ message: error });
   }
 };
 
 exports.edit = async (req, res, next) => {
-  const { date, time, length, frequency } = req.body;
+  const {
+    body: { date, time, length, frequency },
+    params: { groupId },
+  } = req;
 
   try {
-    let group = await Group.updateOne({ _id: req.params.groupId }, { ...req.body });
-    if (!group) return res.status(400).send({ message: "Invalid Link" });
+    let group = await Group.findOne({ _id: groupId });
+    if (!group)
+      return res.status(400).send({ message: "Die Gruppe existiert nicht" });
 
-    group = await Group.findOne({ _id: req.params.groupId });
+    await Group.updateOne({ _id: groupId }, { ...req.body });
 
-    let dateTime = dateTimeForCalender(date, time, length);
+    const dateTime = dateTimeForCalender(date, time, length);
 
-    let event = {
-      summary: `${group.name}`,
+    const event = {
+      summary: group.name,
       description: `Join code: ${group._id}`,
       start: {
         dateTime: dateTime["start"],
@@ -185,25 +147,25 @@ exports.edit = async (req, res, next) => {
       recurrence: [`RRULE:FREQ=WEEKLY;INTERVAL=${+frequency}`],
     };
 
-    if (group) {
-      let updatedEvent = await editEvent(group.meeting, event);
-    }
+    await editEvent(group.meeting, event);
 
     res.status(200).send({ message: "Gruppe erfolgreich aktualisiert" });
   } catch (error) {
-    res.status(500).send({ message: `${error}` });
+    res.status(500).send({ message: error });
   }
 };
 
 exports.delete = async (req, res, next) => {
+  const { groupId } = req.params;
   try {
-    let group = await Group.findOne({ _id: req.params.groupId });
-    if (!group) return res.status(400).send({ message: "Invalid Link" });
+    let group = await Group.findOne({ _id: groupId });
+    if (!group)
+      return res.status(400).send({ message: "Die Gruppe existiert nicht" });
 
-    const data = await User.updateMany(
+    await User.updateMany(
       {
         joinedGroups: {
-          $in: [req.params.groupId],
+          $in: [groupId],
         },
         meetings: {
           $in: [group.meeting],
@@ -211,33 +173,34 @@ exports.delete = async (req, res, next) => {
       },
       {
         $pull: {
-          joinedGroups: req.params.groupId,
+          joinedGroups: groupId,
           meetings: group.meeting,
         },
       }
     );
 
     await User.updateOne(
-      { _id: group.moderator },
+      { _id: group.moderatorId},
       {
         $pull: {
-          moderatedGroups: req.params.groupId,
+          moderatedGroups: groupId,
           meetings: group.meeting,
         },
       }
     );
 
-    const user = await User.findOne({ _id: group.moderator });
+    const user = await User.findOne({ _id: group.moderatorId });
 
     if (user.moderatedGroups.length === 0) {
-      await User.updateOne({ _id: group.moderator }, { moderator: false });
+      user.moderator = false
+      await user.save()
     }
 
     await deleteEvent(group.meeting);
 
-    group = await Group.deleteOne({ _id: req.params.groupId });
-    res.status(200).send({ message: "Gruppe erfolgreich gelöscht", data });
+    await Group.deleteOne({ _id: groupId });
+    res.status(200).send({ message: "Gruppe erfolgreich gelöscht" });
   } catch (error) {
-    res.status(500).send({ message: `${error}` });
+    res.status(500).send({ message: error });
   }
 };

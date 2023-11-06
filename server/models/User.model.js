@@ -19,19 +19,6 @@ const userSchema = new Schema({
   age: {
     type: Date,
   },
-  // goals: [
-  //   {
-  //     type: String,
-  //   },
-  // ],
-  // themes: [
-  //   {
-  //     type: String,
-  //   },
-  // ],
-  // experience: {
-  //   type: String,
-  // },
   questions: {
     type: Object
   },
@@ -39,7 +26,7 @@ const userSchema = new Schema({
     type: Date,
     default: () => new Date(+new Date() + 15 * 60 * 1000) //3 minutes
   },
-  verified: {
+  emailVerified: {
     type: Boolean,
     default: false,
   },
@@ -51,7 +38,6 @@ const userSchema = new Schema({
     type: String,
     // 'One' can be moderate, 'Two' can be need help, 'Three' can be don't want to
   },
-  // Hide this in requests
   paid: {
     type: Boolean,
     // date_paid: Date,
@@ -85,11 +71,7 @@ const userSchema = new Schema({
   refreshToken: {
     type: String
   }
-},
-
-// {
-//   timestamps: true
-// }
+}
 );
 
 const User = model("User", userSchema);
@@ -98,7 +80,7 @@ userSchema.index(
   { 'verificationExpires': 1 },
   {
     expireAfterSeconds: 0,
-    partialFilterExpression: { 'verified': false }
+    partialFilterExpression: { 'emailVerified': false }
   }
 );
 
@@ -129,9 +111,6 @@ const validate = (data) => {
       .valid("Männlich", "Weiblich", "Divers")
       .label("Gender"),
     moderator: Joi.string().valid("One", "Two", "Three").label("Moderator"),
-    // goals: Joi.array().items(Joi.string()).label("Goals"),
-    // themes: Joi.array().items(Joi.string()).label("Themes"),
-    // experience: Joi.string().label("Experience"),
     questions: Joi.object().label("Questions")
   });
   return schema.validate(data);

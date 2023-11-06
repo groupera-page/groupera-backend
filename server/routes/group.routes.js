@@ -3,20 +3,16 @@ const groupControllers = require('../controllers/groupControllers');
 const { verifyJWT, verifyRoles } = require("../middleware/jwt.middleware.js");
 const ROLES_LIST = require('../config/roles_list');
 
-router.post("/create", groupControllers.create);
+router.post("", groupControllers.create);
 
-router.get("/groups", groupControllers.all);
+router.get("/findAll", groupControllers.findAll);
 
-router.get("/meetings/:groupId", groupControllers.meetings);
+router.get("/:groupId/meetings", groupControllers.meetings);
 
-router.get("/:groupId", groupControllers.id);
+router.get("/:groupId", groupControllers.findOne);
 
-router.put("/join/:groupId", groupControllers.join);
+router.patch("/:groupId/edit", verifyJWT, verifyRoles(ROLES_LIST.Admin), groupControllers.edit);
 
-router.put("/leave/:groupId", groupControllers.leave);
-
-router.put("/edit/:groupId", verifyJWT, verifyRoles(ROLES_LIST.Admin), groupControllers.edit);
-
-router.delete("/delete/:groupId", verifyJWT, verifyRoles(ROLES_LIST.Admin), groupControllers.delete);
+router.delete("/:groupId", groupControllers.delete);
 
 module.exports = router;

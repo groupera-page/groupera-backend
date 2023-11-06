@@ -2,19 +2,19 @@ const { User } = require("../models/User.model");
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
 
 
-const stripeSession = async (plan) => {
+const createStripeSession = async (planId) => {
     try {
         const session = await stripe.checkout.sessions.create({
             mode: "subscription",
             payment_method_types: ["card"],
             line_items: [
                 {
-                    price: plan,
+                    price: planId,
                     quantity: 1
                 }
             ],
-            success_url: "http://localhost:3000/success",
-            cancel_url: "http://localhost:3000/cancel"
+            success_url: process.env.SUCCESS,
+            cancel_url: process.env.CANCEL
         });
         return session;
     } catch (error) {
@@ -27,7 +27,7 @@ exports.checkout = async (req, res, next) => {
     const planId = 'price_1O2wEdLSfyDnhMxYbBjqiOXF' 
 
     try {
-        const session = await stripeSession(planId);
+        const session = await createStripeSession(planId);
         const user = await User.findOne({ _id: id });
 
         await User.updateOne({ _id: id}, { subscription: {sessionId: session.id} });
@@ -37,13 +37,12 @@ exports.checkout = async (req, res, next) => {
         res.status(200).send(session)
 
     } catch (error) {
-      res.status(500).send({ message: `${error}` });
+      res.status(500).send({ message: error });
     }
   };
 
-  exports.success = async (req, res, next) => {
-    const { sessionId } = req.body;
-    const { id } = req.params;
+  exports.successfulCheckout = async (req, res, next) => {
+    const { body: { sessionId }, params: { id } } = req;
 
     try {
         const session = await stripe.checkout.sessions.retrieve(sessionId);
@@ -52,7 +51,6 @@ exports.checkout = async (req, res, next) => {
             const subscriptionId = session.subscription;
             try {
                 const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-                const user = await User.findOne({ _id: id});
 
                 await User.updateOne({ _id: id }, {
                     subscription: {
@@ -70,7 +68,7 @@ exports.checkout = async (req, res, next) => {
             return res.status(400).send({message: "Payment failed"})
         }
     } catch (error) {
-        res.status(500).send({ message: `${error}` });
+        res.status(500).send({ message: error });
     }
   }
 

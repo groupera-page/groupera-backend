@@ -7,23 +7,25 @@ router.post("/signup", userControllers.signup);
 
 router.get("/:email", userControllers.forFred);
 
-router.post("/verified", userControllers.verified);
+router.patch("/verifyEmail", userControllers.verifyEmail);
 
-router.post("/reset", userControllers.reset);
+router.post("/resetPassword", userControllers.resetPassword);
 
-router.get("/reset/:id", userControllers.verifyReset);
+router.get("/:userId/verifyResetPasswordToken", userControllers.verifyResetPasswordToken);
 
-router.post("/reset/:id", userControllers.resetPassword);
+router.post("/:userId/resetPassword", userControllers.resetPasswordId);
 
 // router.post("/reset/:id", userExists, passwordValid, userControllers.create, emailController.sendWelcomeMail)
 
-router.get("/one/:id", verifyJWT, userControllers.id);
+router.get("/:userId", userControllers.findOne);
 
-router.get("/meetings/:id", verifyJWT, verifyRoles(ROLES_LIST.Admin), userControllers.meetings);
+router.get("/:userId/meetings", userControllers.meetings);
 
-router.put("/edit/:id", verifyJWT, verifyRoles(ROLES_LIST.Admin), userControllers.edit);
+router.get("/:userId/groups", userControllers.groups)
 
-router.delete("/delete/:id", userControllers.delete);
+router.patch("/:userId", verifyJWT, verifyRoles(ROLES_LIST.Admin), userControllers.edit);
+
+router.delete("/:userId", userControllers.delete);
 
 // router.get("/verify", isAuthenticated, userControllers.verifyToken);
 
