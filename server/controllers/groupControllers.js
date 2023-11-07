@@ -180,7 +180,7 @@ exports.delete = async (req, res, next) => {
     );
 
     await User.updateOne(
-      { _id: group.moderatorId},
+      { _id: group.moderatorId },
       {
         $pull: {
           moderatedGroups: groupId,
@@ -192,8 +192,8 @@ exports.delete = async (req, res, next) => {
     const user = await User.findOne({ _id: group.moderatorId });
 
     if (user.moderatedGroups.length === 0) {
-      user.moderator = false
-      await user.save()
+      user.moderator = false;
+      await user.save();
     }
 
     await deleteEvent(group.meeting);

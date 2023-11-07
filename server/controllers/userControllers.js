@@ -60,7 +60,7 @@ exports.verifyEmail = async (req, res, next) => {
 
       const roles = Object.values(user.roles);
 
-      const { _id  } = user;
+      const { _id } = user;
       const payload = { _id };
 
       const authToken = jwt.sign(
@@ -198,14 +198,12 @@ exports.meetings = async (req, res, next) => {
 };
 
 exports.groups = async (req, res, next) => {
-  const { userId } = req.params 
+  const { userId } = req.params;
   try {
     let groups = await Group.find();
 
     let foundGroups = groups.filter(
-      (groups) =>
-        groups.users.includes(userId) ||
-        groups.moderator == userId
+      (groups) => groups.users.includes(userId) || groups.moderator == userId
     );
     res.status(200).send(foundGroups);
   } catch (error) {
