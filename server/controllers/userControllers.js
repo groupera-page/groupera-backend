@@ -8,7 +8,7 @@ const passwordComplexity = require("joi-password-complexity");
 const { getEvents, deleteEvent } = require("../utils/googleCalendar");
 
 exports.signup = async (req, res, next) => {
-  const { email, password, moderator } = req.body;
+  const { email, password } = req.body;
   try {
     const { error } = validate(req.body);
     if (error)
@@ -21,21 +21,21 @@ exports.signup = async (req, res, next) => {
     const salt = await bcrypt.genSalt(Number(process.env.SALT));
     const hashPassword = await bcrypt.hash(password, salt);
     const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
-    const userRoles =
-      moderator == "One" ? { User: 2001, Moderator: 1984 } : { User: 2001 };
+    console.log(randomCode)
+    const hashCode = await bcrypt.hash(randomCode, salt);
+
     user = await new User({
       ...req.body,
-      password: hashPassword,
-      code: randomCode,
-      roles: userRoles,
+      passwordHash: hashPassword,
+      authCode: hashCode,
       questions: { Themes: ["Depression", "Anxiety"], Experience: "None" },
     }).save();
 
-    // await sendEmail(user.email, "Verify Email", user.code);
+    // await sendEmail(user.email, "Verify Email", randomCode);
 
-    res.sendStatus(201);
+    res.status(201).send(user.email);
   } catch (error) {
-    res.status(500).send({ message: error });
+    res.status(500).send({ message: `${error}` });
   }
 };
 
@@ -52,23 +52,18 @@ exports.forFred = async (req, res, next) => {
 };
 
 exports.verifyEmail = async (req, res, next) => {
-  const { code } = req.body;
+  const { code, email } = req.body;
   try {
     if (code.length == 4) {
-      let user = await User.findOne({ code: code });
-      if (!user) return res.status(400).send({ message: "Ungültiger Code" });
+      let user = await User.findOne({ email: email });
+      if (!user) return res.status(400).send({ message: "Ungültiger Email" });
 
-      const roles = Object.values(user.roles);
-
-      const { _id } = user;
-      const payload = { _id };
+      const validAuthCode = await bcrypt.compare(code, user.authCode);
+      if (!validAuthCode) return res.status(401).send({ message: "Incorrect code!"})
 
       const authToken = jwt.sign(
         {
-          UserInfo: {
-            id: _id,
-            roles: roles,
-          },
+          id: user._id,
         },
         process.env.TOKEN_SECRET,
         {
@@ -76,17 +71,23 @@ exports.verifyEmail = async (req, res, next) => {
           expiresIn: "10m",
         }
       );
-      const refreshToken = jwt.sign(payload, process.env.REFRESH_SECRET, {
-        algorithm: "HS256",
-        expiresIn: "1d",
-      });
+      const refreshToken = jwt.sign(
+        { 
+          id: user._id 
+        },
+        process.env.REFRESH_SECRET,
+        {
+          algorithm: "HS256",
+          expiresIn: "1d",
+        }
+      );
 
       await User.updateOne(
-        { _id: _id },
+        { _id: user._id },
         {
           emailVerified: true,
-          code: "",
-          verificationExpires: null,
+          authCode: "",
+          emailVerificationExpires: null,
           refreshToken: refreshToken,
         }
       );
@@ -102,10 +103,10 @@ exports.verifyEmail = async (req, res, next) => {
         authtoken: authToken,
       });
     } else {
-      res.status(400).send({ message: error });
+      res.status(400).send({ message: `${error}` });
     }
   } catch (error) {
-    res.status(400).send({ message: error });
+    res.status(400).send({ message: `${error}` });
   }
 };
 
@@ -203,7 +204,7 @@ exports.groups = async (req, res, next) => {
     let groups = await Group.find();
 
     let foundGroups = groups.filter(
-      (groups) => groups.users.includes(userId) || groups.moderator == userId
+      (groups) => groups.users.includes(userId) || groups.moderatorId == userId
     );
     res.status(200).send(foundGroups);
   } catch (error) {

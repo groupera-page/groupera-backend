@@ -16,7 +16,7 @@ exports.login = async (req, res, next) => {
         .status(401)
         .send({ message: "Ungültige E-Mail oder Passwort" });
 
-    const validPassword = await bcrypt.compare(password, user.password);
+    const validPassword = await bcrypt.compare(password, user.passwordHash);
     if (!validPassword)
       return res
         .status(401)
@@ -28,17 +28,9 @@ exports.login = async (req, res, next) => {
         .send({ message: "Bitte bestätigen Sie Ihre E-Mail" });
     }
 
-    const roles = Object.values(user.roles);
-
-    const { _id } = user;
-    const payload = { _id };
-
     const authToken = jwt.sign(
       {
-        UserInfo: {
-          id: _id,
-          roles: roles,
-        },
+        id: user._id,
       },
       process.env.TOKEN_SECRET,
       {
@@ -46,15 +38,18 @@ exports.login = async (req, res, next) => {
         expiresIn: "10m",
       }
     );
-    const refreshToken = jwt.sign(payload, process.env.REFRESH_SECRET, {
-      algorithm: "HS256",
-      expiresIn: "1d",
-    });
-
-    let loggedInUser = await User.updateOne(
-      { _id: user._id },
-      { refreshToken: refreshToken }
+    const refreshToken = jwt.sign(
+      {
+        id: user._id,
+      },
+      process.env.REFRESH_SECRET,
+      {
+        algorithm: "HS256",
+        expiresIn: "1d",
+      }
     );
+
+    await User.updateOne({ _id: user._id }, { refreshToken: refreshToken });
 
     res.cookie("jwt", refreshToken, {
       httpOnly: true,
@@ -62,11 +57,24 @@ exports.login = async (req, res, next) => {
       secure: true,
       maxAge: 24 * 60 * 60 * 1000,
     });
-    console.log(authToken);
+
+    const userObject = {
+      alias: user.alias,
+      email: user.email,
+      passwordHash: user.passwordHash,
+      dob: user.dob,
+      questions: user.questions,
+      emailVerified: user.emailVerified,
+      gender: user.gender,
+    };
 
     res
       .status(200)
-      .send({ authToken: authToken, message: "Erfolgreich eingeloggt" });
+      .send({
+        authToken: authToken,
+        userObject,
+        message: "Erfolgreich eingeloggt",
+      });
   } catch (error) {
     res.status(500).send({ message: error });
   }
@@ -100,14 +108,10 @@ exports.refresh = async (req, res, next) => {
     if (!foundUser) return res.status(403).send({ message: "No user found" });
     jwt.verify(refreshToken, process.env.REFRESH_SECRET, (err, decoded) => {
       if (err || foundUser._id !== decoded._id)
-        return res.status(403).send({ message: err });
-      const roles = Object.values(foundUser.roles);
+        return res.status(403).send({ message: `${decoded._id}` });
       const accessToken = jwt.sign(
         {
-          UserInfo: {
-            id: decoded._id,
-            roles: roles,
-          },
+          id: decoded._id,
         },
         process.env.TOKEN_SECRET,
         { expiresIn: "10m" }
@@ -116,7 +120,7 @@ exports.refresh = async (req, res, next) => {
       res.json(accessToken);
     });
   } catch (error) {
-    res.status(500).send({ message: error });
+    res.status(500).send({ message: `${error}` });
   }
 };
 

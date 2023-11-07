@@ -11,35 +11,27 @@ const verifyJWT = (req, res, next) => {
       process.env.TOKEN_SECRET,
       (err, decoded) => {
           if(err) return res.status(403).send({message: `${err}`});
-          req.user = decoded.UserInfo.id;
-          req.roles = decoded.UserInfo.roles
+          req.user = decoded.id;
           next();
       }
   )
 };
 
-const verifyRoles = (...allowedRoles) => {
-  return async (req, res, next) => {
-      if(!req?.roles) return res.sendStatus(401); // unauthorized
-      const rolesArray = [...allowedRoles];
-      console.log(req.user)
-      console.log(rolesArray);
-      console.log(req.roles);
-      const result = req.roles.map(role => rolesArray.includes(role)).find(val => val === true);
+const verifyRoles = async (req, res, next) => {
+      if(!req) return res.sendStatus(401); // unauthorized
       let group = await Group.findOne({_id: req.params.groupId})
       if(group){
-        if(result || req.params.id == req.user || req.user == group.moderator)
+        if(req.params.userId == req.user || req.user == group.moderatorId)
         next(); 
       } else if (!group) {
-        if(result || req.params.id == req.user){
+        if(req.params.userId == req.user){
         next();
         } else {
           return res.sendStatus(401);
         }
       }
       else return res.sendStatus(401);
-  }
-}
+  };
 
 module.exports = {
   verifyJWT,

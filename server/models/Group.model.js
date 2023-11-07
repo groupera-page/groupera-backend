@@ -25,15 +25,15 @@ const groupSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "Moderator",
   },
-  // users: {
-  //   type: Number
-  // }
   users: [
     {
       type: Schema.Types.ObjectId,
       ref: "User",
     },
   ],
+  moderationType: {
+    type: String
+  }
 });
 
 const Group = model("Group", groupSchema);
@@ -66,7 +66,8 @@ const validate = (data) => {
     date: Joi.date().label("Date"),
     frequency: Joi.number().label("Frequency"),
     length: Joi.number().label("Length"),
-    currentUserId: Joi.string().label("Currentuser")
+    currentUserId: Joi.string().label("Currentuser"),
+    moderationType: Joi.string().label("Moderation-type")
   });
   return schema.validate(data);
 };

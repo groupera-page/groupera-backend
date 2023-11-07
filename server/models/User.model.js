@@ -3,26 +3,23 @@ const Joi = require("joi");
 const passwordComplexity = require("joi-password-complexity");
 
 const userSchema = new Schema({
-  username: {
+  alias: {
     type: String,
   },
   email: {
     type: String,
     unique: [true, "Die E-Mail Adresse ist ungültig"],
   },
-  password: {
+  passwordHash: {
     type: String,
   },
-  roles: {
-    type: Object
-  },
-  age: {
+  dob: {
     type: Date,
   },
   questions: {
     type: Object
   },
-  verificationExpires: {
+  emailVerificationExpires: {
     type: Date,
     default: () => new Date(+new Date() + 15 * 60 * 1000) //3 minutes
   },
@@ -30,13 +27,9 @@ const userSchema = new Schema({
     type: Boolean,
     default: false,
   },
-  code: { type: String },
+  authCode: { type: String },
   gender: {
     type: String,
-  },
-  moderator: {
-    type: String,
-    // 'One' can be moderate, 'Two' can be need help, 'Three' can be don't want to
   },
   paid: {
     type: Boolean,
@@ -65,7 +58,7 @@ const userSchema = new Schema({
       type: String,
     },
   ],
-  subscription: {
+  paymentSubscription: {
     type: Object,
   },
   refreshToken: {
@@ -77,7 +70,7 @@ const userSchema = new Schema({
 const User = model("User", userSchema);
 
 userSchema.index(
-  { 'verificationExpires': 1 },
+  { 'emailVerificationExpires': 1 },
   {
     expireAfterSeconds: 0,
     partialFilterExpression: { 'emailVerified': false }
@@ -88,11 +81,11 @@ userSchema.index(
 
 const validate = (data) => {
   const schema = Joi.object({
-    username: Joi.string()
+    alias: Joi.string()
       .min(1)
       .max(70)
       .required()
-      .label("Username")
+      .label("Alias")
       .messages({
         "string.max": "Bitte halten Sie den Namen auf weniger als 70 Zeichen",
         "string.empty": "Bitte Name eingeben",
@@ -105,12 +98,11 @@ const validate = (data) => {
       .required()
       .label("Password")
       .messages({ "any.required": "Erforderliches Feld" }),
-    age: Joi.date().label("Age"),
-    code: Joi.string().label("Code"),
+    dob: Joi.date().label("Age"),
+    authCode: Joi.string().label("Code"),
     gender: Joi.string()
       .valid("Männlich", "Weiblich", "Divers")
       .label("Gender"),
-    moderator: Joi.string().valid("One", "Two", "Three").label("Moderator"),
     questions: Joi.object().label("Questions")
   });
   return schema.validate(data);

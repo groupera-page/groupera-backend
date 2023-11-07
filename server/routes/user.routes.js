@@ -1,7 +1,6 @@
 const router = require("express").Router();
 const userControllers = require("../controllers/userControllers")
 const { verifyJWT, verifyRoles } = require("../middleware/jwt.middleware.js");
-const ROLES_LIST = require('../config/roles_list');
 
 router.post("/signup", userControllers.signup);
 
@@ -23,7 +22,7 @@ router.get("/:userId/meetings", userControllers.meetings);
 
 router.get("/:userId/groups", userControllers.groups)
 
-router.patch("/:userId", verifyJWT, verifyRoles(ROLES_LIST.Moderator), userControllers.edit);
+router.patch("/:userId", verifyJWT, verifyRoles, userControllers.edit);
 
 router.delete("/:userId", userControllers.delete);
 
