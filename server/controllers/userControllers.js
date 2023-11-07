@@ -132,9 +132,9 @@ exports.resetPassword = async (req, res, next) => {
 };
 
 exports.verifyResetPasswordToken = async (req, res, next) => {
-  const { id } = req.params;
+  const { userId } = req.params;
   try {
-    const user = await User.findOne({ _id: id });
+    const user = await User.findOne({ _id: userId });
     if (!user) return res.status(400).send({ message: "Invalid link" });
 
     res.status(200).send({ message: "Valid url " });
@@ -146,7 +146,7 @@ exports.verifyResetPasswordToken = async (req, res, next) => {
 exports.resetPasswordId = async (req, res, next) => {
   const {
     body: { password },
-    params: { id },
+    params: { userId },
   } = req;
   try {
     const passwordSchema = Joi.object({
@@ -156,7 +156,7 @@ exports.resetPasswordId = async (req, res, next) => {
     if (error)
       return res.status(400).send({ message: error.details[0].message });
 
-    const user = await User.findOne({ _id: id });
+    const user = await User.findOne({ _id: userId });
     if (!user) return res.status(400).send({ message: "Invalid link" });
 
     const salt = await bcrypt.genSalt(Number(process.env.SALT));
@@ -172,9 +172,9 @@ exports.resetPasswordId = async (req, res, next) => {
 };
 
 exports.findOne = async (req, res, next) => {
-  const { id } = req.params;
+  const { userId } = req.params;
   try {
-    const user = await User.findOne({ _id: id });
+    const user = await User.findOne({ _id: userId });
     res.status(200).send(user);
   } catch (error) {
     res.status(500).send({ message: error });
@@ -182,8 +182,9 @@ exports.findOne = async (req, res, next) => {
 };
 
 exports.meetings = async (req, res, next) => {
+  const { userId } = req.params;
   try {
-    let user = await User.findOne({ _id: req.params.id });
+    let user = await User.findOne({ _id: userId });
     let start = "2023-10-03T00:00:00.000Z";
     let end = "2026-10-06T00:00:00.000Z";
     let event = await getEvents(start, end);
@@ -197,13 +198,14 @@ exports.meetings = async (req, res, next) => {
 };
 
 exports.groups = async (req, res, next) => {
+  const { userId } = req.params 
   try {
     let groups = await Group.find();
 
     let foundGroups = groups.filter(
       (groups) =>
-        groups.users.includes(req.params.id) ||
-        groups.moderator == req.params.id
+        groups.users.includes(userId) ||
+        groups.moderator == userId
     );
     res.status(200).send(foundGroups);
   } catch (error) {
@@ -212,12 +214,12 @@ exports.groups = async (req, res, next) => {
 };
 
 exports.edit = async (req, res, next) => {
-  const { id } = req.params;
+  const { userId } = req.params;
   try {
-    let user = await User.findOne({ _id: id });
+    let user = await User.findOne({ _id: userId });
     if (!user) return res.status(400).send({ message: "Invalid Link" });
 
-    await User.updateOne({ _id: id }, { ...req.body });
+    await User.updateOne({ _id: userId }, { ...req.body });
 
     res.status(200).send({ message: "Benutzer erfolgreich aktualisiert" });
   } catch (error) {
@@ -226,21 +228,21 @@ exports.edit = async (req, res, next) => {
 };
 
 exports.delete = async (req, res, next) => {
-  const { id } = req.params;
+  const { userId } = req.params;
   try {
-    const user = await User.findOne({ _id: id });
+    const user = await User.findOne({ _id: userId });
     if (!user) return res.status(400).send({ message: "Invalid Link" });
 
     await Group.updateMany(
       {
         users: {
-          $in: [id],
+          $in: [userId],
         },
         // moderator: req.params.id
       },
       {
         $pull: {
-          users: id,
+          users: userId,
           // moderator: req.params.id
         },
       }
@@ -266,9 +268,9 @@ exports.delete = async (req, res, next) => {
 
     user.meetings.map((meeting) => deleteEvent(meeting));
 
-    await Group.deleteMany({ moderator: id });
+    await Group.deleteMany({ moderator: userId });
 
-    await User.deleteOne({ _id: id });
+    await User.deleteOne({ _id: userId });
 
     res.status(200).send({ message: "Benutzer erfolgreich gelöscht" });
   } catch (error) {

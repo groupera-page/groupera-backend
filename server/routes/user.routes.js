@@ -23,7 +23,7 @@ router.get("/:userId/meetings", userControllers.meetings);
 
 router.get("/:userId/groups", userControllers.groups)
 
-router.patch("/:userId", verifyJWT, verifyRoles(ROLES_LIST.Admin), userControllers.edit);
+router.patch("/:userId", verifyJWT, verifyRoles(ROLES_LIST.Moderator), userControllers.edit);
 
 router.delete("/:userId", userControllers.delete);
 
