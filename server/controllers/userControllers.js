@@ -21,7 +21,7 @@ exports.signup = async (req, res, next) => {
     const salt = await bcrypt.genSalt(Number(process.env.SALT));
     const hashPassword = await bcrypt.hash(password, salt);
     const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
-    console.log(randomCode)
+    console.log(randomCode);
     const hashCode = await bcrypt.hash(randomCode, salt);
 
     user = await new User({
@@ -39,17 +39,6 @@ exports.signup = async (req, res, next) => {
   }
 };
 
-exports.forFred = async (req, res, next) => {
-  const { email } = req.params;
-  try {
-    const user = await User.findOne({ email: email });
-    if (!user) return res.status(400).send({ message: "Ungültiger Email" });
-
-    res.status(200).json(user);
-  } catch (error) {
-    res.status(400).send({ message: error });
-  }
-};
 
 exports.verifyEmail = async (req, res, next) => {
   const { code, email } = req.body;
@@ -59,7 +48,8 @@ exports.verifyEmail = async (req, res, next) => {
       if (!user) return res.status(400).send({ message: "Ungültiger Email" });
 
       const validAuthCode = await bcrypt.compare(code, user.authCode);
-      if (!validAuthCode) return res.status(401).send({ message: "Incorrect code!"})
+      if (!validAuthCode)
+        return res.status(401).send({ message: "Incorrect code!" });
 
       const authToken = jwt.sign(
         {
@@ -72,8 +62,8 @@ exports.verifyEmail = async (req, res, next) => {
         }
       );
       const refreshToken = jwt.sign(
-        { 
-          id: user._id 
+        {
+          id: user._id,
         },
         process.env.REFRESH_SECRET,
         {
@@ -99,8 +89,20 @@ exports.verifyEmail = async (req, res, next) => {
         maxAge: 24 * 60 * 60 * 1000,
       });
 
+      const userInformation = {
+        _id: user._id,
+        alias: user.alias,
+        email: user.email,
+        dob: user.dob,
+        questions: user.questions,
+        emailVerified: user.emailVerified,
+        gender: user.gender,
+      };
+
       res.status(200).send({
-        authtoken: authToken,
+        authToken,
+        userInformation,
+        message: `Benutzer erfolgreich verifiziert`
       });
     } else {
       res.status(400).send({ message: `${error}` });

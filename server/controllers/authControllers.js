@@ -58,23 +58,21 @@ exports.login = async (req, res, next) => {
       maxAge: 24 * 60 * 60 * 1000,
     });
 
-    const userObject = {
+    const userInformation = {
+      _id: user._id,
       alias: user.alias,
       email: user.email,
-      passwordHash: user.passwordHash,
       dob: user.dob,
       questions: user.questions,
       emailVerified: user.emailVerified,
       gender: user.gender,
     };
 
-    res
-      .status(200)
-      .send({
-        authToken: authToken,
-        userObject,
-        message: "Erfolgreich eingeloggt",
-      });
+    res.status(200).send({
+      authToken,
+      userInformation,
+      message: "Erfolgreich eingeloggt",
+    });
   } catch (error) {
     res.status(500).send({ message: error });
   }
@@ -99,24 +97,28 @@ exports.logout = async (req, res, next) => {
   }
 };
 
+// Could you take a look at this function, Fritz? It works fine when I throw a console.log(err) on it,
+// though it does log null for the error, but if I return a res.send with the error it just says null
+//  and refuses to go further
 exports.refresh = async (req, res, next) => {
   try {
     const cookies = req.cookies;
     if (!cookies?.jwt) return res.sendStatus(401);
     const refreshToken = cookies.jwt;
     const foundUser = await User.findOne({ refreshToken: refreshToken });
+    console.log(foundUser._id);
     if (!foundUser) return res.status(403).send({ message: "No user found" });
     jwt.verify(refreshToken, process.env.REFRESH_SECRET, (err, decoded) => {
-      if (err || foundUser._id !== decoded._id)
-        return res.status(403).send({ message: `${decoded._id}` });
+      if (err || foundUser._id !== decoded.id) console.log(err);
+
       const accessToken = jwt.sign(
         {
-          id: decoded._id,
+          id: decoded.id,
         },
         process.env.TOKEN_SECRET,
         { expiresIn: "10m" }
       );
-      console.log(decoded._id);
+      console.log(decoded.id);
       res.json(accessToken);
     });
   } catch (error) {

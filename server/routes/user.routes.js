@@ -4,8 +4,6 @@ const { verifyJWT, verifyRoles } = require("../middleware/jwt.middleware.js");
 
 router.post("/signup", userControllers.signup);
 
-router.get("/:email", userControllers.forFred);
-
 router.patch("/verifyEmail", userControllers.verifyEmail);
 
 router.post("/resetPassword", userControllers.resetPassword);
@@ -13,8 +11,6 @@ router.post("/resetPassword", userControllers.resetPassword);
 router.get("/:userId/verifyResetPasswordToken", userControllers.verifyResetPasswordToken);
 
 router.post("/:userId/resetPassword", userControllers.resetPasswordId);
-
-// router.post("/reset/:id", userExists, passwordValid, userControllers.create, emailController.sendWelcomeMail)
 
 router.get("/:userId", userControllers.findOne);
 
