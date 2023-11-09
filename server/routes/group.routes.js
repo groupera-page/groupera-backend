@@ -4,7 +4,7 @@ const { verifyJWT, verifyRoles } = require("../middleware/jwt.middleware.js");
 
 router.post("", groupControllers.create);
 
-router.get("/findAll", groupControllers.findAll);
+router.get("/findAll", verifyJWT, groupControllers.findAll);
 
 router.get("/:groupId/meetings", groupControllers.meetings);
 

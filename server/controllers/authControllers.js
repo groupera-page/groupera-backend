@@ -26,9 +26,11 @@ exports.login = async (req, res, next) => {
       return res
         .status(400)
         .send({ message: "Bitte bestätigen Sie Ihre E-Mail" });
-    }
+    };
 
-    const authToken = jwt.sign(
+    console.log(user._id)
+
+    const accessToken = jwt.sign(
       {
         id: user._id,
       },
@@ -38,6 +40,8 @@ exports.login = async (req, res, next) => {
         expiresIn: "10m",
       }
     );
+
+
     const refreshToken = jwt.sign(
       {
         id: user._id,
@@ -69,7 +73,7 @@ exports.login = async (req, res, next) => {
     };
 
     res.status(200).send({
-      authToken,
+      accessToken,
       userInformation,
       message: "Erfolgreich eingeloggt",
     });
@@ -106,7 +110,6 @@ exports.refresh = async (req, res, next) => {
     if (!cookies?.jwt) return res.sendStatus(401);
     const refreshToken = cookies.jwt;
     const foundUser = await User.findOne({ refreshToken: refreshToken });
-    console.log(foundUser._id);
     if (!foundUser) return res.status(403).send({ message: "No user found" });
     jwt.verify(refreshToken, process.env.REFRESH_SECRET, (err, decoded) => {
       if (err || foundUser._id !== decoded.id) console.log(err);
@@ -116,10 +119,13 @@ exports.refresh = async (req, res, next) => {
           id: decoded.id,
         },
         process.env.TOKEN_SECRET,
-        { expiresIn: "10m" }
+        {
+          algorithm: "HS256",
+          expiresIn: "10m",
+        }
       );
-      console.log(decoded.id);
-      res.json(accessToken);
+
+      res.status(200).send(accessToken);
     });
   } catch (error) {
     res.status(500).send({ message: `${error}` });

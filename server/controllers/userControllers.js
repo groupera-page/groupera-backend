@@ -51,7 +51,7 @@ exports.verifyEmail = async (req, res, next) => {
       if (!validAuthCode)
         return res.status(401).send({ message: "Incorrect code!" });
 
-      const authToken = jwt.sign(
+      const accessToken = jwt.sign(
         {
           id: user._id,
         },
@@ -100,7 +100,7 @@ exports.verifyEmail = async (req, res, next) => {
       };
 
       res.status(200).send({
-        authToken,
+        accessToken,
         userInformation,
         message: `Benutzer erfolgreich verifiziert`
       });
