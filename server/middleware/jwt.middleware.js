@@ -17,7 +17,7 @@ const verifyJWT = (req, res, next) => {
   )
 };
 
-const verifyRoles = async (req, res, next) => {
+const verifyCurrentUser = async (req, res, next) => {
       if(!req) return res.sendStatus(401); // unauthorized
       let group = await Group.findOne({_id: req.params.groupId})
       if(group){
@@ -35,5 +35,5 @@ const verifyRoles = async (req, res, next) => {
 
 module.exports = {
   verifyJWT,
-  verifyRoles
+  verifyCurrentUser
 };
