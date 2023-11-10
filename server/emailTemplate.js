@@ -1,5 +1,4 @@
-export default function emailTemplate(){
-  return(
+const template = (code) => `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html
   xmlns="http://www.w3.org/1999/xhtml"
   xmlns:v="urn:schemas-microsoft-com:vml"
@@ -73,14 +72,14 @@ export default function emailTemplate(){
     <style type="text/css" emogrify="no">
       @media (max-width: 600px) {
         .gmx-killpill {
-          content: " \03D1";
+          content: " ` + "\03D1" + `";
         }
       }
     </style>
     <style type="text/css" emogrify="no">
       @media (max-width: 600px) {
         .gmx-killpill {
-          content: " \03D1";
+          content: " ` + "\03D1" + `";
         }
         .r0-o {
           border-style: solid !important;
@@ -347,12 +346,13 @@ export default function emailTemplate(){
         width: 0;
       }
     </style>
-<xml>
+    <!--[if mso
+      ]><xml>
         <o:OfficeDocumentSettings>
           <o:AllowPNG /> <o:PixelsPerInch>96</o:PixelsPerInch>
         </o:OfficeDocumentSettings>
-      </xml>
-
+      </xml><!
+    [endif]-->
     <style type="text/css">
       a:link {
         color: #0092ff;
@@ -523,7 +523,9 @@ export default function emailTemplate(){
                                                       "
                                                       >Danke, dass du dich bei
                                                       Groupera angemeldet
-                                                      hast!</span></span>
+                                                      hast!</span
+                                                    ></span
+                                                  >
                                                 </h2>
                                               </div>
                                             </td>
@@ -634,7 +636,16 @@ export default function emailTemplate(){
                                                         color: #000000;
                                                         font-family: Roboto;
                                                         font-size: 18px;
-                                                      ">Verwende bitte den Bestätigungscode unten, um deine E-Mail-Adresse zu bestätigen und die Registrierung deines Kontos bei Groupera abzuschließen</span></span>
+                                                      "
+                                                      >Verwende bitte den
+                                                      Bestätigungscode unten, um
+                                                      deine E-Mail-Adresse zu
+                                                      bestätigen und die
+                                                      Registrierung deines
+                                                      Kontos bei Groupera
+                                                      abzuschließen</span
+                                                    ></span
+                                                  >
                                                 </p>
                                               </div>
                                             </td>
@@ -749,7 +760,7 @@ export default function emailTemplate(){
                                                   "
                                                 >
                                                   <span style="font-size: 48px"
-                                                    >4 7 8 9
+                                                    >${code}
                                                   </span>
                                                 </h2>
                                               </div>
@@ -975,7 +986,9 @@ export default function emailTemplate(){
                                                       color: #a64d79;
                                                       font-family: Roboto;
                                                       font-size: 26px;
-                                                    ">Unsere Vision</span>
+                                                    "
+                                                    >Unsere Vision</span
+                                                  >
                                                 </h2>
                                               </div>
                                             </td>
@@ -1713,8 +1726,7 @@ export default function emailTemplate(){
                                                               style="
                                                                 display: block;
                                                                 width: 100%;
-                                                              "
-                                                          /></a>
+                                                              "/></a>
                                                         </td>
                                                       </tr>
                                                     </table>
@@ -1743,6 +1755,6 @@ export default function emailTemplate(){
       </tr>
     </table>
   </body>
-</html>
-)
-}
+</html>`
+
+module.exports = {template}

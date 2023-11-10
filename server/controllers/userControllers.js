@@ -31,7 +31,7 @@ exports.signup = async (req, res, next) => {
       questions: { Themes: ["Depression", "Anxiety"], Experience: "None" },
     }).save();
 
-    // await sendEmail(user.email, "Verify Email", randomCode);
+    await sendEmail(user.email, "Verify Email", randomCode);
 
     res.status(201).send(user.email);
   } catch (error) {

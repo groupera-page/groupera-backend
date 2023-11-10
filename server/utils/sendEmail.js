@@ -1,7 +1,8 @@
 const nodemailer = require("nodemailer");
+const { template } = require('../emailTemplate');
 
 module.exports = async (email, subject, text) => {
-  
+  const output = template(text)
   try {
     const transporter = nodemailer.createTransport({
       host: "smtp-relay.brevo.com",
@@ -17,7 +18,7 @@ module.exports = async (email, subject, text) => {
       from: process.env.EMAIL_FROM,
       to: email,
       subject: subject,
-      text: text
+      html: output
     });
     console.log("Email sent")
   } catch (error) {
