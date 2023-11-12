@@ -8,7 +8,7 @@ router.get("/findAll", groupControllers.findAll);
 
 router.get("/:groupId/meetings", groupControllers.meetings);
 
-router.get("/:groupId", verifyJWT, verifyCurrentUser, groupControllers.findOne);
+router.get("/:groupId", groupControllers.findOne);
 
 router.patch("/:groupId/edit", verifyJWT, verifyCurrentUser, groupControllers.edit);
 
