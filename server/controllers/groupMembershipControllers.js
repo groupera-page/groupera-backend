@@ -1,7 +1,7 @@
 const { Group } = require("../models/Group.model");
 const { User } = require("../models/User.model");
 
-exports.join = async (req, res, next) => {
+exports.join = async (req, res) => {
     const {
       body: { currentUserId },
       params: { groupId },
@@ -32,7 +32,7 @@ exports.join = async (req, res, next) => {
     }
   };
   
-  exports.leave = async (req, res, next) => {
+  exports.leave = async (req, res) => {
     const {
       body: { currentUserId },
       params: { groupId },

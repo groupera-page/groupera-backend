@@ -12,7 +12,7 @@ const {
 // const fetch = require("node-fetch");
 const generateRoom = require("../utils/videoSDK");
 
-exports.create = async (req, res, next) => {
+exports.create = async (req, res) => {
   const { img, frequency, date, time, length, token, currentUserId, name } =
     req.body;
 
@@ -71,7 +71,7 @@ exports.create = async (req, res, next) => {
   }
 };
 
-exports.findAll = async (req, res, next) => {
+exports.findAll = async (req, res) => {
   try {
     let groups = await Group.find();
 
@@ -89,7 +89,7 @@ exports.findAll = async (req, res, next) => {
   }
 };
 
-exports.meetings = async (req, res, next) => {
+exports.meetings = async (req, res) => {
   const { groupId } = req.params;
   try {
     const group = await Group.findOne({ _id: groupId });
@@ -105,7 +105,7 @@ exports.meetings = async (req, res, next) => {
   }
 };
 
-exports.findOne = async (req, res, next) => {
+exports.findOne = async (req, res) => {
   const { groupId } = req.params;
   try {
     let group = await Group.findOne({ _id: groupId });
@@ -118,7 +118,7 @@ exports.findOne = async (req, res, next) => {
   }
 };
 
-exports.edit = async (req, res, next) => {
+exports.edit = async (req, res) => {
   const {
     body: { date, time, length, frequency },
     params: { groupId },
@@ -155,7 +155,7 @@ exports.edit = async (req, res, next) => {
   }
 };
 
-exports.delete = async (req, res, next) => {
+exports.delete = async (req, res) => {
   const { groupId } = req.params;
   try {
     let group = await Group.findOne({ _id: groupId });

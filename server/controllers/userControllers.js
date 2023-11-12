@@ -7,7 +7,7 @@ const Joi = require("joi");
 const passwordComplexity = require("joi-password-complexity");
 const { getEvents, deleteEvent } = require("../utils/googleCalendar");
 
-exports.signup = async (req, res, next) => {
+exports.signup = async (req, res) => {
   const { email, password } = req.body;
   try {
     const { error } = validate(req.body);
@@ -40,7 +40,7 @@ exports.signup = async (req, res, next) => {
 };
 
 
-exports.verifyEmail = async (req, res, next) => {
+exports.verifyEmail = async (req, res) => {
   const { code, email } = req.body;
   try {
     if (code.length == 4) {
@@ -112,7 +112,7 @@ exports.verifyEmail = async (req, res, next) => {
   }
 };
 
-exports.resetPassword = async (req, res, next) => {
+exports.resetPassword = async (req, res) => {
   const { email } = req.body;
   try {
     let user = await User.findOne({ email: email });
@@ -134,7 +134,7 @@ exports.resetPassword = async (req, res, next) => {
   }
 };
 
-exports.verifyResetPasswordToken = async (req, res, next) => {
+exports.verifyResetPasswordToken = async (req, res) => {
   const { userId } = req.params;
   try {
     const user = await User.findOne({ _id: userId });
@@ -146,7 +146,7 @@ exports.verifyResetPasswordToken = async (req, res, next) => {
   }
 };
 
-exports.resetPasswordId = async (req, res, next) => {
+exports.resetPasswordId = async (req, res) => {
   const {
     body: { password },
     params: { userId },
@@ -174,7 +174,7 @@ exports.resetPasswordId = async (req, res, next) => {
   }
 };
 
-exports.findOne = async (req, res, next) => {
+exports.findOne = async (req, res) => {
   const { userId } = req.params;
   try {
     const user = await User.findOne({ _id: userId });
@@ -184,7 +184,7 @@ exports.findOne = async (req, res, next) => {
   }
 };
 
-exports.meetings = async (req, res, next) => {
+exports.meetings = async (req, res) => {
   const { userId } = req.params;
   try {
     let user = await User.findOne({ _id: userId });
@@ -200,7 +200,7 @@ exports.meetings = async (req, res, next) => {
   }
 };
 
-exports.groups = async (req, res, next) => {
+exports.groups = async (req, res) => {
   const { userId } = req.params;
   try {
     let groups = await Group.find();
@@ -214,7 +214,7 @@ exports.groups = async (req, res, next) => {
   }
 };
 
-exports.edit = async (req, res, next) => {
+exports.edit = async (req, res) => {
   const { userId } = req.params;
   try {
     let user = await User.findOne({ _id: userId });

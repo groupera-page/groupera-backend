@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 // const generateToken = require("../utils/videoSDK");
 
-exports.getTokenMod = async (req, res, next) => {
+exports.getTokenMod = async (req, res) => {
   try {
     const API_KEY = process.env.VIDEO_KEY;
     const SECRET_KEY = process.env.VIDEO_SECRET;
@@ -21,7 +21,7 @@ exports.getTokenMod = async (req, res, next) => {
   }
 };
 
-exports.getToken = async (req, res, next) => {
+exports.getToken = async (req, res) => {
   try {
     const API_KEY = process.env.VIDEO_KEY;
     const SECRET_KEY = process.env.VIDEO_SECRET;

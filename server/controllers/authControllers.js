@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 const Joi = require("joi");
 const jwt = require("jsonwebtoken");
 
-exports.login = async (req, res, next) => {
+exports.login = async (req, res) => {
   const { email, password } = req.body;
   try {
     const { error } = validate(req.body);
@@ -82,7 +82,7 @@ exports.login = async (req, res, next) => {
   }
 };
 
-exports.logout = async (req, res, next) => {
+exports.logout = async (req, res) => {
   try {
     const { cookies } = req;
     if (!cookies?.jwt) return res.sendStatus(204);
@@ -101,10 +101,8 @@ exports.logout = async (req, res, next) => {
   }
 };
 
-// Could you take a look at this function, Fritz? It works fine when I throw a console.log(err) on it,
-// though it does log null for the error, but if I return a res.send with the error it just says null
-//  and refuses to go further
-exports.refresh = async (req, res, next) => {
+// Ask Fritz about using != and keeping foundUser._id like in Middleware versus using !== with toString()
+exports.refresh = async (req, res) => {
   try {
     const cookies = req.cookies;
     if (!cookies?.jwt) return res.sendStatus(401);
@@ -112,7 +110,7 @@ exports.refresh = async (req, res, next) => {
     const foundUser = await User.findOne({ refreshToken: refreshToken });
     if (!foundUser) return res.status(403).send({ message: "No user found" });
     jwt.verify(refreshToken, process.env.REFRESH_SECRET, (err, decoded) => {
-      if (err || foundUser._id !== decoded.id) console.log(err);
+      if (err || foundUser._id.toString() !== decoded.id) return res.sendStatus(403);
 
       const accessToken = jwt.sign(
         {
@@ -131,6 +129,42 @@ exports.refresh = async (req, res, next) => {
     res.status(500).send({ message: `${error}` });
   }
 };
+
+// exports.refresh = async (req, res) => {
+//   try {
+//     const cookies = req.cookies;
+//     if (!cookies?.jwt) return res.sendStatus(401);
+//     const refreshToken = cookies.jwt;
+//     const foundUser = await User.findOne({ refreshToken: refreshToken });
+//     if (!foundUser) return res.status(403).send({ message: "No user found" });
+
+//     try {
+//       const decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
+
+//       console.log(foundUser._id);
+
+//       // if (decoded.id === foundUser._id)
+//       const accessToken = jwt.sign(
+//         {
+//           id: decoded.id,
+//         },
+//         process.env.TOKEN_SECRET,
+//         {
+//           algorithm: "HS256",
+//           expiresIn: "10m",
+//         }
+//       );
+
+//       res.status(200).send(accessToken);
+
+//     } catch (error) {
+//       res.sendStatus(400);
+//     }
+//   } catch (error) {
+//     res.status(500).send({ message: `${error}` });
+//   }
+// };
+
 
 const validate = (data) => {
   const schema = Joi.object({

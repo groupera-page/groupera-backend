@@ -22,7 +22,7 @@ const createStripeSession = async (planId) => {
     }
 };
 
-exports.checkout = async (req, res, next) => {
+exports.checkout = async (req, res) => {
     const { id } = req.params;
     const planId = 'price_1O2wEdLSfyDnhMxYbBjqiOXF' 
 
@@ -41,7 +41,7 @@ exports.checkout = async (req, res, next) => {
     }
   };
 
-  exports.successfulCheckout = async (req, res, next) => {
+  exports.successfulCheckout = async (req, res) => {
     const { body: { sessionId }, params: { id } } = req;
 
     try {
@@ -73,7 +73,7 @@ exports.checkout = async (req, res, next) => {
   }
 
 
-// exports.checkout = async (req, res, next) => {
+// exports.checkout = async (req, res) => {
 //   try {
 //     const prices = await stripe.prices.list({
 //       lookup_keys: [req.body.lookup_key],
