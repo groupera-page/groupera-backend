@@ -28,11 +28,11 @@ exports.login = async (req, res) => {
         .send({ message: "Bitte bestätigen Sie Ihre E-Mail" });
     };
 
-    console.log(user._id)
+    console.log(user.id)
 
     const accessToken = jwt.sign(
       {
-        id: user._id,
+        id: user.id,
       },
       process.env.TOKEN_SECRET,
       {
@@ -44,7 +44,7 @@ exports.login = async (req, res) => {
 
     const refreshToken = jwt.sign(
       {
-        id: user._id,
+        id: user.id,
       },
       process.env.REFRESH_SECRET,
       {
@@ -61,6 +61,8 @@ exports.login = async (req, res) => {
       secure: true,
       maxAge: 24 * 60 * 60 * 1000,
     });
+
+    // should I send the Mongo formatted ID as the user ID or just the string?
 
     const userInformation = {
       _id: user._id,
@@ -110,7 +112,7 @@ exports.refresh = async (req, res) => {
     const foundUser = await User.findOne({ refreshToken: refreshToken });
     if (!foundUser) return res.status(403).send({ message: "No user found" });
     jwt.verify(refreshToken, process.env.REFRESH_SECRET, (err, decoded) => {
-      if (err || foundUser._id.toString() !== decoded.id) return res.sendStatus(403);
+      if (err || foundUser.id !== decoded.id) return res.sendStatus(403);
 
       const accessToken = jwt.sign(
         {
