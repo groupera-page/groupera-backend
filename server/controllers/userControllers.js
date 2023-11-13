@@ -112,7 +112,7 @@ exports.verifyEmail = async (req, res) => {
   }
 };
 
-exports.resetPassword = async (req, res) => {
+exports.resetPasswordRequest = async (req, res) => {
   const { email } = req.body;
   try {
     let user = await User.findOne({ email: email });

@@ -6,7 +6,7 @@ router.post("/signup", userControllers.signup);
 
 router.patch("/verifyEmail", userControllers.verifyEmail);
 
-router.post("/resetPassword", userControllers.resetPassword);
+router.post("/resetPasswordRequest", userControllers.resetPasswordRequest);
 
 router.get("/:userId/verifyResetPasswordToken", userControllers.verifyResetPasswordToken);
 

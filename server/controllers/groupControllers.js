@@ -75,11 +75,21 @@ exports.findAll = async (req, res) => {
   try {
     let groups = await Group.find();
 
-    groups = groups.map((group) => {
+    const start = "2023-10-03T00:00:00.000Z";
+    const end = "2036-10-06T00:00:00.000Z";
+    const events = await getEvents(start, end);
+
+    groups = await groups.map((group) => {
+
       return {
         _id: group._id,
         name: group.name,
         description: group.description,
+        img: group.img,
+        topic: group.topic,
+        meetings: events.filter((event) =>
+        event.id.includes(group.meeting)
+      )
       };
     });
 
@@ -89,6 +99,7 @@ exports.findAll = async (req, res) => {
   }
 };
 
+// pretty sure I made this obsolete
 exports.meetings = async (req, res) => {
   const { groupId } = req.params;
   try {
@@ -96,10 +107,11 @@ exports.meetings = async (req, res) => {
     const start = "2023-10-03T00:00:00.000Z";
     const end = "2036-10-06T00:00:00.000Z";
     const events = await getEvents(start, end);
-    const filteredEvent = events.filter((event) =>
+    const groupEvents = events.filter((event) =>
       event.id.includes(group.meeting)
     );
-    res.status(200).send(filteredEvent);
+    // console.log(events)
+    res.status(200).send(groupEvents);
   } catch (error) {
     res.status(500).send(error);
   }
@@ -111,8 +123,13 @@ exports.findOne = async (req, res) => {
     let group = await Group.findOne({ _id: groupId });
     if (!group)
       return res.status(400).send({ message: "Die Gruppe existiert nicht" });
-
-    res.status(200).send({ group });
+      const start = "2023-10-03T00:00:00.000Z";
+      const end = "2036-10-06T00:00:00.000Z";
+      const events = await getEvents(start, end);
+      const filteredEvent = events.filter((event) =>
+        event.id.includes(group.meeting)
+      );
+    res.status(200).send({ group, filteredEvent });
   } catch (error) {
     res.status(500).send({ message: error });
   }
