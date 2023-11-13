@@ -7,6 +7,7 @@ const { User } = require("./models/User.model");
 const authRoutes = require("./routes/auth.routes");
 const userRoutes = require("./routes/user.routes");
 const groupRoutes = require("./routes/group.routes");
+const groupMembershipRoutes = require("./routes/groupMembership.routes");
 const videoRoutes = require('./routes/video.routes');
 const paymentRoutes = require('./routes/payment.routes');
 
@@ -19,7 +20,7 @@ require("./config")(app);
 // 👇 Start handling routes here
 app.use("/auth", authRoutes);
 app.use("/user", userRoutes);
-app.use("/group", groupRoutes);
+app.use("/group", groupRoutes, groupMembershipRoutes);
 app.use("/video", videoRoutes);
 app.use("/payment", paymentRoutes);
 

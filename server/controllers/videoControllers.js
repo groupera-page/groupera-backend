@@ -13,14 +13,15 @@ exports.getTokenMod = async (req, res) => {
       permissions: ["allow_join", "allow_mod"], // also accepts "ask_join"
     };
 
-    const token = jwt.sign(payload, SECRET_KEY, options);
-    res.json({ token });
-    console.log(token);
+    const videoTokenMod = jwt.sign(payload, SECRET_KEY, options);
+    res.json({ videoTokenMod });
+    console.log(videoTokenMod);
   } catch (error) {
     res.status(400).send({ message: `${error}` });
   }
 };
 
+// I don't think this is necessary but I'm gonna take another look at it if I have time this week
 exports.getToken = async (req, res) => {
   try {
     const API_KEY = process.env.VIDEO_KEY;
@@ -33,9 +34,9 @@ exports.getToken = async (req, res) => {
       permissions: ["ask_join"], // also accepts "ask_join"
     };
 
-    const token = jwt.sign(payload, SECRET_KEY, options);
-    res.json({ token });
-    console.log(token);
+    const videoTokenUser = jwt.sign(payload, SECRET_KEY, options);
+    res.json({ videoTokenUser });
+    console.log(videoTokenUser);
   } catch (error) {
     res.status(400).send({ message: `${error}` });
   }

@@ -11,7 +11,7 @@ router.get("/:groupId/meetings", groupControllers.meetings);
 
 router.get("/:groupId", groupControllers.findOne);
 
-router.patch("/:groupId/edit", verifyJWT, verifyCurrentUser, groupControllers.edit);
+router.patch("/:groupId", verifyJWT, verifyCurrentUser, groupControllers.edit);
 
 router.delete("/:groupId", verifyJWT, verifyCurrentUser, groupControllers.delete);
 

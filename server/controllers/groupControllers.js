@@ -35,7 +35,6 @@ exports.create = async (req, res) => {
       ...req.body,
       // img: uploadRes
     }).save();
-    // let user = await User.findOne({ _id: group.moderator._id });
     const user = await User.findOne({ _id: currentUserId });
     const dateTime = dateTimeForCalender(date, time, length);
     const event = {
@@ -49,7 +48,7 @@ exports.create = async (req, res) => {
         dateTime: dateTime["end"],
         timeZone: "Europe/Berlin",
       },
-      recurrence: [`RRULE:FREQ=WEEKLY;INTERVAL=${+frequency}`],
+      recurrence: [`RRULE:FREQ=WEEKLY;REPEAT=2;INTERVAL=${+frequency}`],
     };
     const newEvent = await insertEvent(event);
     if (newEvent) {
@@ -77,7 +76,7 @@ exports.findAll = async (req, res) => {
 
     const start = "2023-10-03T00:00:00.000Z";
     const end = "2036-10-06T00:00:00.000Z";
-    const events = await getEvents(start, end);
+    const allGroupMeetings = await getEvents(start, end);
 
     groups = await groups.map((group) => {
 
@@ -87,8 +86,8 @@ exports.findAll = async (req, res) => {
         description: group.description,
         img: group.img,
         topic: group.topic,
-        meetings: events.filter((event) =>
-        event.id.includes(group.meeting)
+        meetings: allGroupMeetings.filter((groupMeeting) =>
+        groupMeeting.id.includes(group.meeting)
       )
       };
     });
@@ -125,11 +124,11 @@ exports.findOne = async (req, res) => {
       return res.status(400).send({ message: "Die Gruppe existiert nicht" });
       const start = "2023-10-03T00:00:00.000Z";
       const end = "2036-10-06T00:00:00.000Z";
-      const events = await getEvents(start, end);
-      const filteredEvent = events.filter((event) =>
-        event.id.includes(group.meeting)
+      const allGroupMeetings = await getEvents(start, end);
+      const groupMeetings = allGroupMeetings.filter((groupMeeting) =>
+        groupMeeting.id.includes(group.meeting)
       );
-    res.status(200).send({ group, filteredEvent });
+    res.status(200).send({ group, groupMeetings });
   } catch (error) {
     res.status(500).send({ message: error });
   }
