@@ -1,5 +1,5 @@
 const nodemailer = require("nodemailer");
-const { template } = require('../emailTemplate');
+const { template } = require('../lib/emailVerificationTemplate');
 
 module.exports = async (email, subject, text) => {
   const output = template(text)
