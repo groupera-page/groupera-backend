@@ -5,7 +5,7 @@ const { Group } = require("../models/Group.model");
 const jwt = require("jsonwebtoken");
 const Joi = require("joi");
 const passwordComplexity = require("joi-password-complexity");
-const { getEvents, deleteEvent } = require("../utils/googleCalendar");
+const { getEvents, deleteEvent, getEvent } = require("../utils/googleCalendar");
 
 exports.signup = async (req, res) => {
   const { email, password } = req.body;
@@ -38,7 +38,6 @@ exports.signup = async (req, res) => {
     res.status(500).send({ message: `${error}` });
   }
 };
-
 
 exports.verifyEmail = async (req, res) => {
   const { code, email } = req.body;
@@ -89,8 +88,8 @@ exports.verifyEmail = async (req, res) => {
         maxAge: 24 * 60 * 60 * 1000,
       });
 
-      const userInformation = {
-        _id: user._id,
+      user = {
+        id: user.id,
         alias: user.alias,
         email: user.email,
         dob: user.dob,
@@ -101,8 +100,8 @@ exports.verifyEmail = async (req, res) => {
 
       res.status(200).send({
         accessToken,
-        userInformation,
-        message: `Benutzer erfolgreich verifiziert`
+        user,
+        message: `Benutzer erfolgreich verifiziert`,
       });
     } else {
       res.status(400).send({ message: `${error}` });
@@ -130,7 +129,7 @@ exports.resetPasswordRequest = async (req, res) => {
         "Der Link zum Zurücksetzen des Passworts wurde an Ihre E-Mail-Adresse gesendet",
     });
   } catch (error) {
-    res.status(500).send({ message: error });
+    res.status(500).send({ message: `${error}` });
   }
 };
 
@@ -142,7 +141,7 @@ exports.verifyResetPasswordToken = async (req, res) => {
 
     res.status(200).send({ message: "Valid url " });
   } catch (error) {
-    res.status(500).send({ message: error });
+    res.status(500).send({ message: `${error}` });
   }
 };
 
@@ -170,35 +169,52 @@ exports.resetPasswordId = async (req, res) => {
 
     res.status(200).send({ message: "Passwort erfolgreich zurückgesetzt" });
   } catch (error) {
-    res.status(500).send({ message: error });
+    res.status(500).send({ message: `${error}` });
   }
 };
 
 exports.findOne = async (req, res) => {
   const { userId } = req.params;
-  try {
-    const user = await User.findOne({ _id: userId });
-    if (!user) return res.status(400).send({ message: "Der Benutzer existiert nicht" });
-    const start = "2023-10-03T00:00:00.000Z";
-    const end = "2025-10-06T00:00:00.000Z";
-    const allGroupMeetings = await getEvents(start, end);
-    const userMeetings = user.meetings.map((meeting) =>
-      allGroupMeetings.filter((groupMeeting) => groupMeeting.id.includes(meeting))
-    );
-    // const joinedGroups = await user.joinedGroups.map(async (joinedGroup) => await Group.findOne({ _id: joinedGroup}));
-    // const moderatedGroups = await user.moderatedGroups.map(async (moderatedGroup) => await Group.findOne({ _id: moderatedGroup}));
-    const groups = await Group.find();
+  const meetings = await getEvents();
 
-    const foundGroups = groups.filter(
-      (groups) => groups.users.includes(userId) || groups.moderatorId == userId
+  try {
+    let user = await User.findOne({ _id: userId });
+    if (!user)
+      return res.status(400).send({ message: "Der Benutzer existiert nicht" });
+
+    let groups = await Group.find();
+    groups = groups.filter(
+      (group) => group.users.includes(userId) || group.moderatorId == userId
     );
-    res.status(200).send({user, userMeetings, foundGroups});
+
+    user = {
+      id: user.id,
+      alias: user.alias,
+      email: user.email,
+      dob: user.dob,
+      questions: user.questions,
+      emailVerified: user.emailVerified,
+      gender: user.gender,
+      groups: groups.map((group) => {
+        return {
+          id: group.id,
+          name: group.name,
+          description: group.description,
+          img: group.img,
+          topic: group.topic,
+          meetings: meetings.filter((meeting) =>
+            meeting.id.includes(group.meeting)
+          ),
+        };
+      })
+    };
+    res.status(200).send(user);
   } catch (error) {
-    res.status(500).send({ message: error });
+    res.status(500).send({ message: `${error}` });
   }
 };
 
-// I think this is obsolete now
+// I think this is unnecessary
 exports.meetings = async (req, res) => {
   const { userId } = req.params;
   try {
@@ -211,11 +227,11 @@ exports.meetings = async (req, res) => {
     );
     res.status(200).send(mappedEvent);
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500).send({ message: `${error}` });
   }
 };
 
-// also obsolete
+// And this is obsolete
 exports.groups = async (req, res) => {
   const { userId } = req.params;
   try {
@@ -240,7 +256,7 @@ exports.edit = async (req, res) => {
 
     res.status(200).send({ message: "Benutzer erfolgreich aktualisiert" });
   } catch (error) {
-    res.status(500).send({ message: error });
+    res.status(500).send({ message: `${error}` });
   }
 };
 
@@ -291,6 +307,6 @@ exports.delete = async (req, res, next) => {
 
     res.status(200).send({ message: "Benutzer erfolgreich gelöscht" });
   } catch (error) {
-    res.status(500).send({ message: error });
+    res.status(500).send({ message: `${error}` });
   }
 };

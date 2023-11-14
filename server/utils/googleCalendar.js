@@ -53,13 +53,13 @@ const insertEvent = async (event) => {
   }
 };
 
-const getEvents = async (dateTimeStart, dateTimeEnd) => {
+const getEvents = async () => {
   try {
     const response = await calendar.events.list({
       auth: auth,
       calendarId: calendarId,
-      timeMin: dateTimeStart,
-      timeMax: dateTimeEnd,
+      timeMin:  "2023-10-03T00:00:00.000Z",
+      timeMax: "2025-10-06T00:00:00.000Z",
       timeZone: "Europe/Berlin",
       singleEvents: true,
     });
