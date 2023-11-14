@@ -75,7 +75,7 @@ exports.findAll = async (req, res) => {
     let groups = await Group.find();
 
     const start = "2023-10-03T00:00:00.000Z";
-    const end = "2036-10-06T00:00:00.000Z";
+    const end = "2025-10-06T00:00:00.000Z";
     const allGroupMeetings = await getEvents(start, end);
 
     groups = await groups.map((group) => {
@@ -104,7 +104,7 @@ exports.meetings = async (req, res) => {
   try {
     const group = await Group.findOne({ _id: groupId });
     const start = "2023-10-03T00:00:00.000Z";
-    const end = "2036-10-06T00:00:00.000Z";
+    const end = "2025-10-06T00:00:00.000Z";
     const events = await getEvents(start, end);
     const groupEvents = events.filter((event) =>
       event.id.includes(group.meeting)
@@ -123,7 +123,7 @@ exports.findOne = async (req, res) => {
     if (!group)
       return res.status(400).send({ message: "Die Gruppe existiert nicht" });
       const start = "2023-10-03T00:00:00.000Z";
-      const end = "2036-10-06T00:00:00.000Z";
+      const end = "2025-10-06T00:00:00.000Z";
       const allGroupMeetings = await getEvents(start, end);
       const groupMeetings = allGroupMeetings.filter((groupMeeting) =>
         groupMeeting.id.includes(group.meeting)

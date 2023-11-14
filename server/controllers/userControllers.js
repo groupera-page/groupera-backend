@@ -178,20 +178,35 @@ exports.findOne = async (req, res) => {
   const { userId } = req.params;
   try {
     const user = await User.findOne({ _id: userId });
-    res.status(200).send(user);
+    if (!user) return res.status(400).send({ message: "Der Benutzer existiert nicht" });
+    const start = "2023-10-03T00:00:00.000Z";
+    const end = "2025-10-06T00:00:00.000Z";
+    const allGroupMeetings = await getEvents(start, end);
+    const userMeetings = user.meetings.map((meeting) =>
+      allGroupMeetings.filter((groupMeeting) => groupMeeting.id.includes(meeting))
+    );
+    // const joinedGroups = await user.joinedGroups.map(async (joinedGroup) => await Group.findOne({ _id: joinedGroup}));
+    // const moderatedGroups = await user.moderatedGroups.map(async (moderatedGroup) => await Group.findOne({ _id: moderatedGroup}));
+    const groups = await Group.find();
+
+    const foundGroups = groups.filter(
+      (groups) => groups.users.includes(userId) || groups.moderatorId == userId
+    );
+    res.status(200).send({user, userMeetings, foundGroups});
   } catch (error) {
     res.status(500).send({ message: error });
   }
 };
 
+// I think this is obsolete now
 exports.meetings = async (req, res) => {
   const { userId } = req.params;
   try {
-    let user = await User.findOne({ _id: userId });
-    let start = "2023-10-03T00:00:00.000Z";
-    let end = "2026-10-06T00:00:00.000Z";
-    let event = await getEvents(start, end);
-    let mappedEvent = user.meetings.map((meetings) =>
+    const user = await User.findOne({ _id: userId });
+    const start = "2023-10-03T00:00:00.000Z";
+    const end = "2025-10-06T00:00:00.000Z";
+    const event = await getEvents(start, end);
+    const mappedEvent = user.meetings.map((meetings) =>
       event.filter((events) => events.id.includes(meetings))
     );
     res.status(200).send(mappedEvent);
@@ -200,12 +215,13 @@ exports.meetings = async (req, res) => {
   }
 };
 
+// also obsolete
 exports.groups = async (req, res) => {
   const { userId } = req.params;
   try {
-    let groups = await Group.find();
+    const groups = await Group.find();
 
-    let foundGroups = groups.filter(
+    const foundGroups = groups.filter(
       (groups) => groups.users.includes(userId) || groups.moderatorId == userId
     );
     res.status(200).send(foundGroups);
@@ -217,7 +233,7 @@ exports.groups = async (req, res) => {
 exports.edit = async (req, res) => {
   const { userId } = req.params;
   try {
-    let user = await User.findOne({ _id: userId });
+    const user = await User.findOne({ _id: userId });
     if (!user) return res.status(400).send({ message: "Invalid Link" });
 
     await User.updateOne({ _id: userId }, { ...req.body });
