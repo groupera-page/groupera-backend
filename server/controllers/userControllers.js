@@ -175,9 +175,7 @@ exports.resetPasswordId = async (req, res) => {
     const user = await User.findOne({ _id: userId });
     if (!user) return res.status(400).send({ message: "Invalid link" });
 
-    const salt = await bcrypt.genSalt(Number(process.env.SALT));
-    const hashPassword = await bcrypt.hash(password, salt);
-
+    const hashPassword = hashSomething(password)
     user.passwordHash = hashPassword;
     await user.save();
 
@@ -270,11 +268,11 @@ exports.edit = async (req, res) => {
     let user = await User.findOne({ _id: userId });
     if (!user) return res.status(400).send({ message: "Invalid Link" });
 
-    const hashedPassword = await hashSomething(password);
+    const hashPassword = await hashSomething(password);
 
     await User.updateOne(
       { _id: userId },
-      { ...req.body, passwordHash: hashedPassword }
+      { ...req.body, passwordHash: hashPassword }
     );
 
     let newUser = await User.findOne({ _id: userId });
@@ -289,6 +287,7 @@ exports.edit = async (req, res) => {
           emailVerified: false,
           authCode: hashCode,
           emailVerificationExpires: createDate(),
+          refreshToken: ""
         }
       );
 
@@ -328,7 +327,7 @@ exports.delete = async (req, res) => {
 
     user.moderatedGroups.map(async (groupIds) => {
       const specGroup = await Group.findOne({ _id: groupIds });
-      
+
       await User.updateMany(
         {
           joinedGroups: {

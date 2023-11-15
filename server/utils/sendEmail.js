@@ -1,7 +1,6 @@
 const nodemailer = require("nodemailer");
 
 module.exports = async (email, subject, template) => {
-  // const output = template(text)
   try {
     const transporter = nodemailer.createTransport({
       host: "smtp-relay.brevo.com",
