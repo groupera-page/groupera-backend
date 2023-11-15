@@ -12,7 +12,7 @@ const hashSomething = async (thingToHash) => {
   const salt = await bcrypt.genSalt(Number(process.env.SALT));
 
   return bcrypt.hash(thingToHash, salt);
-}
+};
 
 exports.signup = async (req, res) => {
   const { email, password } = req.body;
@@ -25,12 +25,8 @@ exports.signup = async (req, res) => {
     if (user)
       return res.status(409).send({ message: "E-Mail bereits in Gebrauch" });
 
-    // const salt = await bcrypt.genSalt(Number(process.env.SALT));
-    // const hashPassword = await bcrypt.hash(password, salt);
     const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
     console.log(randomCode);
-    // const hashCode = await bcrypt.hash(randomCode, salt);
-
     const hashPassword = await hashSomething(password);
     const hashCode = await hashSomething(randomCode);
 
@@ -264,8 +260,13 @@ exports.groups = async (req, res) => {
 exports.edit = async (req, res) => {
   const { userId } = req.params;
   const { password } = req.body;
-  const createDate = () => new Date(+new Date() + 15 * 60 * 1000)
+  const createDate = () => new Date(+new Date() + 15 * 60 * 1000);
+
   try {
+    const { error } = validate(req.body);
+    if (error)
+      return res.status(400).send({ message: error.details[0].message });
+      
     let user = await User.findOne({ _id: userId });
     if (!user) return res.status(400).send({ message: "Invalid Link" });
 
@@ -273,25 +274,21 @@ exports.edit = async (req, res) => {
 
     await User.updateOne(
       { _id: userId },
-      { ...req.body,
-      passwordHash: hashedPassword }
+      { ...req.body, passwordHash: hashedPassword }
     );
 
     let newUser = await User.findOne({ _id: userId });
 
     if (newUser.email !== user.email) {
-      // const salt = await bcrypt.genSalt(Number(process.env.SALT));
       const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
-      // const hashCode = await bcrypt.hash(randomCode, salt);
-
-      const hashCode = hashSomething(randomCode)
+      const hashCode = hashSomething(randomCode);
 
       await User.updateOne(
         { _id: userId },
         {
           emailVerified: false,
           authCode: hashCode,
-          emailVerificationExpires: createDate()
+          emailVerificationExpires: createDate(),
         }
       );
 
@@ -310,47 +307,6 @@ exports.edit = async (req, res) => {
   }
 };
 
-// exports.edit = async (req, res) => {
-//   const { userId } = req.params;
-//   try {
-//     let user = await User.findOne({ _id: userId });
-//     if (!user) return res.status(400).send({ message: "Invalid Link" });
-
-//     let newUser = User.findOneAndUpdate(
-//       { _id: userId },
-//       { ...req.body },
-//       { returnOriginal: false }
-//     );
-
-//     if (newUser._update.email !== user.email) {
-//       const salt = await bcrypt.genSalt(Number(process.env.SALT));
-//       const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
-//       const hashCode = await bcrypt.hash(randomCode, salt);
-
-//       await User.updateOne(
-//         { _id: userId },
-//         {
-//           email: newUser._update.email,
-//           emailVerified: false,
-//           authCode: hashCode,
-//         }
-//       );
-
-//       await sendEmail(
-//         newUser._update.email,
-//         "Verify Email",
-//         emailTemplates.emailVerification(randomCode)
-//       );
-
-//       return res.status(200).send(newUser._update.email);
-//     }
-
-//     res.status(200).send({ message: "Benutzer erfolgreich aktualisiert" });
-//   } catch (error) {
-//     res.status(500).send({ message: `${error}` });
-//   }
-// };
-
 exports.delete = async (req, res) => {
   const { userId } = req.params;
   try {
@@ -362,12 +318,10 @@ exports.delete = async (req, res) => {
         users: {
           $in: [userId],
         },
-        // moderator: req.params.id
       },
       {
         $pull: {
           users: userId,
-          // moderator: req.params.id
         },
       }
     );
