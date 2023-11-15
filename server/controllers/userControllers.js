@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken");
 const Joi = require("joi");
 const passwordComplexity = require("joi-password-complexity");
 const { getEvents, deleteEvent } = require("../utils/googleCalendar");
-const emailTemplates = require('../lib/emailTemplates');
+const emailTemplates = require("../lib/emailTemplates");
 
 exports.signup = async (req, res) => {
   const { email, password } = req.body;
@@ -32,14 +32,17 @@ exports.signup = async (req, res) => {
       questions: { Themes: ["Depression", "Anxiety"], Experience: "None" },
     }).save();
 
-    await sendEmail(user.email, "Verify Email", emailTemplates.emailVerification(randomCode));
+    // await sendEmail(
+    //   user.email,
+    //   "Verify Email",
+    //   emailTemplates.emailVerification(randomCode)
+    // );
 
     res.status(201).send(user.email);
   } catch (error) {
     res.status(500).send({ message: `${error}` });
   }
 };
-
 
 exports.verifyEmail = async (req, res) => {
   const { code, email } = req.body;
@@ -103,7 +106,7 @@ exports.verifyEmail = async (req, res) => {
       res.status(200).send({
         accessToken,
         user,
-        message: `Benutzer erfolgreich verifiziert`
+        message: `Benutzer erfolgreich verifiziert`,
       });
     } else {
       res.status(400).send({ message: `${error}` });
@@ -124,7 +127,11 @@ exports.resetPasswordRequest = async (req, res) => {
       });
 
     const url = `${process.env.BASE_URL}password-reset/${user._id}`;
-    await sendEmail(user.email, "Password Reset", emailTemplates.passwordReset(user.alias, user.email, url));
+    await sendEmail(
+      user.email,
+      "Password Reset",
+      emailTemplates.passwordReset(user.alias, user.email, url)
+    );
 
     res.status(200).send({
       message:
@@ -143,7 +150,7 @@ exports.verifyResetPasswordToken = async (req, res) => {
 
     res.status(200).send({ message: "Valid url " });
   } catch (error) {
-    res.status(500).send({ message: error });
+    res.status(500).send({ message: `${error}` });
   }
 };
 
@@ -171,7 +178,7 @@ exports.resetPasswordId = async (req, res) => {
 
     res.status(200).send({ message: "Passwort erfolgreich zurückgesetzt" });
   } catch (error) {
-    res.status(500).send({ message: error });
+    res.status(500).send({ message: `${error}` });
   }
 };
 
@@ -182,7 +189,9 @@ exports.findOne = async (req, res) => {
   try {
     let user = await User.findOne({ _id: userId });
     let groups = await Group.find();
-    groups = groups.filter(group => group.users.includes(user.id) || group.moderatorId == user.id)
+    groups = groups.filter(
+      (group) => group.users.includes(user.id) || group.moderatorId == user.id
+    );
 
     user = {
       id: user.id,
@@ -193,18 +202,18 @@ exports.findOne = async (req, res) => {
       emailVerified: user.emailVerified,
       gender: user.gender,
       groups: groups.map((group) => {
-        return group = {
-        id: group.id,
-        verified: group.verified,
-        name: group.name,
-        description: group.description,
-        topic: group.topic,
-        moderator: group.moderatorId,
-        meeting: allGroupMeetings.filter((groupMeeting) =>
-          groupMeeting.id.includes(group.meeting)
-        ),
-      }
-    })
+        return (group = {
+          id: group.id,
+          verified: group.verified,
+          name: group.name,
+          description: group.description,
+          topic: group.topic,
+          moderator: group.moderatorId,
+          meeting: allGroupMeetings.filter((groupMeeting) =>
+            groupMeeting.id.includes(group.meeting)
+          ),
+        });
+      }),
     };
 
     res.status(200).send(user);
@@ -224,7 +233,7 @@ exports.meetings = async (req, res) => {
     );
     res.status(200).send(mappedEvent);
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500).send(`${error}`);
   }
 };
 
@@ -239,7 +248,7 @@ exports.groups = async (req, res) => {
     );
     res.status(200).send(foundGroups);
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500).send(`${error}`);
   }
 };
 
@@ -249,15 +258,42 @@ exports.edit = async (req, res) => {
     let user = await User.findOne({ _id: userId });
     if (!user) return res.status(400).send({ message: "Invalid Link" });
 
-    await User.updateOne({ _id: userId }, { ...req.body });
+    let newUser = User.findOneAndUpdate(
+      { _id: userId },
+      { ...req.body },
+      { returnOriginal: false }
+    );
+
+    if (newUser._update.email !== user.email) {
+      const salt = await bcrypt.genSalt(Number(process.env.SALT));
+      const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
+      const hashCode = await bcrypt.hash(randomCode, salt);
+
+      await User.updateOne(
+        { _id: userId },
+        {
+          email: newUser._update.email,
+          emailVerified: false,
+          authCode: hashCode,
+        }
+      );
+
+      await sendEmail(
+        newUser._update.email,
+        "Verify Email",
+        emailTemplates.emailVerification(randomCode)
+      );
+
+      return res.status(200).send(newUser._update.email);
+    }
 
     res.status(200).send({ message: "Benutzer erfolgreich aktualisiert" });
   } catch (error) {
-    res.status(500).send({ message: error });
+    res.status(500).send({ message: `${error}` });
   }
 };
 
-exports.delete = async (req, res, next) => {
+exports.delete = async (req, res) => {
   const { userId } = req.params;
   try {
     const user = await User.findOne({ _id: userId });
@@ -304,6 +340,6 @@ exports.delete = async (req, res, next) => {
 
     res.status(200).send({ message: "Benutzer erfolgreich gelöscht" });
   } catch (error) {
-    res.status(500).send({ message: error });
+    res.status(500).send({ message: `${error}` });
   }
 };
