@@ -40,6 +40,8 @@ exports.signup = async (req, res) => {
   }
 };
 
+// bloop
+
 
 exports.verifyEmail = async (req, res) => {
   const { code, email } = req.body;
