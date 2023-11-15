@@ -90,8 +90,8 @@ exports.verifyEmail = async (req, res) => {
         maxAge: 24 * 60 * 60 * 1000,
       });
 
-      const userInformation = {
-        _id: user._id,
+      user = {
+        id: user.id,
         alias: user.alias,
         email: user.email,
         dob: user.dob,
@@ -102,7 +102,7 @@ exports.verifyEmail = async (req, res) => {
 
       res.status(200).send({
         accessToken,
-        userInformation,
+        user,
         message: `Benutzer erfolgreich verifiziert`
       });
     } else {
@@ -166,7 +166,7 @@ exports.resetPasswordId = async (req, res) => {
     const salt = await bcrypt.genSalt(Number(process.env.SALT));
     const hashPassword = await bcrypt.hash(password, salt);
 
-    user.password = hashPassword;
+    user.passwordHash = hashPassword;
     await user.save();
 
     res.status(200).send({ message: "Passwort erfolgreich zurückgesetzt" });
@@ -177,21 +177,48 @@ exports.resetPasswordId = async (req, res) => {
 
 exports.findOne = async (req, res) => {
   const { userId } = req.params;
+  const allGroupMeetings = await getEvents();
+
   try {
-    const user = await User.findOne({ _id: userId });
+    let user = await User.findOne({ _id: userId });
+    let groups = await Group.find();
+    groups = groups.filter(group => group.users.includes(user.id) || group.moderatorId == user.id)
+
+    user = {
+      id: user.id,
+      alias: user.alias,
+      email: user.email,
+      dob: user.dob,
+      questions: user.questions,
+      emailVerified: user.emailVerified,
+      gender: user.gender,
+      groups: groups.map((group) => {
+        return group = {
+        id: group.id,
+        verified: group.verified,
+        name: group.name,
+        description: group.description,
+        topic: group.topic,
+        moderator: group.moderatorId,
+        meeting: allGroupMeetings.filter((groupMeeting) =>
+          groupMeeting.id.includes(group.meeting)
+        ),
+      }
+    })
+    };
+
     res.status(200).send(user);
   } catch (error) {
-    res.status(500).send({ message: error });
+    res.status(500).send({ message: `${error}` });
   }
 };
 
+// Think I made this obsolete...again
 exports.meetings = async (req, res) => {
   const { userId } = req.params;
   try {
     let user = await User.findOne({ _id: userId });
-    let start = "2023-10-03T00:00:00.000Z";
-    let end = "2026-10-06T00:00:00.000Z";
-    let event = await getEvents(start, end);
+    let event = await getEvents();
     let mappedEvent = user.meetings.map((meetings) =>
       event.filter((events) => events.id.includes(meetings))
     );
@@ -201,6 +228,7 @@ exports.meetings = async (req, res) => {
   }
 };
 
+// Same here
 exports.groups = async (req, res) => {
   const { userId } = req.params;
   try {

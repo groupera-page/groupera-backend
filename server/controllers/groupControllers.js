@@ -48,7 +48,7 @@ exports.create = async (req, res) => {
         dateTime: dateTime["end"],
         timeZone: "Europe/Berlin",
       },
-      recurrence: [`RRULE:FREQ=WEEKLY;REPEAT=2;INTERVAL=${+frequency}`],
+      recurrence: [`RRULE:FREQ=WEEKLY;COUNT=2;INTERVAL=${+frequency}`],
     };
     const newEvent = await insertEvent(event);
     if (newEvent) {
@@ -78,7 +78,7 @@ exports.findAll = async (req, res) => {
 
     groups = await groups.map((group) => {
       return {
-        _id: group._id,
+        id: group.id,
         name: group.name,
         description: group.description,
         img: group.img,

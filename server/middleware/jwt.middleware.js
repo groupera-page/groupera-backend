@@ -26,21 +26,6 @@ const verifyCurrentUser = async (req, res, next) => {
   }
 };
 
-// const verifyCurrentUser = async (req, res, next) => {
-//       if(!req) return res.sendStatus(401); // unauthorized
-//       let group = await Group.findOne({_id: req.params.groupId})
-//       if(group){
-//         if(req.params.userId == req.user || req.user == group.moderatorId)
-//         next();
-//       } else if (!group) {
-//         if(req.params.userId == req.user){
-//         next();
-//         } else {
-//           return res.sendStatus(401);
-//         }
-//       }
-//       else return res.sendStatus(401);
-//   };
 
 module.exports = {
   verifyJWT,
