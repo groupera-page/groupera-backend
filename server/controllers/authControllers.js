@@ -65,7 +65,7 @@ exports.login = async (req, res) => {
     // should I send the Mongo formatted ID as the user ID or just the string?
 
     const userInformation = {
-      _id: user._id,
+      id: user.id,
       alias: user.alias,
       email: user.email,
       dob: user.dob,

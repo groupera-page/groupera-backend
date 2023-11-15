@@ -266,7 +266,7 @@ exports.edit = async (req, res) => {
     const { error } = validate(req.body);
     if (error)
       return res.status(400).send({ message: error.details[0].message });
-      
+
     let user = await User.findOne({ _id: userId });
     if (!user) return res.status(400).send({ message: "Invalid Link" });
 
@@ -328,7 +328,7 @@ exports.delete = async (req, res) => {
 
     user.moderatedGroups.map(async (groupIds) => {
       const specGroup = await Group.findOne({ _id: groupIds });
-
+      
       await User.updateMany(
         {
           joinedGroups: {
