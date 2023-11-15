@@ -37,7 +37,7 @@ exports.login = async (req, res) => {
       process.env.TOKEN_SECRET,
       {
         algorithm: "HS256",
-        expiresIn: "10m",
+        expiresIn: "30m",
       }
     );
 
@@ -121,7 +121,7 @@ exports.refresh = async (req, res) => {
         process.env.TOKEN_SECRET,
         {
           algorithm: "HS256",
-          expiresIn: "10m",
+          expiresIn: "30m",
         }
       );
 
@@ -131,41 +131,6 @@ exports.refresh = async (req, res) => {
     res.status(500).send({ message: `${error}` });
   }
 };
-
-// exports.refresh = async (req, res) => {
-//   try {
-//     const cookies = req.cookies;
-//     if (!cookies?.jwt) return res.sendStatus(401);
-//     const refreshToken = cookies.jwt;
-//     const foundUser = await User.findOne({ refreshToken: refreshToken });
-//     if (!foundUser) return res.status(403).send({ message: "No user found" });
-
-//     try {
-//       const decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
-
-//       console.log(foundUser._id);
-
-//       // if (decoded.id === foundUser._id)
-//       const accessToken = jwt.sign(
-//         {
-//           id: decoded.id,
-//         },
-//         process.env.TOKEN_SECRET,
-//         {
-//           algorithm: "HS256",
-//           expiresIn: "10m",
-//         }
-//       );
-
-//       res.status(200).send(accessToken);
-
-//     } catch (error) {
-//       res.sendStatus(400);
-//     }
-//   } catch (error) {
-//     res.status(500).send({ message: `${error}` });
-//   }
-// };
 
 
 const validate = (data) => {

@@ -8,6 +8,12 @@ const passwordComplexity = require("joi-password-complexity");
 const { getEvents, deleteEvent } = require("../utils/googleCalendar");
 const emailTemplates = require("../lib/emailTemplates");
 
+const hashSomething = async (thingToHash) => {
+  const salt = await bcrypt.genSalt(Number(process.env.SALT));
+
+  return bcrypt.hash(thingToHash, salt);
+}
+
 exports.signup = async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -19,11 +25,14 @@ exports.signup = async (req, res) => {
     if (user)
       return res.status(409).send({ message: "E-Mail bereits in Gebrauch" });
 
-    const salt = await bcrypt.genSalt(Number(process.env.SALT));
-    const hashPassword = await bcrypt.hash(password, salt);
+    // const salt = await bcrypt.genSalt(Number(process.env.SALT));
+    // const hashPassword = await bcrypt.hash(password, salt);
     const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
     console.log(randomCode);
-    const hashCode = await bcrypt.hash(randomCode, salt);
+    // const hashCode = await bcrypt.hash(randomCode, salt);
+
+    const hashPassword = await hashSomething(password);
+    const hashCode = await hashSomething(randomCode);
 
     user = await new User({
       ...req.body,
@@ -62,7 +71,7 @@ exports.verifyEmail = async (req, res) => {
         process.env.TOKEN_SECRET,
         {
           algorithm: "HS256",
-          expiresIn: "10m",
+          expiresIn: "30m",
         }
       );
       const refreshToken = jwt.sign(
@@ -254,37 +263,45 @@ exports.groups = async (req, res) => {
 
 exports.edit = async (req, res) => {
   const { userId } = req.params;
+  const { password } = req.body;
+  const createDate = () => new Date(+new Date() + 15 * 60 * 1000)
   try {
     let user = await User.findOne({ _id: userId });
     if (!user) return res.status(400).send({ message: "Invalid Link" });
 
-    let newUser = User.findOneAndUpdate(
+    const hashedPassword = await hashSomething(password);
+
+    await User.updateOne(
       { _id: userId },
-      { ...req.body },
-      { returnOriginal: false }
+      { ...req.body,
+      passwordHash: hashedPassword }
     );
 
-    if (newUser._update.email !== user.email) {
-      const salt = await bcrypt.genSalt(Number(process.env.SALT));
+    let newUser = await User.findOne({ _id: userId });
+
+    if (newUser.email !== user.email) {
+      // const salt = await bcrypt.genSalt(Number(process.env.SALT));
       const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
-      const hashCode = await bcrypt.hash(randomCode, salt);
+      // const hashCode = await bcrypt.hash(randomCode, salt);
+
+      const hashCode = hashSomething(randomCode)
 
       await User.updateOne(
         { _id: userId },
         {
-          email: newUser._update.email,
           emailVerified: false,
           authCode: hashCode,
+          emailVerificationExpires: createDate()
         }
       );
 
       await sendEmail(
-        newUser._update.email,
+        newUser.email,
         "Verify Email",
         emailTemplates.emailVerification(randomCode)
       );
 
-      return res.status(200).send(newUser._update.email);
+      return res.status(200).send(newUser.email);
     }
 
     res.status(200).send({ message: "Benutzer erfolgreich aktualisiert" });
@@ -292,6 +309,47 @@ exports.edit = async (req, res) => {
     res.status(500).send({ message: `${error}` });
   }
 };
+
+// exports.edit = async (req, res) => {
+//   const { userId } = req.params;
+//   try {
+//     let user = await User.findOne({ _id: userId });
+//     if (!user) return res.status(400).send({ message: "Invalid Link" });
+
+//     let newUser = User.findOneAndUpdate(
+//       { _id: userId },
+//       { ...req.body },
+//       { returnOriginal: false }
+//     );
+
+//     if (newUser._update.email !== user.email) {
+//       const salt = await bcrypt.genSalt(Number(process.env.SALT));
+//       const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
+//       const hashCode = await bcrypt.hash(randomCode, salt);
+
+//       await User.updateOne(
+//         { _id: userId },
+//         {
+//           email: newUser._update.email,
+//           emailVerified: false,
+//           authCode: hashCode,
+//         }
+//       );
+
+//       await sendEmail(
+//         newUser._update.email,
+//         "Verify Email",
+//         emailTemplates.emailVerification(randomCode)
+//       );
+
+//       return res.status(200).send(newUser._update.email);
+//     }
+
+//     res.status(200).send({ message: "Benutzer erfolgreich aktualisiert" });
+//   } catch (error) {
+//     res.status(500).send({ message: `${error}` });
+//   }
+// };
 
 exports.delete = async (req, res) => {
   const { userId } = req.params;
