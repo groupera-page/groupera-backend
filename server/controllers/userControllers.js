@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const Joi = require("joi");
 const passwordComplexity = require("joi-password-complexity");
 const { getEvents, deleteEvent } = require("../utils/googleCalendar");
+const emailTemplates = require('../lib/emailTemplates');
 
 exports.signup = async (req, res) => {
   const { email, password } = req.body;
@@ -31,7 +32,7 @@ exports.signup = async (req, res) => {
       questions: { Themes: ["Depression", "Anxiety"], Experience: "None" },
     }).save();
 
-    await sendEmail(user.email, "Verify Email", randomCode);
+    await sendEmail(user.email, "Verify Email", emailTemplates.emailVerification(randomCode));
 
     res.status(201).send(user.email);
   } catch (error) {
@@ -123,7 +124,7 @@ exports.resetPasswordRequest = async (req, res) => {
       });
 
     const url = `${process.env.BASE_URL}password-reset/${user._id}`;
-    await sendEmail(user.email, "Password Reset", url);
+    await sendEmail(user.email, "Password Reset", emailTemplates.passwordReset(user.alias, user.email, url));
 
     res.status(200).send({
       message:
