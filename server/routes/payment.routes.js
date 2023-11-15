@@ -1,9 +1,9 @@
 const router = require("express").Router();
 const paymentControllers = require("../controllers/paymentControllers");
 
-router.post("/checkout/:id", paymentControllers.checkout);
+router.post("/:userId/checkout", paymentControllers.checkout);
 
-router.post('/success/:id', paymentControllers.successfulCheckout);
+router.post('/:userId/success', paymentControllers.successfulCheckout);
 
 // router.post('/webhook', paymentControllers.webhook);
 
