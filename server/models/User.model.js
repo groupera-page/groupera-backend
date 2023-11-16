@@ -19,7 +19,7 @@ const userSchema = new Schema({
   questions: {
     type: Object
   },
-  emailVerificationExpires: {
+  emailVerificationExpiration: {
     type: Date,
     default: () => new Date(+new Date() + 15 * 60 * 1000) // 15 minutes
   },
@@ -70,7 +70,7 @@ const userSchema = new Schema({
 const User = model("User", userSchema);
 
 userSchema.index(
-  { 'emailVerificationExpires': 1 },
+  { 'emailVerificationExpiration': 1 },
   {
     expireAfterSeconds: 0,
     partialFilterExpression: { 'emailVerified': false }
