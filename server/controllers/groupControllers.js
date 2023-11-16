@@ -8,8 +8,7 @@ const {
   deleteEvent,
   editEvent,
 } = require("../utils/googleCalendar");
-// const fetch = require("node-fetch");
-const generateRoom = require("../utils/videoSDK");
+// const generateRoom = require("../utils/videoSDK");
 
 exports.create = async (req, res) => {
   const {
