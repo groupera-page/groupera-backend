@@ -79,7 +79,9 @@ const validate = (data) => {
     frequency: Joi.number().label("Frequency"),
     length: Joi.number().label("Length"),
     currentUserId: Joi.string().label("Currentuser"),
-    moderationType: Joi.string().label("Moderation-type")
+    moderationType: Joi.string().
+    valid("Selbstmoderiert", "Halbmoderiert", "Groupera-moderiert").
+    label("Moderation-type")
   });
   return schema.validate(data);
 };
