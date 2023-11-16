@@ -37,11 +37,11 @@ exports.signup = async (req, res) => {
       questions: { Themes: ["Depression", "Anxiety"], Experience: "None" },
     }).save();
 
-    await sendEmail(
-      user.email,
-      "Verify Email",
-      emailTemplates.emailVerification(randomCode)
-    );
+    // await sendEmail(
+    //   user.email,
+    //   "Verify Email",
+    //   emailTemplates.emailVerification(randomCode)
+    // );
 
     res.status(201).send(user.email);
   } catch (error) {
