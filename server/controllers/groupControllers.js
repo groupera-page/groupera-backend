@@ -13,8 +13,17 @@ const {
 const generateRoom = require("../utils/videoSDK");
 
 exports.create = async (req, res) => {
-  const { img, frequency, date, time, length, token, currentUserId, name } =
-    req.body;
+  const {
+    img,
+    frequency,
+    date,
+    time,
+    length,
+    token,
+    currentUserId,
+    name,
+    moderationType,
+  } = req.body;
 
   try {
     const { error } = validate(req.body);
@@ -56,10 +65,17 @@ exports.create = async (req, res) => {
         { _id: user._id },
         { $push: { moderatedGroups: group._id, meetings: newEvent.id } }
       );
-      await Group.updateOne(
-        { _id: group._id },
-        { meeting: newEvent.id, verified: true, moderatorId: user._id }
-      );
+      if (moderationType === "Selbstmoderiert") {
+        await Group.updateOne(
+          { _id: group._id },
+          { meeting: newEvent.id, verified: true, moderatorId: user._id }
+        );
+      } else {
+        await Group.updateOne(
+          { _id: group._id },
+          { meeting: newEvent.id, moderatorId: user._id }
+        );
+      }
     }
     // generateRoom(token, group._id, length);
     // }

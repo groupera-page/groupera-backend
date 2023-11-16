@@ -6,10 +6,6 @@ const groupSchema = new Schema({
     type: Boolean,
     default: false,
   },
-  verificationExpires: {
-    type: Date,
-    default: () => new Date(+new Date() + 2 * 60 * 1000) //3 minutes
-  },
   name: {
     type: String,
   },
@@ -42,13 +38,6 @@ const groupSchema = new Schema({
 
 const Group = model("Group", groupSchema);
 
-groupSchema.index(
-  { 'verificationExpires': 1 },
-  {
-    expireAfterSeconds: 0,
-    partialFilterExpression: { 'verified': false }
-  }
-);
 
 const validate = (data) => {
   const schema = Joi.object({

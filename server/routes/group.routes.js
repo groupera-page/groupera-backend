@@ -2,7 +2,7 @@ const router = require("express").Router();
 const groupControllers = require('../controllers/groupControllers');
 const { verifyJWT, verifyCurrentUser } = require("../middleware/jwt.middleware.js");
 
-router.post("", groupControllers.create);
+router.post("", verifyJWT, groupControllers.create);
 
 router.get("/findAll", groupControllers.findAll);
 
