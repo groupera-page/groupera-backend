@@ -21,7 +21,7 @@ exports.signup = async (req, res) => {
     if (error)
       return res.status(400).send({ message: error.details[0].message });
 
-    let user = await User.findOne({ email: email });
+    let user = await User.findOne({ email: email.toLowerCase() });
     if (user)
       return res.status(409).send({ message: "E-Mail bereits in Gebrauch" });
 
@@ -32,16 +32,17 @@ exports.signup = async (req, res) => {
 
     user = await new User({
       ...req.body,
+      email: email.toLowerCase(),
       passwordHash: hashPassword,
       authCode: hashCode,
       questions: { Themes: ["Depression", "Anxiety"], Experience: "None" },
     }).save();
 
-    // await sendEmail(
-    //   user.email,
-    //   "Verify Email",
-    //   emailTemplates.emailVerification(randomCode)
-    // );
+    await sendEmail(
+      user.email,
+      "Verify Email",
+      emailTemplates.emailVerification(randomCode)
+    );
 
     res.status(201).send(user.email);
   } catch (error) {
