@@ -6,7 +6,6 @@ const {
   insertEvent,
   getEvents,
   deleteEvent,
-  getEvent,
   editEvent,
 } = require("../utils/googleCalendar");
 // const fetch = require("node-fetch");

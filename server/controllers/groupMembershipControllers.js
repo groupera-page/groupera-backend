@@ -28,7 +28,7 @@ exports.join = async (req, res) => {
         res.status(400).send({ message: "Sie sind bereits in dieser Gruppe" });
       }
     } catch (error) {
-      res.status(500).send({ message: error });
+      res.status(500).send({ message: `${error}` });
     }
   };
   
@@ -42,6 +42,9 @@ exports.join = async (req, res) => {
       let group = await Group.findOne({ _id: groupId });
       if (!group)
         return res.status(400).send({ message: "Die Gruppe existiert nicht" });
+
+      let user = await User.findOne({ _id: currentUserId });
+      if (!user.joinedGroups.includes(groupId)) return res.status(400).send({ message: "Sie sind nicht in dieser Gruppe" });
   
       await Group.updateOne(
         { _id: groupId },
@@ -54,6 +57,6 @@ exports.join = async (req, res) => {
       );
       res.status(200).send({ message: "Gruppe erfolgreich verlassen" });
     } catch (error) {
-      res.status(500).send({ message: error });
+      res.status(500).send({ message: `${error}` });
     }
   };
