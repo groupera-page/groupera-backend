@@ -21,7 +21,7 @@ exports.signup = async (req, res) => {
     if (error)
       return res.status(400).send({ message: error.details[0].message });
 
-    let user = await User.findOne({ email: email });
+    let user = await User.findOne({ email: email.toLowerCase() });
     if (user)
       return res.status(409).send({ message: "E-Mail bereits in Gebrauch" });
 
@@ -32,6 +32,7 @@ exports.signup = async (req, res) => {
 
     user = await new User({
       ...req.body,
+      email: email.toLowerCase(),
       passwordHash: hashPassword,
       authCode: hashCode,
       questions: { Themes: ["Depression", "Anxiety"], Experience: "None" },
@@ -86,7 +87,7 @@ exports.verifyEmail = async (req, res) => {
         {
           emailVerified: true,
           authCode: "",
-          emailVerificationExpires: null,
+          emailVerificationExpiration: null,
           refreshToken: refreshToken,
         }
       );
@@ -175,7 +176,7 @@ exports.resetPasswordId = async (req, res) => {
     const user = await User.findOne({ _id: userId });
     if (!user) return res.status(400).send({ message: "Invalid link" });
 
-    const hashPassword = hashSomething(password)
+    const hashPassword = hashSomething(password);
     user.passwordHash = hashPassword;
     await user.save();
 
@@ -257,7 +258,7 @@ exports.groups = async (req, res) => {
 
 exports.edit = async (req, res) => {
   const { userId } = req.params;
-  const { password } = req.body;
+  const { password, email } = req.body;
   const createDate = () => new Date(+new Date() + 15 * 60 * 1000);
 
   try {
@@ -272,7 +273,7 @@ exports.edit = async (req, res) => {
 
     await User.updateOne(
       { _id: userId },
-      { ...req.body, passwordHash: hashPassword }
+      { ...req.body, email: email.toLowerCase(), passwordHash: hashPassword }
     );
 
     let newUser = await User.findOne({ _id: userId });
@@ -286,8 +287,8 @@ exports.edit = async (req, res) => {
         {
           emailVerified: false,
           authCode: hashCode,
-          emailVerificationExpires: createDate(),
-          refreshToken: ""
+          emailVerificationExpiration: createDate(),
+          refreshToken: "",
         }
       );
 

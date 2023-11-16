@@ -10,7 +10,7 @@ exports.login = async (req, res) => {
     if (error)
       return res.status(400).send({ message: error.details[0].message });
 
-    const user = await User.findOne({ email: email });
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (!user)
       return res
         .status(401)
@@ -26,9 +26,7 @@ exports.login = async (req, res) => {
       return res
         .status(400)
         .send({ message: "Bitte bestätigen Sie Ihre E-Mail" });
-    };
-
-    console.log(user.id)
+    }
 
     const accessToken = jwt.sign(
       {
@@ -40,7 +38,6 @@ exports.login = async (req, res) => {
         expiresIn: "30m",
       }
     );
-
 
     const refreshToken = jwt.sign(
       {
@@ -131,7 +128,6 @@ exports.refresh = async (req, res) => {
     res.status(500).send({ message: `${error}` });
   }
 };
-
 
 const validate = (data) => {
   const schema = Joi.object({

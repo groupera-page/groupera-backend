@@ -14,14 +14,14 @@ router.post("/:userId/resetPassword", userControllers.resetPasswordId);
 
 router.get("/:userId", verifyJWT, verifyCurrentUser, userControllers.findOne);
 
+// Obsolete, I think
 router.get("/:userId/meetings", verifyJWT, verifyCurrentUser, userControllers.meetings);
 
+// Same as above
 router.get("/:userId/groups", userControllers.groups)
 
 router.patch("/:userId", verifyJWT, verifyCurrentUser, userControllers.edit);
 
 router.delete("/:userId", verifyJWT, verifyCurrentUser, userControllers.delete);
-
-// router.get("/verify", isAuthenticated, userControllers.verifyToken);
 
 module.exports = router;
