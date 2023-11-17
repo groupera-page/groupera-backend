@@ -150,10 +150,31 @@ exports.findOne = async (req, res) => {
       description: group.description,
       topic: group.topic,
       moderator: moderator,
+      users: group.users.length,
       meeting: allGroupMeetings.filter((groupMeeting) =>
         groupMeeting.id.includes(group.meeting)
       ),
     };
+    res.status(200).send(group);
+  } catch (error) {
+    res.status(500).send({ message: `${error}` });
+  }
+};
+
+// allows moderators to see member names but not other members. My thought is I'd need another route and controller to do this in a protected form. Is that right?
+exports.groupUsers = async (req, res) => {
+  const { groupId } = req.params;
+
+  try {
+    let group = await Group.findOne({ _id: groupId });
+    if (!group)
+      return res.status(400).send({ message: "Die Gruppe existiert nicht" });
+      
+    group = await Promise.all(group.users.map(async (user) => {
+      let foundUser = await User.findOne({ _id: user });
+
+      return foundUser.alias
+    }));
     res.status(200).send(group);
   } catch (error) {
     res.status(500).send({ message: `${error}` });
