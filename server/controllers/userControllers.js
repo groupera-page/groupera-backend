@@ -16,6 +16,7 @@ const hashSomething = async (thingToHash) => {
 
 exports.signup = async (req, res) => {
   const { email, password } = req.body;
+
   try {
     const { error } = validate(req.body);
     if (error)
@@ -51,7 +52,8 @@ exports.signup = async (req, res) => {
 };
 
 exports.verifyEmail = async (req, res) => {
-  const { code, email } = req.body;
+  const { params: { email }, body: { code } } = req;
+
   try {
     if (code.length == 4) {
       let user = await User.findOne({ email: email });
@@ -124,6 +126,7 @@ exports.verifyEmail = async (req, res) => {
 
 exports.resetPasswordRequest = async (req, res) => {
   const { email } = req.body;
+
   try {
     let user = await User.findOne({ email: email });
     if (!user)
@@ -150,6 +153,7 @@ exports.resetPasswordRequest = async (req, res) => {
 
 exports.verifyResetPasswordToken = async (req, res) => {
   const { userId } = req.params;
+
   try {
     const user = await User.findOne({ _id: userId });
     if (!user) return res.status(400).send({ message: "Invalid link" });
@@ -165,6 +169,7 @@ exports.resetPasswordId = async (req, res) => {
     body: { password },
     params: { userId },
   } = req;
+
   try {
     const passwordSchema = Joi.object({
       password: passwordComplexity().required().label("Password"),
@@ -229,6 +234,7 @@ exports.findOne = async (req, res) => {
 // Think I made this obsolete...again
 exports.meetings = async (req, res) => {
   const { userId } = req.params;
+
   try {
     let user = await User.findOne({ _id: userId });
     let event = await getEvents();
@@ -244,6 +250,7 @@ exports.meetings = async (req, res) => {
 // Same here
 exports.groups = async (req, res) => {
   const { userId } = req.params;
+
   try {
     let groups = await Group.find();
 
@@ -309,6 +316,7 @@ exports.edit = async (req, res) => {
 
 exports.delete = async (req, res) => {
   const { userId } = req.params;
+  
   try {
     const user = await User.findOne({ _id: userId });
     if (!user) return res.status(400).send({ message: "Invalid Link" });
