@@ -40,15 +40,11 @@ exports.leave = async (req, res) => {
   } = req;
 
   try {
-    const group = await Group.findOneAndUpdate(
-      { _id: groupId },
-      { $pull: { users: currentUserId } }
-    );
+    let group = await Group.findOne({ _id: groupId });
     if (!group)
       return res.status(400).send({ message: "Die Gruppe existiert nicht" });
 
-    let user = await User.findOne({ _id: currentUserId });
-    if (!user.joinedGroups.includes(groupId))
+    if (!group.users.includes(currentUserId))
       return res
         .status(400)
         .send({ message: "Sie sind kein Mitglied dieser Gruppe" });
@@ -57,6 +53,11 @@ exports.leave = async (req, res) => {
       { _id: currentUserId },
       { $pull: { joinedGroups: groupId, meetings: group.meeting } }
     );
+
+    await Group.findOneAndUpdate(
+        { _id: groupId },
+        { $pull: { users: currentUserId } }
+      );
     res.status(200).send({ message: "Gruppe erfolgreich verlassen" });
   } catch (error) {
     res.status(500).send({ message: `${error}` });
