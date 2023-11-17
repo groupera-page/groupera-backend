@@ -144,6 +144,12 @@ exports.findOne = async (req, res) => {
       alias: moderator.alias,
     };
 
+    let users = await Promise.all(group.users.map(async (user) => {
+      let foundUser = await User.findOne({ _id: user });
+      console.log(foundUser.alias)
+      return foundUser.alias;
+    }));
+
     group = {
       id: group.id,
       verified: group.verified,
@@ -151,7 +157,7 @@ exports.findOne = async (req, res) => {
       description: group.description,
       topic: group.topic,
       moderator: moderator,
-      users: group.users.length,
+      users: users,
       meeting: allGroupMeetings.filter((groupMeeting) =>
         groupMeeting.id.includes(group.meeting)
       ),
@@ -162,27 +168,27 @@ exports.findOne = async (req, res) => {
   }
 };
 
-// allows moderators to see member names but not other members. My thought is I'd need another route and controller to do this in a protected form. Is that right?
-exports.groupUsers = async (req, res) => {
-  const { groupId } = req.params;
+// allows group members to see member names. My thought is I'd need another route and controller to do this in a protected form. Is that necessary?
+// exports.groupUsers = async (req, res) => {
+//   const { groupId } = req.params;
 
-  try {
-    let group = await Group.findOne({ _id: groupId });
-    if (!group)
-      return res.status(400).send({ message: "Die Gruppe existiert nicht" });
+//   try {
+//     let group = await Group.findOne({ _id: groupId });
+//     if (!group)
+//       return res.status(400).send({ message: "Die Gruppe existiert nicht" });
 
-    group = await Promise.all(
-      group.users.map(async (user) => {
-        let foundUser = await User.findOne({ _id: user });
+//     group = await Promise.all(
+      // group.users.map(async (user) => {
+      //   let foundUser = await User.findOne({ _id: user });
 
-        return foundUser.alias;
-      })
-    );
-    res.status(200).send(group);
-  } catch (error) {
-    res.status(500).send({ message: `${error}` });
-  }
-};
+      //   return foundUser.alias;
+//       })
+//     );
+//     res.status(200).send(group);
+//   } catch (error) {
+//     res.status(500).send({ message: `${error}` });
+//   }
+// };
 
 exports.edit = async (req, res) => {
   const {

@@ -9,7 +9,7 @@ exports.join = async (req, res) => {
     if (!group)
       return res.status(400).send({ message: "Die Gruppe existiert nicht" });
 
-    if (group.users.includes(userId))
+    if (group.users.includes(userId) || group.moderatorId == userId)
       return res
         .status(400)
         .send({ message: "Sie sind bereits Mitglied dieser Gruppe" });
