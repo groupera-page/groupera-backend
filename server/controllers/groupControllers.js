@@ -97,6 +97,7 @@ exports.findAll = async (req, res) => {
         description: group.description,
         img: group.img,
         topic: group.topic,
+        users: group.users.length,
         meetings: allGroupMeetings.filter((groupMeeting) =>
           groupMeeting.id.includes(group.meeting)
         ),
@@ -169,12 +170,14 @@ exports.groupUsers = async (req, res) => {
     let group = await Group.findOne({ _id: groupId });
     if (!group)
       return res.status(400).send({ message: "Die Gruppe existiert nicht" });
-      
-    group = await Promise.all(group.users.map(async (user) => {
-      let foundUser = await User.findOne({ _id: user });
 
-      return foundUser.alias
-    }));
+    group = await Promise.all(
+      group.users.map(async (user) => {
+        let foundUser = await User.findOne({ _id: user });
+
+        return foundUser.alias;
+      })
+    );
     res.status(200).send(group);
   } catch (error) {
     res.status(500).send({ message: `${error}` });

@@ -11,7 +11,8 @@ router.get("/:groupId/meetings", groupControllers.meetings);
 
 router.get("/:groupId", groupControllers.findOne);
 
-router.get("/:groupId/users", verifyJWT, verifyCurrentUser, groupControllers.groupUsers)
+// here's the route for mods to access group member names
+router.get("/:groupId/users", verifyJWT, verifyCurrentUser, groupControllers.groupUsers);
 
 router.patch("/:groupId", verifyJWT, verifyCurrentUser, groupControllers.edit);
 
