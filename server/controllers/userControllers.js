@@ -5,9 +5,10 @@ const { Group } = require("../models/Group.model");
 const jwt = require("jsonwebtoken");
 const Joi = require("joi");
 const passwordComplexity = require("joi-password-complexity");
+const {myCustomError} = require("../error-handling");
 const { getEvents, deleteEvent } = require("../utils/googleCalendar");
 
-exports.signup = async (req, res) => {
+exports.signup = async (req, res, next) => {
   const { email, password } = req.body;
   try {
     const { error } = validate(req.body);
@@ -35,84 +36,81 @@ exports.signup = async (req, res) => {
 
     res.status(201).send(user.email);
   } catch (error) {
-    res.status(500).send({ message: `${error}` });
+    next(error)
   }
 };
 
 
-exports.verifyEmail = async (req, res) => {
+exports.verifyEmail = async (req, res, next) => {
   const { code, email } = req.body;
   try {
-    if (code.length == 4) {
-      let user = await User.findOne({ email: email });
-      if (!user) return res.status(400).send({ message: "Ungültiger Email" });
+    if (code.length !== 4) throw myCustomError('Wrong email or password', 401)
 
-      const validAuthCode = await bcrypt.compare(code, user.authCode);
-      if (!validAuthCode)
-        return res.status(401).send({ message: "Incorrect code!" });
+    let user = await User.findOne({ email: email });
+    if (!user) throw myCustomError('Ungültiger Email', 401);
 
-      const accessToken = jwt.sign(
-        {
-          id: user._id,
-        },
-        process.env.TOKEN_SECRET,
-        {
-          algorithm: "HS256",
-          expiresIn: "10m",
-        }
-      );
-      const refreshToken = jwt.sign(
-        {
-          id: user._id,
-        },
-        process.env.REFRESH_SECRET,
-        {
-          algorithm: "HS256",
-          expiresIn: "1d",
-        }
-      );
+    const validAuthCode = await bcrypt.compare(code, user.authCode);
+    if (!validAuthCode) throw myCustomError('Incorrect code!', 401)
 
-      await User.updateOne(
-        { _id: user._id },
-        {
-          emailVerified: true,
-          authCode: "",
-          emailVerificationExpires: null,
-          refreshToken: refreshToken,
-        }
-      );
+    const accessToken = jwt.sign(
+      {
+        id: user._id,
+      },
+      process.env.TOKEN_SECRET,
+      {
+        algorithm: "HS256",
+        expiresIn: "10m",
+      }
+    );
+    const refreshToken = jwt.sign(
+      {
+        id: user._id,
+      },
+      process.env.REFRESH_SECRET,
+      {
+        algorithm: "HS256",
+        expiresIn: "1d",
+      }
+    );
 
-      res.cookie("jwt", refreshToken, {
-        httpOnly: true,
-        sameSite: "None",
-        secure: true,
-        maxAge: 24 * 60 * 60 * 1000,
-      });
+    await User.updateOne(
+      { _id: user._id },
+      {
+        emailVerified: true,
+        authCode: "",
+        emailVerificationExpires: null,
+        refreshToken: refreshToken,
+      }
+    );
 
-      const userInformation = {
-        _id: user._id,
-        alias: user.alias,
-        email: user.email,
-        dob: user.dob,
-        questions: user.questions,
-        emailVerified: user.emailVerified,
-        gender: user.gender,
-      };
+    res.cookie("jwt", refreshToken, {
+      httpOnly: true,
+      sameSite: "None",
+      secure: true,
+      maxAge: 24 * 60 * 60 * 1000,
+    });
 
-      res.status(200).send({
-        accessToken,
-        userInformation,
-        message: `Benutzer erfolgreich verifiziert`
-      });
-    } else {
-      res.status(400).send({ message: `${error}` });
-    }
+    const userInformation = {
+      _id: user._id,
+      alias: user.alias,
+      email: user.email,
+      dob: user.dob,
+      questions: user.questions,
+      emailVerified: user.emailVerified,
+      gender: user.gender,
+    };
+
+    res.status(200).send({
+      accessToken,
+      userInformation,
+      message: `Benutzer erfolgreich verifiziert`
+    });
   } catch (error) {
-    res.status(400).send({ message: `${error}` });
+    next(error);
   }
 };
 
-exports.resetPasswordRequest = async (req, res) => {
+exports.resetPasswordRequest = async (req, res, next) => {
   const { email } = req.body;
   try {
     let user = await User.findOne({ email: email });
@@ -130,11 +128,11 @@ exports.resetPasswordRequest = async (req, res) => {
         "Der Link zum Zurücksetzen des Passworts wurde an Ihre E-Mail-Adresse gesendet",
     });
   } catch (error) {
-    res.status(500).send({ message: error });
+    next(error)
   }
 };
 
-exports.verifyResetPasswordToken = async (req, res) => {
+exports.verifyResetPasswordToken = async (req, res, next) => {
   const { userId } = req.params;
   try {
     const user = await User.findOne({ _id: userId });
@@ -142,11 +140,11 @@ exports.verifyResetPasswordToken = async (req, res) => {
 
     res.status(200).send({ message: "Valid url " });
   } catch (error) {
-    res.status(500).send({ message: error });
+    next(error)
   }
 };
 
-exports.resetPasswordId = async (req, res) => {
+exports.resetPasswordId = async (req, res, next) => {
   const {
     body: { password },
     params: { userId },
@@ -170,21 +168,21 @@ exports.resetPasswordId = async (req, res) => {
 
     res.status(200).send({ message: "Passwort erfolgreich zurückgesetzt" });
   } catch (error) {
-    res.status(500).send({ message: error });
+    next(error)
   }
 };
 
-exports.findOne = async (req, res) => {
+exports.findOne = async (req, res, next) => {
   const { userId } = req.params;
   try {
     const user = await User.findOne({ _id: userId });
     res.status(200).send(user);
   } catch (error) {
-    res.status(500).send({ message: error });
+    next(error)
   }
 };
 
-exports.meetings = async (req, res) => {
+exports.meetings = async (req, res, next) => {
   const { userId } = req.params;
   try {
     let user = await User.findOne({ _id: userId });
@@ -200,7 +198,7 @@ exports.meetings = async (req, res) => {
   }
 };
 
-exports.groups = async (req, res) => {
+exports.groups = async (req, res, next) => {
   const { userId } = req.params;
   try {
     let groups = await Group.find();
@@ -214,7 +212,7 @@ exports.groups = async (req, res) => {
   }
 };
 
-exports.edit = async (req, res) => {
+exports.edit = async (req, res, next) => {
   const { userId } = req.params;
   try {
     let user = await User.findOne({ _id: userId });
@@ -224,7 +222,7 @@ exports.edit = async (req, res) => {
 
     res.status(200).send({ message: "Benutzer erfolgreich aktualisiert" });
   } catch (error) {
-    res.status(500).send({ message: error });
+    next(error)
   }
 };
 
@@ -275,6 +273,6 @@ exports.delete = async (req, res, next) => {
 
     res.status(200).send({ message: "Benutzer erfolgreich gelöscht" });
   } catch (error) {
-    res.status(500).send({ message: error });
+    next(error)
   }
 };

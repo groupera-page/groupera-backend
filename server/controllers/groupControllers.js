@@ -12,7 +12,7 @@ const {
 // const fetch = require("node-fetch");
 const generateRoom = require("../utils/videoSDK");
 
-exports.create = async (req, res) => {
+exports.create = async (req, res, next) => {
   const { img, frequency, date, time, length, token, currentUserId, name } =
     req.body;
 
@@ -66,11 +66,11 @@ exports.create = async (req, res) => {
     res.status(200).send({ message: "all good here, boss" });
     // }
   } catch (error) {
-    res.status(500).send({ message: error });
+    next(error)
   }
 };
 
-exports.findAll = async (req, res) => {
+exports.findAll = async (req, res, next) => {
   try {
     let groups = await Group.find();
 
@@ -99,7 +99,7 @@ exports.findAll = async (req, res) => {
 };
 
 // pretty sure I made this obsolete
-exports.meetings = async (req, res) => {
+exports.meetings = async (req, res, next) => {
   const { groupId } = req.params;
   try {
     const group = await Group.findOne({ _id: groupId });
@@ -116,7 +116,7 @@ exports.meetings = async (req, res) => {
   }
 };
 
-exports.findOne = async (req, res) => {
+exports.findOne = async (req, res, next) => {
   const { groupId } = req.params;
   try {
     let group = await Group.findOne({ _id: groupId });
@@ -130,11 +130,11 @@ exports.findOne = async (req, res) => {
       );
     res.status(200).send({ group, groupMeetings });
   } catch (error) {
-    res.status(500).send({ message: error });
+    next(error)
   }
 };
 
-exports.edit = async (req, res) => {
+exports.edit = async (req, res, next) => {
   const {
     body: { date, time, length, frequency },
     params: { groupId },
@@ -167,11 +167,11 @@ exports.edit = async (req, res) => {
 
     res.status(200).send({ message: "Gruppe erfolgreich aktualisiert" });
   } catch (error) {
-    res.status(500).send({ message: error });
+    next(error)
   }
 };
 
-exports.delete = async (req, res) => {
+exports.delete = async (req, res, next) => {
   const { groupId } = req.params;
   try {
     let group = await Group.findOne({ _id: groupId });
@@ -217,6 +217,6 @@ exports.delete = async (req, res) => {
     await Group.deleteOne({ _id: groupId });
     res.status(200).send({ message: "Gruppe erfolgreich gelöscht" });
   } catch (error) {
-    res.status(500).send({ message: error });
+    next(error)
   }
 };

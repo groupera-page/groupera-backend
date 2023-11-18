@@ -22,7 +22,7 @@ const createStripeSession = async (planId) => {
     }
 };
 
-exports.checkout = async (req, res) => {
+exports.checkout = async (req, res, next) => {
     const { id } = req.params;
     const planId = 'price_1O2wEdLSfyDnhMxYbBjqiOXF' 
 
@@ -37,11 +37,11 @@ exports.checkout = async (req, res) => {
         res.status(200).send(session)
 
     } catch (error) {
-      res.status(500).send({ message: error });
+      next(error)
     }
   };
 
-  exports.successfulCheckout = async (req, res) => {
+  exports.successfulCheckout = async (req, res, next) => {
     const { body: { sessionId }, params: { id } } = req;
 
     try {
@@ -68,12 +68,12 @@ exports.checkout = async (req, res) => {
             return res.status(400).send({message: "Payment failed"})
         }
     } catch (error) {
-        res.status(500).send({ message: error });
+        next(error)
     }
   }
 
 
-// exports.checkout = async (req, res) => {
+// exports.checkout = async (req, res, next) => {
 //   try {
 //     const prices = await stripe.prices.list({
 //       lookup_keys: [req.body.lookup_key],
@@ -95,7 +95,7 @@ exports.checkout = async (req, res) => {
 
 //     res.redirect(303, session.url);
 //   } catch (error) {
-//     res.status(500).send({ message: `${error}` });
+//     next(error)
 //   }
 // };
 
@@ -115,7 +115,7 @@ exports.checkout = async (req, res) => {
 
 //     res.redirect(303, portalSession.url);
 //   } catch (error) {
-//     res.status(500).send({ message: `${error}` });
+//     next(error)
 //   }
 // };
 
@@ -186,6 +186,6 @@ exports.checkout = async (req, res) => {
 //       // Return a 200 response to acknowledge receipt of the event
 //       response.send();
 //     } catch (error) {
-//       res.status(500).send({ message: `${error}` });
+//       next(error)
 //     }
 //   };

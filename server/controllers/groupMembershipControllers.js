@@ -1,7 +1,7 @@
 const { Group } = require("../models/Group.model");
 const { User } = require("../models/User.model");
 
-exports.join = async (req, res) => {
+exports.join = async (req, res, next) => {
     const {
       body: { currentUserId },
       params: { groupId },
@@ -28,11 +28,11 @@ exports.join = async (req, res) => {
         res.status(400).send({ message: "Sie sind bereits in dieser Gruppe" });
       }
     } catch (error) {
-      res.status(500).send({ message: error });
+      next(error)
     }
   };
   
-  exports.leave = async (req, res) => {
+  exports.leave = async (req, res, next) => {
     const {
       body: { currentUserId },
       params: { groupId },
@@ -54,6 +54,6 @@ exports.join = async (req, res) => {
       );
       res.status(200).send({ message: "Gruppe erfolgreich verlassen" });
     } catch (error) {
-      res.status(500).send({ message: error });
+      next(error)
     }
   };

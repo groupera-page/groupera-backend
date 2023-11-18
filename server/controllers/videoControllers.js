@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 // const generateToken = require("../utils/videoSDK");
 
-exports.getTokenMod = async (req, res) => {
+exports.getTokenMod = async (req, res, next) => {
   try {
     const API_KEY = process.env.VIDEO_KEY;
     const SECRET_KEY = process.env.VIDEO_SECRET;
@@ -17,12 +17,12 @@ exports.getTokenMod = async (req, res) => {
     res.json({ videoTokenMod });
     console.log(videoTokenMod);
   } catch (error) {
-    res.status(400).send({ message: `${error}` });
+    next(error)
   }
 };
 
 // I don't think this is necessary but I'm gonna take another look at it if I have time this week
-exports.getToken = async (req, res) => {
+exports.getToken = async (req, res, next) => {
   try {
     const API_KEY = process.env.VIDEO_KEY;
     const SECRET_KEY = process.env.VIDEO_SECRET;
@@ -38,6 +38,6 @@ exports.getToken = async (req, res) => {
     res.json({ videoTokenUser });
     console.log(videoTokenUser);
   } catch (error) {
-    res.status(400).send({ message: `${error}` });
+    next(error)
   }
 };

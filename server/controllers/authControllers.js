@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 const Joi = require("joi");
 const jwt = require("jsonwebtoken");
 
-exports.login = async (req, res) => {
+exports.login = async (req, res, next) => {
   const { email, password } = req.body;
   try {
     const { error } = validate(req.body);
@@ -80,11 +80,11 @@ exports.login = async (req, res) => {
       message: "Erfolgreich eingeloggt",
     });
   } catch (error) {
-    res.status(500).send({ message: error });
+    next(error)
   }
 };
 
-exports.logout = async (req, res) => {
+exports.logout = async (req, res, next) => {
   try {
     const { cookies } = req;
     if (!cookies?.jwt) return res.sendStatus(204);
@@ -99,12 +99,12 @@ exports.logout = async (req, res) => {
     res.clearCookie("jwt", { httpOnly: true, sameSite: "None", secure: true });
     res.sendStatus(204);
   } catch (error) {
-    res.status(500).send({ message: error });
+    next(error)
   }
 };
 
 // Ask Fritz about using != and keeping foundUser._id like in Middleware versus using !== with toString()
-exports.refresh = async (req, res) => {
+exports.refresh = async (req, res, next) => {
   try {
     const cookies = req.cookies;
     if (!cookies?.jwt) return res.sendStatus(401);
@@ -128,11 +128,11 @@ exports.refresh = async (req, res) => {
       res.status(200).send(accessToken);
     });
   } catch (error) {
-    res.status(500).send({ message: `${error}` });
+    next(error)
   }
 };
 
-// exports.refresh = async (req, res) => {
+// exports.refresh = async (req, res, next) => {
 //   try {
 //     const cookies = req.cookies;
 //     if (!cookies?.jwt) return res.sendStatus(401);
@@ -163,7 +163,7 @@ exports.refresh = async (req, res) => {
 //       res.sendStatus(400);
 //     }
 //   } catch (error) {
-//     res.status(500).send({ message: `${error}` });
+//     next(error)
 //   }
 // };
 
