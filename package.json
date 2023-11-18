@@ -1,8 +1,8 @@
 {
-  "name": "we.together",
+  "name": "groupera",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
@@ -10,15 +10,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/we-together-page/wt-backend.git"
+    "url": "git+https://github.com/groupera-page/groupera-backend.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/we-together-page/wt-backend/issues"
+    "url": "https://github.com/groupera-page/groupera-backend/issues"
   },
-  "homepage": "https://github.com/we-together-page/wt-backend#readme",
+  "homepage": "https://github.com/groupera-page/groupera-backend#readme",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.1",
