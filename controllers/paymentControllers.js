@@ -1,77 +1,77 @@
-const { User } = require("../models/User.model");
-const myCustomError = require("../utils/myCustomError");
-const stripe = require("stripe")(process.env.STRIPE_SECRET);
+const { User } = require('../models/User.model')
+const myCustomError = require('../utils/myCustomError')
+const stripe = require('stripe')(process.env.STRIPE_SECRET)
 
 const createStripeSession = async (planId) => {
-  try {
-    return await stripe.checkout.sessions.create({
-      mode: "subscription",
-      payment_method_types: ["card"],
-      line_items: [
-        {
-          price: planId,
-          quantity: 1,
-        },
-      ],
-      success_url: `${process.env.FRONTEND_BASE_URL}payment/success`,
-      cancel_url: `${process.env.FRONTEND_BASE_URL}payment/cancel`,
-    });
-  } catch (error) {
-    return error;
-  }
-};
+	try {
+		return await stripe.checkout.sessions.create({
+			mode: 'subscription',
+			payment_method_types: ['card'],
+			line_items: [
+				{
+					price: planId,
+					quantity: 1,
+				},
+			],
+			success_url: `${process.env.FRONTEND_BASE_URL}payment/success`,
+			cancel_url: `${process.env.FRONTEND_BASE_URL}payment/cancel`,
+		})
+	} catch (error) {
+		return error
+	}
+}
 
 exports.checkout = async (req, res, next) => {
-  const { id } = req.params;
-  const planId = "price_1O2wEdLSfyDnhMxYbBjqiOXF";
+	const { id } = req.params
+	const planId = 'price_1O2wEdLSfyDnhMxYbBjqiOXF'
 
-  try {
-    const session = await createStripeSession(planId);
-    const user = await User.findOne({ _id: id });
+	try {
+		const session = await createStripeSession(planId)
+		const user = await User.findOne({ _id: id })
 
-    user.subscription = {
-      sessionId: session.id,
-    };
+		user.subscription = {
+			sessionId: session.id,
+		}
 
-    await user.save();
+		await user.save()
 
-    res.send(session);
-  } catch (error) {
-    next(error);
-  }
-};
+		res.send(session)
+	} catch (error) {
+		next(error)
+	}
+}
 
 exports.successfulCheckout = async (req, res, next) => {
-  const {
-    body: { sessionId },
-    params: { id },
-  } = req;
+	const {
+		body: { sessionId },
+		params: { id },
+	} = req
 
-  try {
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
+	try {
+		const session = await stripe.checkout.sessions.retrieve(sessionId)
 
-    if (session.payment_status !== "paid")
-      throw myCustomError("Payment failed", 400);
-    const subscriptionId = session.subscription;
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+		if (session.payment_status !== 'paid')
+			throw myCustomError('Payment failed', 400)
+		const subscriptionId = session.subscription
+		const subscription = await stripe.subscriptions.retrieve(subscriptionId)
 
-    await User.updateOne(
-      { _id: id },
-      {
-        subscription: {
-          sessionId: null,
-          startDate: subscription.current_period_start,
-          endDate: subscription.current_period_end,
-        },
-        paid: true,
-      },
-    );
+		await User.updateOne(
+			{ _id: id },
+			{
+				subscription: {
+					sessionId: null,
+					startDate: subscription.current_period_start,
+					endDate: subscription.current_period_end,
+				},
+				paid: true,
+			}
+		)
 
-    res.send({ message: "Payment successful" });
-  } catch (error) {
-    next(error);
-  }
-};
+		res.send({ message: 'Payment successful' })
+	} catch (error) {
+		next(error)
+	}
+}
 
 // exports.checkout = async (req, res, next) => {
 //   try {

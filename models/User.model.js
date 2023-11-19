@@ -1,115 +1,109 @@
-const { Schema, model } = require("mongoose");
-const Joi = require("joi");
-const passwordComplexity = require("joi-password-complexity");
+const { Schema, model } = require('mongoose')
+const Joi = require('joi')
+const passwordComplexity = require('joi-password-complexity')
 
 const userSchema = new Schema({
-  alias: {
-    type: String,
-  },
-  email: {
-    type: String,
-    unique: [true, "Die E-Mail Adresse ist ungültig"],
-  },
-  passwordHash: {
-    type: String,
-  },
-  dob: {
-    type: Date,
-  },
-  questions: {
-    type: Object
-  },
-  emailVerificationExpires: {
-    type: Date,
-    default: () => new Date(+new Date() + 15 * 60 * 1000) //3 minutes
-  },
-  emailVerified: {
-    type: Boolean,
-    default: false,
-  },
-  authCode: { type: String },
-  emailVerificationTokenExp: {type: Date},
-  resetPasswordToken: {type: String},
-  resetPasswordTokenExp: {type: Date},
-  gender: {
-    type: String,
-  },
-  paid: {
-    type: Boolean,
-    // date_paid: Date,
-    default: false,
-  },
-  terms: {
-    type: Boolean,
-    date_agreed: Date,
-    default: false,
-  },
-  moderatedGroups: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "Group",
-    },
-  ],
-  joinedGroups: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "Group",
-    },
-  ],
-  meetings: [
-    {
-      type: String,
-    },
-  ],
-  paymentSubscription: {
-    type: Object,
-  },
-  refreshToken: {
-    type: String
-  }
-}
-);
+	alias: {
+		type: String,
+	},
+	email: {
+		type: String,
+		unique: [true, 'Die E-Mail Adresse ist ungültig'],
+	},
+	passwordHash: {
+		type: String,
+	},
+	dob: {
+		type: Date,
+	},
+	questions: {
+		type: Object,
+	},
+	emailVerificationExpires: {
+		type: Date,
+		default: () => new Date(+new Date() + 15 * 60 * 1000), //3 minutes
+	},
+	emailVerified: {
+		type: Boolean,
+		default: false,
+	},
+	authCode: { type: String },
+	emailVerificationTokenExp: { type: Date },
+	resetPasswordToken: { type: String },
+	resetPasswordTokenExp: { type: Date },
+	gender: {
+		type: String,
+	},
+	paid: {
+		type: Boolean,
+		// date_paid: Date,
+		default: false,
+	},
+	terms: {
+		type: Boolean,
+		date_agreed: Date,
+		default: false,
+	},
+	moderatedGroups: [
+		{
+			type: Schema.Types.ObjectId,
+			ref: 'Group',
+		},
+	],
+	joinedGroups: [
+		{
+			type: Schema.Types.ObjectId,
+			ref: 'Group',
+		},
+	],
+	meetings: [
+		{
+			type: String,
+		},
+	],
+	paymentSubscription: {
+		type: Object,
+	},
+	refreshToken: {
+		type: String,
+	},
+})
 
-const User = model("User", userSchema);
+const User = model('User', userSchema)
 
 userSchema.index(
-  { 'emailVerificationExpires': 1 },
-  {
-    expireAfterSeconds: 0,
-    partialFilterExpression: { 'emailVerified': false }
-  }
-);
+	{ emailVerificationExpires: 1 },
+	{
+		expireAfterSeconds: 0,
+		partialFilterExpression: { emailVerified: false },
+	}
+)
 
 // https://github.com/hapijs/joi/blob/master/API.md#list-of-errors
 
 const schema = {
-  alias: Joi.string()
-    .min(1)
-    .max(70)
-    .required()
-    .label("Alias")
-    .messages({
-      "string.max": "Bitte halten Sie den Namen auf weniger als 70 Zeichen",
-      "string.empty": "Bitte Name eingeben",
-    }),
-  email: Joi.string().email().required().label("Email").messages({
-    "string.email": "Bitte geben Sie eine gültige E-Mail Adresse ein",
-    "string.empty": "Bitte geben Sie eine E-Mail Adresse ein",
-  }),
-  password: passwordComplexity()
-    .required()
-    .label("Password")
-    .messages({ "any.required": "Erforderliches Feld" }),
-  dob: Joi.date().label("Age"),
-  authCode: Joi.string().label("Code"),
-  gender: Joi.string()
-    .valid("Männlich", "Weiblich", "Divers")
-    .label("Gender"),
-  questions: Joi.object().label("Questions"),
-  emailVerified: Joi.bool().label("emailVerified"),
-  emailVerificationTokenExp: Joi.date().label("emailVerificationTokenExp"),
-  resetPasswordToken: Joi.string().label("resetPasswordToken"),
-  resetPasswordTokenExp: Joi.date().label("resetPasswordTokenExp"),
-};
+	alias: Joi.string().min(1).max(70).required().label('Alias').messages({
+		'string.max': 'Bitte halten Sie den Namen auf weniger als 70 Zeichen',
+		'string.empty': 'Bitte Name eingeben',
+	}),
+	email: Joi.string().email().required().label('Email').messages({
+		'string.email': 'Bitte geben Sie eine gültige E-Mail Adresse ein',
+		'string.empty': 'Bitte geben Sie eine E-Mail Adresse ein',
+	}),
+	password: passwordComplexity()
+		.required()
+		.label('Password')
+		.messages({ 'any.required': 'Erforderliches Feld' }),
+	dob: Joi.date().label('Age'),
+	authCode: Joi.string().label('Code'),
+	gender: Joi.string()
+		.valid('Männlich', 'Weiblich', 'Divers')
+		.label('Gender'),
+	questions: Joi.object().label('Questions'),
+	emailVerified: Joi.bool().label('emailVerified'),
+	emailVerificationTokenExp: Joi.date().label('emailVerificationTokenExp'),
+	resetPasswordToken: Joi.string().label('resetPasswordToken'),
+	resetPasswordTokenExp: Joi.date().label('resetPasswordTokenExp'),
+}
 
-module.exports = { User, userSchema: schema };
+module.exports = { User, userSchema: schema }

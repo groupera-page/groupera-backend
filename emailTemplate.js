@@ -1,4 +1,5 @@
-const template = (code) => `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+const template = (code) =>
+	`<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html
   xmlns="http://www.w3.org/1999/xhtml"
   xmlns:v="urn:schemas-microsoft-com:vml"
@@ -72,14 +73,18 @@ const template = (code) => `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict/
     <style type="text/css" emogrify="no">
       @media (max-width: 600px) {
         .gmx-killpill {
-          content: " ` + "\03D1" + `";
+          content: " ` +
+	'\03D1' +
+	`";
         }
       }
     </style>
     <style type="text/css" emogrify="no">
       @media (max-width: 600px) {
         .gmx-killpill {
-          content: " ` + "\03D1" + `";
+          content: " ` +
+	'\03D1' +
+	`";
         }
         .r0-o {
           border-style: solid !important;
@@ -1757,4 +1762,4 @@ const template = (code) => `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict/
   </body>
 </html>`
 
-module.exports = {template}
+module.exports = { template }
