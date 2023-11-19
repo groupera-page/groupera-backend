@@ -23,8 +23,8 @@ app.use(defaultError)
 
 module.exports = app
 
-// ℹ️ Sets the PORT for our app to have access to it. Defaults to 8080
-const PORT = Number(process.env.PORT) || 8080
+// ℹ️ Sets the PORT for our app to have access to it. Defaults to 3000
+const PORT = Number(process.env.PORT) || 3000
 
 app.listen(PORT, () => {
 	console.log(`Server listening on http://localhost:${PORT}`)

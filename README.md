@@ -41,7 +41,7 @@ Run the server with:
 npm start
 ```
 
-The magic happens on `http://localhost:8080` by default!
+The magic happens on `http://localhost:3000` by default!
 
 ## Features
 
