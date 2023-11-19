@@ -90,3 +90,33 @@ Website: [groupera.de](https://groupera.de)<br/>
 Software Support - softwaresupport@groupera.de<br/>
 Customer Support - support@groupera.de <br/>
 Project Link: [https://github.com/groupera-page/groupera-backend](https://github.com/groupera-page/groupera-backend)
+
+---
+
+## Code Quality: ESLint and Prettier
+
+### ESLint
+ESLint is our tool of choice for identifying and reporting on patterns in JavaScript. It helps us maintain code quality and adhere to coding standards.
+
+To run ESLint:
+
+```bash
+npm run lint
+```
+
+This command will check for any linting errors across the codebase. If you find any, try to fix them to keep the code clean and consistent!
+
+### Configuring ESLint
+Our ESLint configuration is defined in `.eslintrc.js`. Feel free to tweak the rules according to the project's coding standards.
+
+### Prettier
+Prettier is our code formatter. It enforces a consistent style by parsing the code and reprinting it with its own rules that take the maximum line length into account, wrapping code when necessary.
+To format your code with Prettier:
+
+```bash
+npm run format
+```
+This command will automatically format your code according to the predefined styles in the Prettier configuration.
+
+### Configuring Prettier
+The Prettier configuration is located in `.prettierrc`.
