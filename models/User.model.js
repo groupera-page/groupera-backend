@@ -28,6 +28,9 @@ const userSchema = new Schema({
     default: false,
   },
   authCode: { type: String },
+  emailVerificationTokenExp: {type: Date},
+  resetPasswordToken: {type: String},
+  resetPasswordTokenExp: {type: Date},
   gender: {
     type: String,
   },
@@ -79,34 +82,34 @@ userSchema.index(
 
 // https://github.com/hapijs/joi/blob/master/API.md#list-of-errors
 
-const validate = (data) => {
-  const schema = Joi.object({
-    alias: Joi.string()
-      .min(1)
-      .max(70)
-      .required()
-      .label("Alias")
-      .messages({
-        "string.max": "Bitte halten Sie den Namen auf weniger als 70 Zeichen",
-        "string.empty": "Bitte Name eingeben",
-      }),
-    email: Joi.string().email().required().label("Email").messages({
-      "string.email": "Bitte geben Sie eine gültige E-Mail Adresse ein",
-      "string.empty": "Bitte geben Sie eine E-Mail Adresse ein",
+const schema = {
+  alias: Joi.string()
+    .min(1)
+    .max(70)
+    .required()
+    .label("Alias")
+    .messages({
+      "string.max": "Bitte halten Sie den Namen auf weniger als 70 Zeichen",
+      "string.empty": "Bitte Name eingeben",
     }),
-    password: passwordComplexity()
-      .required()
-      .label("Password")
-      .messages({ "any.required": "Erforderliches Feld" }),
-    dob: Joi.date().label("Age"),
-    authCode: Joi.string().label("Code"),
-    gender: Joi.string()
-      .valid("Männlich", "Weiblich", "Divers")
-      .label("Gender"),
-    questions: Joi.object().label("Questions")
-  });
-  return schema.validate(data);
+  email: Joi.string().email().required().label("Email").messages({
+    "string.email": "Bitte geben Sie eine gültige E-Mail Adresse ein",
+    "string.empty": "Bitte geben Sie eine E-Mail Adresse ein",
+  }),
+  password: passwordComplexity()
+    .required()
+    .label("Password")
+    .messages({ "any.required": "Erforderliches Feld" }),
+  dob: Joi.date().label("Age"),
+  authCode: Joi.string().label("Code"),
+  gender: Joi.string()
+    .valid("Männlich", "Weiblich", "Divers")
+    .label("Gender"),
+  questions: Joi.object().label("Questions"),
+  emailVerified: Joi.bool().label("emailVerified"),
+  emailVerificationTokenExp: Joi.date().label("emailVerificationTokenExp"),
+  resetPasswordToken: Joi.string().label("resetPasswordToken"),
+  resetPasswordTokenExp: Joi.date().label("resetPasswordTokenExp"),
 };
 
-
-module.exports = { User, validate };
+module.exports = { User, userSchema: schema };

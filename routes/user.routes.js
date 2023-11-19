@@ -1,27 +1,38 @@
 const router = require("express").Router();
-const userControllers = require("../controllers/userControllers")
-const { verifyJWT, verifyCurrentUser } = require("../middleware/jwt.middleware.js");
+const userControllers = require("../controllers/userControllers");
+const {
+  verifyCurrentUser,
+} = require("../middleware/userAuthentication.middleware.js");
+const { validateAuthToken } = require("../middleware/auth.middleware.js");
 
-router.post("/signup", userControllers.signup);
+router.get(
+  "/:userId",
+  validateAuthToken,
+  verifyCurrentUser,
+  userControllers.findOne,
+);
 
-router.patch("/verifyEmail", userControllers.verifyEmail);
+router.get(
+  "/:userId/meetings",
+  validateAuthToken,
+  verifyCurrentUser,
+  userControllers.meetings,
+);
 
-router.post("/resetPasswordRequest", userControllers.resetPasswordRequest);
+router.get("/:userId/groups", userControllers.groups);
 
-router.get("/:userId/verifyResetPasswordToken", userControllers.verifyResetPasswordToken);
+router.patch(
+  "/:userId",
+  validateAuthToken,
+  verifyCurrentUser,
+  userControllers.edit,
+);
 
-router.post("/:userId/resetPassword", userControllers.resetPasswordId);
-
-router.get("/:userId", verifyJWT, verifyCurrentUser, userControllers.findOne);
-
-router.get("/:userId/meetings", verifyJWT, verifyCurrentUser, userControllers.meetings);
-
-router.get("/:userId/groups", userControllers.groups)
-
-router.patch("/:userId", verifyJWT, verifyCurrentUser, userControllers.edit);
-
-router.delete("/:userId", verifyJWT, verifyCurrentUser, userControllers.delete);
-
-// router.get("/verify", isAuthenticated, userControllers.verifyToken);
+router.delete(
+  "/:userId",
+  validateAuthToken,
+  verifyCurrentUser,
+  userControllers.delete,
+);
 
 module.exports = router;

@@ -1,6 +1,9 @@
 const router = require("express").Router();
-const groupControllers = require('../controllers/groupControllers');
-const { verifyJWT, verifyCurrentUser } = require("../middleware/jwt.middleware.js");
+const groupControllers = require("../controllers/groupControllers");
+const {
+  verifyGroupModerator,
+} = require("../middleware/userAuthentication.middleware.js");
+const { validateAuthToken } = require("../middleware/auth.middleware");
 
 router.post("", groupControllers.create);
 
@@ -11,8 +14,18 @@ router.get("/:groupId/meetings", groupControllers.meetings);
 
 router.get("/:groupId", groupControllers.findOne);
 
-router.patch("/:groupId", verifyJWT, verifyCurrentUser, groupControllers.edit);
+router.patch(
+  "/:groupId",
+  validateAuthToken,
+  verifyGroupModerator,
+  groupControllers.edit,
+);
 
-router.delete("/:groupId", verifyJWT, verifyCurrentUser, groupControllers.delete);
+router.delete(
+  "/:groupId",
+  validateAuthToken,
+  verifyGroupModerator,
+  groupControllers.delete,
+);
 
 module.exports = router;

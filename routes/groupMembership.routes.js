@@ -1,9 +1,9 @@
 const router = require("express").Router();
 const groupMembershipControllers = require('../controllers/groupMembershipControllers');
-const { verifyJWT } = require("../middleware/jwt.middleware.js");
+const { validateAuthToken } = require("../middleware/auth.middleware");
 
-router.put("/:groupId/join", verifyJWT, groupMembershipControllers.join);
+router.put("/:groupId/join", validateAuthToken, groupMembershipControllers.join);
 
-router.put("/:groupId/leave", verifyJWT, groupMembershipControllers.leave);
+router.put("/:groupId/leave", validateAuthToken, groupMembershipControllers.leave);
 
 module.exports = router;
