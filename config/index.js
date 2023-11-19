@@ -22,13 +22,19 @@ module.exports = (app) => {
 	// controls a very specific header to pass headers from the frontend
 	// app.use(
 	//   cors({
-	//     origin: ["http://localhost:3000", process.env.FRONTEND_BASE_URL],
+	//     origin: ["http://localhost:8080", process.env.FRONTEND_BASE_URL],
 	//   })
 	// );
 
 	const corsConfig = {
 		origin: true,
 		credentials: true,
+		allowedHeaders: [
+			'set-cookie',
+			'Content-Type',
+			'Access-Control-Allow-Origin',
+			'Access-Control-Allow-Credentials',
+		]
 	}
 
 	app.use(cors(corsConfig))
