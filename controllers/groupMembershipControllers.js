@@ -23,7 +23,7 @@ exports.join = async (req, res, next) => {
           { $push: { users: currentUserId } }
         );
   
-        res.status(200).send({ message: "Gruppe erfolgreich beigetreten" });
+        res.send({ message: "Gruppe erfolgreich beigetreten" });
       } else {
         res.status(400).send({ message: "Sie sind bereits in dieser Gruppe" });
       }
@@ -52,7 +52,7 @@ exports.join = async (req, res, next) => {
         { _id: currentUserId },
         { $pull: { joinedGroups: groupId, meetings: group.meeting } }
       );
-      res.status(200).send({ message: "Gruppe erfolgreich verlassen" });
+      res.send({ message: "Gruppe erfolgreich verlassen" });
     } catch (error) {
       next(error)
     }

@@ -6,15 +6,23 @@ const {
   insertEvent,
   getEvents,
   deleteEvent,
-  getEvent,
+  // getEvent,
   editEvent,
 } = require("../utils/googleCalendar");
 // const fetch = require("node-fetch");
-const generateRoom = require("../utils/videoSDK");
+// const generateRoom = require("../utils/videoSDK");
 
 exports.create = async (req, res, next) => {
-  const { img, frequency, date, time, length, token, currentUserId, name } =
-    req.body;
+  const {
+    // img,
+    frequency,
+    date,
+    time,
+    length,
+    // token,
+    currentUserId,
+    name,
+  } = req.body;
 
   try {
     const { error } = validate(req.body);
@@ -54,19 +62,19 @@ exports.create = async (req, res, next) => {
     if (newEvent) {
       await User.updateOne(
         { _id: user._id },
-        { $push: { moderatedGroups: group._id, meetings: newEvent.id } }
+        { $push: { moderatedGroups: group._id, meetings: newEvent.id } },
       );
       await Group.updateOne(
         { _id: group._id },
-        { meeting: newEvent.id, verified: true, moderatorId: user._id }
+        { meeting: newEvent.id, verified: true, moderatorId: user._id },
       );
     }
     // generateRoom(token, group._id, length);
     // }
-    res.status(200).send({ message: "all good here, boss" });
+    res.send({ message: "all good here, boss" });
     // }
   } catch (error) {
-    next(error)
+    next(error);
   }
 };
 
@@ -79,7 +87,6 @@ exports.findAll = async (req, res, next) => {
     const allGroupMeetings = await getEvents(start, end);
 
     groups = await groups.map((group) => {
-
       return {
         _id: group._id,
         name: group.name,
@@ -87,14 +94,14 @@ exports.findAll = async (req, res, next) => {
         img: group.img,
         topic: group.topic,
         meetings: allGroupMeetings.filter((groupMeeting) =>
-        groupMeeting.id.includes(group.meeting)
-      )
+          groupMeeting.id.includes(group.meeting),
+        ),
       };
     });
 
-    res.status(200).send(groups);
+    res.send(groups);
   } catch (error) {
-    res.status(500).send(`${error}`);
+    next(error);
   }
 };
 
@@ -107,12 +114,12 @@ exports.meetings = async (req, res, next) => {
     const end = "2036-10-06T00:00:00.000Z";
     const events = await getEvents(start, end);
     const groupEvents = events.filter((event) =>
-      event.id.includes(group.meeting)
+      event.id.includes(group.meeting),
     );
     // console.log(events)
-    res.status(200).send(groupEvents);
+    res.send(groupEvents);
   } catch (error) {
-    res.status(500).send(error);
+    next(error);
   }
 };
 
@@ -122,15 +129,15 @@ exports.findOne = async (req, res, next) => {
     let group = await Group.findOne({ _id: groupId });
     if (!group)
       return res.status(400).send({ message: "Die Gruppe existiert nicht" });
-      const start = "2023-10-03T00:00:00.000Z";
-      const end = "2036-10-06T00:00:00.000Z";
-      const allGroupMeetings = await getEvents(start, end);
-      const groupMeetings = allGroupMeetings.filter((groupMeeting) =>
-        groupMeeting.id.includes(group.meeting)
-      );
-    res.status(200).send({ group, groupMeetings });
+    const start = "2023-10-03T00:00:00.000Z";
+    const end = "2036-10-06T00:00:00.000Z";
+    const allGroupMeetings = await getEvents(start, end);
+    const groupMeetings = allGroupMeetings.filter((groupMeeting) =>
+      groupMeeting.id.includes(group.meeting),
+    );
+    res.send({ group, groupMeetings });
   } catch (error) {
-    next(error)
+    next(error);
   }
 };
 
@@ -165,9 +172,9 @@ exports.edit = async (req, res, next) => {
 
     await editEvent(group.meeting, event);
 
-    res.status(200).send({ message: "Gruppe erfolgreich aktualisiert" });
+    res.send({ message: "Gruppe erfolgreich aktualisiert" });
   } catch (error) {
-    next(error)
+    next(error);
   }
 };
 
@@ -192,7 +199,7 @@ exports.delete = async (req, res, next) => {
           joinedGroups: groupId,
           meetings: group.meeting,
         },
-      }
+      },
     );
 
     await User.updateOne(
@@ -202,7 +209,7 @@ exports.delete = async (req, res, next) => {
           moderatedGroups: groupId,
           meetings: group.meeting,
         },
-      }
+      },
     );
 
     const user = await User.findOne({ _id: group.moderatorId });
@@ -215,8 +222,8 @@ exports.delete = async (req, res, next) => {
     await deleteEvent(group.meeting);
 
     await Group.deleteOne({ _id: groupId });
-    res.status(200).send({ message: "Gruppe erfolgreich gelöscht" });
+    res.send({ message: "Gruppe erfolgreich gelöscht" });
   } catch (error) {
-    next(error)
+    next(error);
   }
 };

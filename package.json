@@ -1,19 +1,21 @@
 {
   "name": "groupera",
   "version": "1.0.0",
-  "description": "",
+  "description": "Backend service for the Groupera application, built with Node.js and Express.",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "node app.js",
+    "dev": "echo \"Error: no dev specified\" && exit 1",
+    "lint": "eslint .",
+    "format": "prettier . --write"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/groupera-page/groupera-backend.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "Groupera GmbG <softwaresupport@groupera.de>",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/groupera-page/groupera-backend/issues"
