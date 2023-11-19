@@ -55,10 +55,10 @@ The magic happens on `http://localhost:3000` by default!
 Here’s a sneak peek of our main endpoints:
 
 | Method | Endpoint                                | Description                                          |
-| ------ | --------------------------------------- | ---------------------------------------------------- |
+|--------| --------------------------------------- | ---------------------------------------------------- |
 | POST   | /auth/sigup                             | Log in to an existing user                           |
 | PATCH  | /auth/verifyEmail                       | Verify email address based on generated 4 digit code |
-| GET    | /auth/login                             | Log in to an existing user                           |
+| POST   | /auth/login                             | Log in to an existing user                           |
 | POST   | /auth/resetPasswordRequest              | Request reset password instruction email             |
 | POST   | /auth/resetPassword/:resetPasswordToken | Reset password based on generated uuid token         |
 | POST   | /auth/logout                            | Log out current user or rather clear all cookies     |

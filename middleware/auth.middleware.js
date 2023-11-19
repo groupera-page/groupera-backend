@@ -24,12 +24,14 @@ exports.validateRefreshToken = async (req, res, next) => {
 	next()
 }
 
-exports.validateScheme = (schema, compareTo) => async (req, res, next) => {
-	const { error } = Joi.object(schema).validate(compareTo || req.body)
-	if (error) next(myCustomError(error.details[0].message, 400))
+exports.validateScheme =
+	(schema, compareTo = undefined) =>
+		async (req, res, next) => {
+			const { error } = Joi.object(schema).validate(compareTo || req.body)
+			if (error) next(myCustomError(error.details[0].message, 400))
 
-	next()
-}
+			next()
+		}
 
 exports.validateResetPassword = async (req, res, next) => {
 	const { error } = Joi.object({

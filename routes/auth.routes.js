@@ -37,7 +37,7 @@ router.patch(
 	authControllers.verifyEmail
 )
 
-router.get('/login', validateScheme(loginBodySchema), authControllers.login)
+router.post('/login', validateScheme(loginBodySchema), authControllers.login)
 
 router.post(
 	'/resetPasswordRequest',
