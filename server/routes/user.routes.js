@@ -4,7 +4,7 @@ const { verifyJWT, verifyCurrentUser } = require("../middleware/jwt.middleware.j
 
 router.post("/signup", userControllers.signup);
 
-router.patch("/verifyEmail/:email", userControllers.verifyEmail);
+router.patch("/:email/verifyEmail", userControllers.verifyEmail);
 
 router.post("/resetPasswordRequest", userControllers.resetPasswordRequest);
 

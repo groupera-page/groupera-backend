@@ -39,11 +39,11 @@ exports.signup = async (req, res) => {
       questions: { Themes: ["Depression", "Anxiety"], Experience: "None" },
     }).save();
 
-    // await sendEmail(
-    //   user.email,
-    //   "Verify Email",
-    //   emailTemplates.emailVerification(randomCode)
-    // );
+    await sendEmail(
+      user.email,
+      "Verify Email",
+      emailTemplates.emailVerification(randomCode)
+    );
 
     res.status(201).send(user.email);
   } catch (error) {
@@ -52,7 +52,10 @@ exports.signup = async (req, res) => {
 };
 
 exports.verifyEmail = async (req, res) => {
-  const { params: { email }, body: { code } } = req;
+  const {
+    params: { email },
+    body: { code },
+  } = req;
 
   try {
     if (code.length == 4) {
@@ -61,7 +64,7 @@ exports.verifyEmail = async (req, res) => {
 
       const validAuthCode = await bcrypt.compare(code, user.authCode);
       if (!validAuthCode)
-        return res.status(401).send({ message: "Incorrect code!" });
+        return res.status(401).send({ message: "Falscher Code" });
 
       const accessToken = jwt.sign(
         {
@@ -84,14 +87,15 @@ exports.verifyEmail = async (req, res) => {
         }
       );
 
-      await User.updateOne(
+      user = await User.findOneAndUpdate(
         { _id: user._id },
         {
           emailVerified: true,
           authCode: "",
           emailVerificationExpiration: null,
           refreshToken: refreshToken,
-        }
+        },
+        { returnOriginal: false }
       );
 
       res.cookie("jwt", refreshToken, {
@@ -179,7 +183,7 @@ exports.resetPasswordId = async (req, res) => {
       return res.status(400).send({ message: error.details[0].message });
 
     const user = await User.findOne({ _id: userId });
-    if (!user) return res.status(400).send({ message: "Invalid link" });
+    if (!user) return res.status(400).send({ message: "Ungültiger Benutzer" });
 
     const hashPassword = hashSomething(password);
     user.passwordHash = hashPassword;
@@ -197,6 +201,7 @@ exports.findOne = async (req, res) => {
 
   try {
     let user = await User.findOne({ _id: userId });
+    if (!user) return res.status(400).send({ message: "Ungültiger Benutzer" });
     let groups = await Group.find();
     groups = groups.filter(
       (group) => group.users.includes(user.id) || group.moderatorId == user.id
@@ -266,35 +271,34 @@ exports.groups = async (req, res) => {
 exports.edit = async (req, res) => {
   const { userId } = req.params;
   const { password, email } = req.body;
-  const createDate = () => new Date(+new Date() + 15 * 60 * 1000);
+  const createExpirationDate = () => new Date(+new Date() + 15 * 60 * 1000);
 
   try {
     const { error } = validate(req.body);
     if (error)
       return res.status(400).send({ message: error.details[0].message });
 
-    let user = await User.findOne({ _id: userId });
-    if (!user) return res.status(400).send({ message: "Invalid Link" });
+    const user = await User.findOne({ _id: userId });
+    if (!user) return res.status(400).send({ message: "Ungültiger Benutzer" });
 
     const hashPassword = await hashSomething(password);
 
-    await User.updateOne(
+    const newUser = await User.findOneAndUpdate(
       { _id: userId },
-      { ...req.body, email: email.toLowerCase(), passwordHash: hashPassword }
+      { ...req.body, email: email.toLowerCase(), passwordHash: hashPassword },
+      { returnOriginal: false }
     );
-
-    let newUser = await User.findOne({ _id: userId });
 
     if (newUser.email !== user.email) {
       const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
-      const hashCode = hashSomething(randomCode);
+      const hashCode = await hashSomething(randomCode);
 
       await User.updateOne(
         { _id: userId },
         {
           emailVerified: false,
           authCode: hashCode,
-          emailVerificationExpiration: createDate(),
+          emailVerificationExpiration: createExpirationDate(),
           refreshToken: "",
         }
       );
@@ -316,10 +320,10 @@ exports.edit = async (req, res) => {
 
 exports.delete = async (req, res) => {
   const { userId } = req.params;
-  
+
   try {
     const user = await User.findOne({ _id: userId });
-    if (!user) return res.status(400).send({ message: "Invalid Link" });
+    if (!user) return res.status(400).send({ message: "Ungültiger Benutzer" });
 
     await Group.updateMany(
       {
