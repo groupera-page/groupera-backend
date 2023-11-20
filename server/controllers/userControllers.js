@@ -387,10 +387,6 @@ exports.delete = async (req, res) => {
       await specGroup.delete();
     });
 
-    // user.meetings.map((meeting) => deleteEvent(meeting));
-
-    // await Group.deleteMany({ moderatorId: userId });
-
     await User.deleteOne({ _id: userId });
 
     res.status(200).send({ message: "Benutzer erfolgreich gelöscht" });
