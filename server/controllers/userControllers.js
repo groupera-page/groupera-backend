@@ -271,7 +271,7 @@ exports.groups = async (req, res) => {
 exports.edit = async (req, res) => {
   const { userId } = req.params;
   const { password, email } = req.body;
-  const createExpirationDate = () => new Date(+new Date() + 15 * 60 * 1000);
+  const createExpirationDate = () => new Date(+new Date() + 24 * 60 * 60 * 1000);
 
   try {
     const { error } = validate(req.body);

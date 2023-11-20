@@ -21,7 +21,7 @@ const userSchema = new Schema({
   },
   emailVerificationExpiration: {
     type: Date,
-    default: () => new Date(+new Date() + 15 * 60 * 1000) // 15 minutes
+    default: () => new Date(+new Date() + 24 * 60 * 60 * 1000) // 24 hours
   },
   emailVerified: {
     type: Boolean,
