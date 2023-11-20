@@ -12,16 +12,9 @@ const {
 
 exports.create = async (req, res) => {
   const {
-    img,
-    frequency,
-    date,
-    time,
-    length,
-    token,
-    currentUserId,
-    name,
-    moderationType,
-  } = req.body;
+    body: { img, frequency, date, time, length, token, name, moderationType },
+    params: { userId },
+  } = req;
 
   try {
     const { error } = validate(req.body);
@@ -42,7 +35,9 @@ exports.create = async (req, res) => {
       ...req.body,
       // img: uploadRes
     }).save();
-    const user = await User.findOne({ _id: currentUserId });
+    const user = await User.findOne({ _id: userId });
+    if (!user) return res.status(400).send({ message: "Ungültiger Benutzer" });
+
     const dateTime = dateTimeForCalender(date, time, length);
     const event = {
       summary: group.name,
@@ -111,22 +106,22 @@ exports.findAll = async (req, res) => {
 };
 
 // pretty sure I made this obsolete
-exports.meetings = async (req, res) => {
-  const { groupId } = req.params;
-  try {
-    const group = await Group.findOne({ _id: groupId });
-    const start = "2023-10-03T00:00:00.000Z";
-    const end = "2036-10-06T00:00:00.000Z";
-    const events = await getEvents(start, end);
-    const groupEvents = events.filter((event) =>
-      event.id.includes(group.meeting)
-    );
-    // console.log(events)
-    res.status(200).send(groupEvents);
-  } catch (error) {
-    res.status(500).send(`${error}`);
-  }
-};
+// exports.meetings = async (req, res) => {
+//   const { groupId } = req.params;
+//   try {
+//     const group = await Group.findOne({ _id: groupId });
+//     const start = "2023-10-03T00:00:00.000Z";
+//     const end = "2036-10-06T00:00:00.000Z";
+//     const events = await getEvents(start, end);
+//     const groupEvents = events.filter((event) =>
+//       event.id.includes(group.meeting)
+//     );
+//     // console.log(events)
+//     res.status(200).send(groupEvents);
+//   } catch (error) {
+//     res.status(500).send(`${error}`);
+//   }
+// };
 
 exports.findOne = async (req, res) => {
   const { groupId } = req.params;
@@ -144,11 +139,12 @@ exports.findOne = async (req, res) => {
       alias: moderator.alias,
     };
 
-    let users = await Promise.all(group.users.map(async (user) => {
-      let foundUser = await User.findOne({ _id: user });
-      console.log(foundUser.alias)
-      return foundUser.alias;
-    }));
+    let users = await Promise.all(
+      group.users.map(async (user) => {
+        let foundUser = await User.findOne({ _id: user });
+        return foundUser.alias;
+      })
+    );
 
     group = {
       id: group.id,
@@ -168,28 +164,6 @@ exports.findOne = async (req, res) => {
   }
 };
 
-// allows group members to see member names. My thought is I'd need another route and controller to do this in a protected form. Is that necessary?
-// exports.groupUsers = async (req, res) => {
-//   const { groupId } = req.params;
-
-//   try {
-//     let group = await Group.findOne({ _id: groupId });
-//     if (!group)
-//       return res.status(400).send({ message: "Die Gruppe existiert nicht" });
-
-//     group = await Promise.all(
-      // group.users.map(async (user) => {
-      //   let foundUser = await User.findOne({ _id: user });
-
-      //   return foundUser.alias;
-//       })
-//     );
-//     res.status(200).send(group);
-//   } catch (error) {
-//     res.status(500).send({ message: `${error}` });
-//   }
-// };
-
 exports.edit = async (req, res) => {
   const {
     body: { date, time, length, frequency },
@@ -197,6 +171,10 @@ exports.edit = async (req, res) => {
   } = req;
 
   try {
+    const { error } = validate(req.body);
+    if (error)
+      return res.status(400).send({ message: error.details[0].message });
+
     let group = await Group.findOne({ _id: groupId });
     if (!group)
       return res.status(400).send({ message: "Die Gruppe existiert nicht" });
@@ -216,7 +194,7 @@ exports.edit = async (req, res) => {
         dateTime: dateTime["end"],
         timeZone: "Europe/Berlin",
       },
-      recurrence: [`RRULE:FREQ=WEEKLY;INTERVAL=${+frequency}`],
+      recurrence: [`RRULE:FREQ=WEEKLY;COUNT=2;INTERVAL=${+frequency}`],
     };
 
     await editEvent(group.meeting, event);
@@ -261,12 +239,13 @@ exports.delete = async (req, res) => {
       }
     );
 
-    const user = await User.findOne({ _id: group.moderatorId });
+    // Shouldn't be necessary as moderation is held within groups now
+    // const user = await User.findOne({ _id: group.moderatorId });
 
-    if (user.moderatedGroups.length === 0) {
-      user.moderator = false;
-      await user.save();
-    }
+    // if (user.moderatedGroups.length === 0) {
+    //   user.moderator = false;
+    //   await user.save();
+    // }
 
     await deleteEvent(group.meeting);
 
