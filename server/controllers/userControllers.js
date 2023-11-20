@@ -51,6 +51,32 @@ exports.signup = async (req, res) => {
   }
 };
 
+exports.resendEmailVerification = async (req, res) => {
+  const { email } = req.params;
+
+  try {
+    let user = await User.findOne({ email: email });
+    if (!user) return res.status(400).send({ message: "Ungültiger Email" });
+
+    const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
+    console.log(randomCode);
+    const hashCode = await hashSomething(randomCode);
+
+    user.authCode = hashCode;
+    await user.save();
+
+    await sendEmail(
+      user.email,
+      "Verify Email",
+      emailTemplates.emailVerification(randomCode)
+    );
+
+    res.status(201).send(user.email);
+  } catch (error) {
+    res.status(500).send({ message: `${error}` });
+  }
+};
+
 exports.verifyEmail = async (req, res) => {
   const {
     params: { email },
@@ -271,7 +297,8 @@ exports.groups = async (req, res) => {
 exports.edit = async (req, res) => {
   const { userId } = req.params;
   const { password, email } = req.body;
-  const createExpirationDate = () => new Date(+new Date() + 24 * 60 * 60 * 1000);
+  const createExpirationDate = () =>
+    new Date(+new Date() + 24 * 60 * 60 * 1000);
 
   try {
     const { error } = validate(req.body);
