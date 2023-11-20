@@ -365,27 +365,31 @@ exports.delete = async (req, res) => {
       }
     );
 
-    user.moderatedGroups.map(async (groupIds) => {
-      const specGroup = await Group.findOne({ _id: groupIds });
+    user.moderatedGroups.map(async (groupId) => {
+      const specGroup = await Group.findOne({ _id: groupId });
+
+      await deleteEvent(specGroup.meeting);
 
       await User.updateMany(
         {
           joinedGroups: {
-            $in: [groupIds],
+            $in: [groupId],
           },
         },
         {
           $pull: {
-            joinedGroups: groupIds,
+            joinedGroups: groupId,
             meetings: specGroup.meeting,
           },
         }
       );
+
+      await specGroup.delete();
     });
 
-    user.meetings.map((meeting) => deleteEvent(meeting));
+    // user.meetings.map((meeting) => deleteEvent(meeting));
 
-    await Group.deleteMany({ moderator: userId });
+    // await Group.deleteMany({ moderatorId: userId });
 
     await User.deleteOne({ _id: userId });
 
