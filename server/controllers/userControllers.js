@@ -7,30 +7,76 @@ const Joi = require("joi");
 const passwordComplexity = require("joi-password-complexity");
 const { getEvents, deleteEvent } = require("../utils/googleCalendar");
 const emailTemplates = require("../lib/emailTemplates");
+<<<<<<< HEAD
+=======
+
+const hashSomething = async (thingToHash) => {
+  const salt = await bcrypt.genSalt(Number(process.env.SALT));
+
+  return bcrypt.hash(thingToHash, salt);
+};
+>>>>>>> user-management-1
 
 exports.signup = async (req, res) => {
   const { email, password } = req.body;
+
   try {
     const { error } = validate(req.body);
     if (error)
       return res.status(400).send({ message: error.details[0].message });
 
-    let user = await User.findOne({ email: email });
+    let user = await User.findOne({ email: email.toLowerCase() });
     if (user)
       return res.status(409).send({ message: "E-Mail bereits in Gebrauch" });
 
-    const salt = await bcrypt.genSalt(Number(process.env.SALT));
-    const hashPassword = await bcrypt.hash(password, salt);
     const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
     console.log(randomCode);
-    const hashCode = await bcrypt.hash(randomCode, salt);
+    const hashPassword = await hashSomething(password);
+    const hashCode = await hashSomething(randomCode);
 
     user = await new User({
       ...req.body,
+      email: email.toLowerCase(),
       passwordHash: hashPassword,
       authCode: hashCode,
       questions: { Themes: ["Depression", "Anxiety"], Experience: "None" },
     }).save();
+
+<<<<<<< HEAD
+    await sendEmail(
+      user.email,
+      "Verify Email",
+      emailTemplates.emailVerification(randomCode)
+    );
+=======
+    // await sendEmail(
+    //   user.email,
+    //   "Verify Email",
+    //   emailTemplates.emailVerification(randomCode)
+    // );
+>>>>>>> user-management-1
+
+    res.status(201).send(user.email);
+  } catch (error) {
+    res.status(500).send({ message: `${error}` });
+  }
+};
+
+<<<<<<< HEAD
+=======
+exports.resendEmailVerification = async (req, res) => {
+  const { email } = req.params;
+
+  try {
+    let user = await User.findOne({ email: email });
+    if (!user) return res.status(400).send({ message: "Ungültiger Email" });
+
+    const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
+    console.log(randomCode);
+    const hashCode = await hashSomething(randomCode);
+
+    user.authCode = hashCode;
+    await user.save();
 
     await sendEmail(
       user.email,
@@ -44,8 +90,13 @@ exports.signup = async (req, res) => {
   }
 };
 
+>>>>>>> user-management-1
 exports.verifyEmail = async (req, res) => {
-  const { code, email } = req.body;
+  const {
+    params: { email },
+    body: { code },
+  } = req;
+
   try {
     if (code.length == 4) {
       let user = await User.findOne({ email: email });
@@ -53,7 +104,7 @@ exports.verifyEmail = async (req, res) => {
 
       const validAuthCode = await bcrypt.compare(code, user.authCode);
       if (!validAuthCode)
-        return res.status(401).send({ message: "Incorrect code!" });
+        return res.status(401).send({ message: "Falscher Code" });
 
       const accessToken = jwt.sign(
         {
@@ -62,7 +113,7 @@ exports.verifyEmail = async (req, res) => {
         process.env.TOKEN_SECRET,
         {
           algorithm: "HS256",
-          expiresIn: "10m",
+          expiresIn: "30m",
         }
       );
       const refreshToken = jwt.sign(
@@ -76,14 +127,15 @@ exports.verifyEmail = async (req, res) => {
         }
       );
 
-      await User.updateOne(
+      user = await User.findOneAndUpdate(
         { _id: user._id },
         {
           emailVerified: true,
           authCode: "",
-          emailVerificationExpires: null,
+          emailVerificationExpiration: null,
           refreshToken: refreshToken,
-        }
+        },
+        { returnOriginal: false }
       );
 
       res.cookie("jwt", refreshToken, {
@@ -118,6 +170,7 @@ exports.verifyEmail = async (req, res) => {
 
 exports.resetPasswordRequest = async (req, res) => {
   const { email } = req.body;
+
   try {
     let user = await User.findOne({ email: email });
     if (!user)
@@ -144,13 +197,14 @@ exports.resetPasswordRequest = async (req, res) => {
 
 exports.verifyResetPasswordToken = async (req, res) => {
   const { userId } = req.params;
+
   try {
     const user = await User.findOne({ _id: userId });
     if (!user) return res.status(400).send({ message: "Invalid link" });
 
     res.status(200).send({ message: "Valid url " });
   } catch (error) {
-    res.status(500).send({ message: error });
+    res.status(500).send({ message: `${error}` });
   }
 };
 
@@ -159,6 +213,7 @@ exports.resetPasswordId = async (req, res) => {
     body: { password },
     params: { userId },
   } = req;
+
   try {
     const passwordSchema = Joi.object({
       password: passwordComplexity().required().label("Password"),
@@ -168,17 +223,15 @@ exports.resetPasswordId = async (req, res) => {
       return res.status(400).send({ message: error.details[0].message });
 
     const user = await User.findOne({ _id: userId });
-    if (!user) return res.status(400).send({ message: "Invalid link" });
+    if (!user) return res.status(400).send({ message: "Ungültiger Benutzer" });
 
-    const salt = await bcrypt.genSalt(Number(process.env.SALT));
-    const hashPassword = await bcrypt.hash(password, salt);
-
+    const hashPassword = hashSomething(password);
     user.passwordHash = hashPassword;
     await user.save();
 
     res.status(200).send({ message: "Passwort erfolgreich zurückgesetzt" });
   } catch (error) {
-    res.status(500).send({ message: error });
+    res.status(500).send({ message: `${error}` });
   }
 };
 
@@ -188,6 +241,7 @@ exports.findOne = async (req, res) => {
 
   try {
     let user = await User.findOne({ _id: userId });
+    if (!user) return res.status(400).send({ message: "Ungültiger Benutzer" });
     let groups = await Group.find();
     groups = groups.filter(
       (group) => group.users.includes(user.id) || group.moderatorId == user.id
@@ -225,6 +279,7 @@ exports.findOne = async (req, res) => {
 // Think I made this obsolete...again
 exports.meetings = async (req, res) => {
   const { userId } = req.params;
+
   try {
     let user = await User.findOne({ _id: userId });
     let event = await getEvents();
@@ -233,13 +288,14 @@ exports.meetings = async (req, res) => {
     );
     res.status(200).send(mappedEvent);
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500).send(`${error}`);
   }
 };
 
 // Same here
 exports.groups = async (req, res) => {
   const { userId } = req.params;
+
   try {
     let groups = await Group.find();
 
@@ -248,71 +304,107 @@ exports.groups = async (req, res) => {
     );
     res.status(200).send(foundGroups);
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500).send(`${error}`);
   }
 };
 
 exports.edit = async (req, res) => {
   const { userId } = req.params;
-  try {
-    let user = await User.findOne({ _id: userId });
-    if (!user) return res.status(400).send({ message: "Invalid Link" });
+  const { password, email } = req.body;
+  const createExpirationDate = () =>
+    new Date(+new Date() + 24 * 60 * 60 * 1000);
 
-    await User.updateOne({ _id: userId }, { ...req.body });
+  try {
+    const { error } = validate(req.body);
+    if (error)
+      return res.status(400).send({ message: error.details[0].message });
+
+    const user = await User.findOne({ _id: userId });
+    if (!user) return res.status(400).send({ message: "Ungültiger Benutzer" });
+
+    const hashPassword = await hashSomething(password);
+
+    const newUser = await User.findOneAndUpdate(
+      { _id: userId },
+      { ...req.body, email: email.toLowerCase(), passwordHash: hashPassword },
+      { returnOriginal: false }
+    );
+
+    if (newUser.email !== user.email) {
+      const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
+      const hashCode = await hashSomething(randomCode);
+
+      await User.updateOne(
+        { _id: userId },
+        {
+          emailVerified: false,
+          authCode: hashCode,
+          emailVerificationExpiration: createExpirationDate(),
+          refreshToken: "",
+        }
+      );
+
+      await sendEmail(
+        newUser.email,
+        "Verify Email",
+        emailTemplates.emailVerification(randomCode)
+      );
+
+      return res.status(200).send(newUser.email);
+    }
 
     res.status(200).send({ message: "Benutzer erfolgreich aktualisiert" });
   } catch (error) {
-    res.status(500).send({ message: error });
+    res.status(500).send({ message: `${error}` });
   }
 };
 
-exports.delete = async (req, res, next) => {
+exports.delete = async (req, res) => {
   const { userId } = req.params;
+
   try {
     const user = await User.findOne({ _id: userId });
-    if (!user) return res.status(400).send({ message: "Invalid Link" });
+    if (!user) return res.status(400).send({ message: "Ungültiger Benutzer" });
 
     await Group.updateMany(
       {
         users: {
           $in: [userId],
         },
-        // moderator: req.params.id
       },
       {
         $pull: {
           users: userId,
-          // moderator: req.params.id
         },
       }
     );
 
-    user.moderatedGroups.map(async (groupIds) => {
-      const specGroup = await Group.findOne({ _id: groupIds });
+    user.moderatedGroups.map(async (groupId) => {
+      const specGroup = await Group.findOne({ _id: groupId });
+
+      await deleteEvent(specGroup.meeting);
 
       await User.updateMany(
         {
           joinedGroups: {
-            $in: [groupIds],
+            $in: [groupId],
           },
         },
         {
           $pull: {
-            joinedGroups: groupIds,
+            joinedGroups: groupId,
             meetings: specGroup.meeting,
           },
         }
       );
+
+      await specGroup.delete();
     });
 
-    user.meetings.map((meeting) => deleteEvent(meeting));
-
-    await Group.deleteMany({ moderator: userId });
-
-    await User.deleteOne({ _id: userId });
+    await user.delete();
 
     res.status(200).send({ message: "Benutzer erfolgreich gelöscht" });
   } catch (error) {
-    res.status(500).send({ message: error });
+    res.status(500).send({ message: `${error}` });
   }
 };

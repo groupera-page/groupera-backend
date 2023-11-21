@@ -1,7 +1,6 @@
 const jwt = require("jsonwebtoken");
 const { Group } = require("../models/Group.model");
 
-
 // for some reason, bearer is acting weird
 const verifyJWT = (req, res, next) => {
   const authHeader = req.headers.authorization || req.headers.Authorization;
@@ -25,7 +24,6 @@ const verifyCurrentUser = async (req, res, next) => {
     next();
   }
 };
-
 
 module.exports = {
   verifyJWT,
