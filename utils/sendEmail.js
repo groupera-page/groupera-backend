@@ -7,8 +7,8 @@ module.exports = async (email, subject, template) => {
 			port: 587,
 			secure: false, // true for 465, false for other ports
 			auth: {
-				user: process.env.EMAIL_USER, // generated brevo user
-				pass: process.env.EMAIL_PASS, // generated brevo password
+				user: process.env.BREVO_EMAIL, // generated brevo user
+				pass: process.env.BREVO_PASSWORD, // generated brevo password
 			},
 		})
 

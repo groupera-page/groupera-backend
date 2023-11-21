@@ -1,16 +1,19 @@
 const nodemailer = require('nodemailer')
 
-const { template } = require('../emailTemplate')
+const { emailVerification, passwordReset } = require('../lib/emailTemplates')
 const myCustomError = require('../utils/myCustomError')
 
 exports.sendEmail = (emailType) => async (req, res, next) => {
 	if (!res.locals)
 		next(myCustomError('Something went wrong with setting locals', 500))
 	const {
-		user: { email, alias },
+		// user: { email, alias },
+		user,
 		authCode,
 		url,
-	} = res.locals
+	} = await res.locals
+
+	console.log('Supposed to be last')
 
 	let subject // case emailType === "Verify email"
 	switch (emailType) {
@@ -37,9 +40,10 @@ exports.sendEmail = (emailType) => async (req, res, next) => {
 
 		const info = await transporter.sendMail({
 			from: `${process.env.SEND_TRANSACTIONAL_EMAILS_FROM_NAME} <${process.env.SEND_TRANSACTIONAL_EMAILS_FROM_EMAIL}>`,
-			to: `${alias} <${email}>`,
+			// to: `${alias} <${email}>`,
+			to: `John <${user}>`,
 			subject: subject,
-			html: template(authCode || url),
+			html: subject === 'Verify your email Address' ? emailVerification(authCode) : passwordReset(url)
 		})
 
 		if (!info.messageId)
@@ -51,7 +55,7 @@ exports.sendEmail = (emailType) => async (req, res, next) => {
 			)
 
 		res.send({
-			message: `Email gesendet an: ${email}`,
+			message: `Email gesendet an: ${user}`,
 		})
 	} catch (error) {
 		next(error)

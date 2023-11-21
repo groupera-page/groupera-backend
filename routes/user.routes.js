@@ -3,7 +3,8 @@ const userControllers = require('../controllers/userControllers')
 const {
 	verifyCurrentUser,
 } = require('../middleware/userAuthentication.middleware.js')
-const { validateAuthToken } = require('../middleware/auth.middleware.js')
+const { validateAuthToken, validateScheme } = require('../middleware/auth.middleware.js')
+const { userSchema } = require('../models/User.model')
 
 router.get(
 	'/:userId',
@@ -12,17 +13,9 @@ router.get(
 	userControllers.findOne
 )
 
-router.get(
-	'/:userId/meetings',
-	validateAuthToken,
-	verifyCurrentUser,
-	userControllers.meetings
-)
-
-router.get('/:userId/groups', userControllers.groups)
-
 router.patch(
 	'/:userId',
+	validateScheme(userSchema),
 	validateAuthToken,
 	verifyCurrentUser,
 	userControllers.edit

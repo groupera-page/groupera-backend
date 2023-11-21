@@ -29,17 +29,15 @@ exports.validateScheme =
 		async (req, res, next) => {
 			const { error } = Joi.object(schema).validate(compareTo || req.body)
 			if (error) next(myCustomError(error.details[0].message, 400))
-
+			console.log('validateScheme, second')
 			next()
 		}
 
 exports.validateResetPassword = async (req, res, next) => {
 	const { error } = Joi.object({
 		password: passwordComplexity().required().label('Password'),
-		resetPasswordToken: Joi.string().required().label('resetPasswordToken'),
 	}).validate({
 		password: req.body.password,
-		resetPasswordToken: req.params.resetPasswordToken,
 	})
 	if (error) next(myCustomError(error.details[0].message, 400))
 
@@ -50,7 +48,7 @@ exports.validateNoEmailDuplicates = async (req, res, next) => {
 	try {
 		const user = await User.findOne({ email: req.body.email })
 		if (user) throw myCustomError('E-Mail bereits in Gebrauch', 409)
-
+		console.log('validateNoEmailDuplicates')
 		next()
 	} catch (error) {
 		next(error)
