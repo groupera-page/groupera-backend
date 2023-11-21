@@ -27,14 +27,15 @@ module.exports = (app) => {
 	// );
 
 	const corsConfig = {
-		origin: true,
+		// origin: '*',
+		origin: ['http://localhost:8080', process.env.FRONTEND_BASE_URL],
 		credentials: true,
-		allowedHeaders: [
-			'set-cookie',
-			'Content-Type',
-			'Access-Control-Allow-Origin',
-			'Access-Control-Allow-Credentials',
-		]
+		// allowedHeaders: [
+		// 	'set-cookie',
+		// 	'Content-Type',
+		// 	'Access-Control-Allow-Origin',
+		// 	'Access-Control-Allow-Credentials',
+		// ]
 	}
 
 	app.use(cors(corsConfig))

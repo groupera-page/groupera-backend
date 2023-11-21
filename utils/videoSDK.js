@@ -18,8 +18,7 @@ const generateRoom = async (token, id, length) => {
 	}
 	const url = 'https://api.videosdk.live/v2/rooms'
 	const response = await fetch(url, options)
-	const data = await response.json()
-	console.log(data)
+	return response.json()
 }
 
 module.exports = generateRoom

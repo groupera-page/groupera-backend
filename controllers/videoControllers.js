@@ -15,7 +15,6 @@ exports.getTokenMod = async (req, res, next) => {
 
 		const videoTokenMod = jwt.sign(payload, SECRET_KEY, options)
 		res.json({ videoTokenMod })
-		console.log(videoTokenMod)
 	} catch (error) {
 		next(error)
 	}
@@ -36,7 +35,6 @@ exports.getToken = async (req, res, next) => {
 
 		const videoTokenUser = jwt.sign(payload, SECRET_KEY, options)
 		res.json({ videoTokenUser })
-		console.log(videoTokenUser)
 	} catch (error) {
 		next(error)
 	}

@@ -3,7 +3,8 @@ exports.noPathError = (req, res) => {
 	res.status(404).json({ message: 'Not found' })
 }
 
-exports.defaultError = (err, req, res) => {
+// eslint-disable-next-line no-unused-vars
+exports.defaultError = (err, req, res, next) => {
 	// whenever you call next(err), this middleware will handle the error
 	// always logs the error
 	console.error('Default ERROR', req.method, req.path, err)

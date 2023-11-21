@@ -116,7 +116,7 @@ exports.meetings = async (req, res, next) => {
 		const groupEvents = events.filter((event) =>
 			event.id.includes(group.meeting)
 		)
-		// console.log(events)
+
 		res.send(groupEvents)
 	} catch (error) {
 		next(error)

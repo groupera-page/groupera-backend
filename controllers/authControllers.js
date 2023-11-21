@@ -55,8 +55,8 @@ exports.verifyEmail = async (req, res, next) => {
 
 		// should I send the Mongo formatted ID as the user ID or just the string?!
 		res.cookie('refreshToken', refreshToken, cookieOptions)
-			.header('Authorization', authToken)
 			.send({
+				authToken,
 				user: userObject,
 				message: 'Bentzer erfolgreich verfiziert',
 			})
@@ -86,8 +86,8 @@ exports.login = async (req, res, next) => {
 
 		// should I send the Mongo formatted ID as the user ID or just the string?!
 		res.cookie('refreshToken', refreshToken, cookieOptions)
-			.header('Authorization', authToken)
 			.send({
+				authToken,
 				user: userObject,
 				message: 'Erfolgreich eingeloggt',
 			})
@@ -151,8 +151,8 @@ exports.resetPassword = async (req, res, next) => {
 		const { userObject, authToken, refreshToken } = getAuthTokens(user)
 		// should I send the Mongo formatted ID as the user ID or just the string?!
 		res.cookie('refreshToken', refreshToken, cookieOptions)
-			.header('Authorization', authToken)
 			.send({
+				authToken,
 				user: userObject,
 				message: 'Passwort erfolgreich zurückgesetzt.',
 			})
@@ -183,16 +183,16 @@ exports.refresh = async (req, res, next) => {
 			currentRefreshToken,
 			process.env.REFRESH_TOKEN_SECRET,
 			(err, decoded) => {
-				if (err) return res.sendStatus(403)
+				if (err) throw myCustomError('Invalid Token', 400)
 
 				const {
 					authToken: newAuthToken,
 					refreshToken: newRefreshToken,
 				} = getAuthTokens(decoded.user)
 
-				res.cookie('refreshToken', newAuthToken, cookieOptions)
-					.header('Authorization', newRefreshToken)
+				res.cookie('refreshToken', newRefreshToken, cookieOptions)
 					.send({
+						authToken: newAuthToken,
 						user: decoded.user,
 					})
 			}
