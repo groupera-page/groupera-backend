@@ -17,10 +17,6 @@ const loginBodySchema = {
 	password: Joi.string().required().label('Password'),
 }
 
-const emailSchema = {
-	email: Joi.string().email().required().label('Email'),
-}
-
 const codeSchema = {
 	code: Joi.string().required().min(4).length(4).label('authCode'),
 }

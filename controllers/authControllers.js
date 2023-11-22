@@ -45,7 +45,7 @@ exports.signup = async (req, res, next) => {
 				Themes: ['Depression', 'Anxiety'],
 				Experience: 'None',
 			},
-		}).save()
+		})
 
 		await sendEmail(
 			user.email,
@@ -53,7 +53,7 @@ exports.signup = async (req, res, next) => {
 			emailTemplates.emailVerification(randomCode)
 		)
 
-		next()
+		res.send(user.email)
 	} catch (error) {
 		res.status(500).send({ message: `${error}` })
 	}
