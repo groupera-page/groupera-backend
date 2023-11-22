@@ -21,22 +21,22 @@ const hashSomething = async (thingToHash) => {
 	return bcrypt.hash(thingToHash, salt)
 }
 
-exports.signup = async (req, res, next) => {
+exports.signup = async (req, res) => {
 	const { email, password } = req.body
 
 	try {
-		let user = await User.findOne({ email: email.toLowerCase() })
-		if (user)
-			return res
-				.status(409)
-				.send({ message: 'E-Mail bereits in Gebrauch' })
+		// let user = await User.findOne({ email: email.toLowerCase() })
+		// if (user)
+		// 	return res
+		// 		.status(409)
+		// 		.send({ message: 'E-Mail bereits in Gebrauch' })
 
 		const randomCode = Math.floor(1000 + Math.random() * 9000).toString()
 		console.log(randomCode)
 		const hashPassword = await hashSomething(password)
 		const hashCode = await hashSomething(randomCode)
 
-		user = await new User({
+		const user = await new User({
 			...req.body,
 			email: email.toLowerCase(),
 			passwordHash: hashPassword,
@@ -45,7 +45,7 @@ exports.signup = async (req, res, next) => {
 				Themes: ['Depression', 'Anxiety'],
 				Experience: 'None',
 			},
-		})
+		}).save()
 
 		await sendEmail(
 			user.email,
@@ -53,7 +53,7 @@ exports.signup = async (req, res, next) => {
 			emailTemplates.emailVerification(randomCode)
 		)
 
-		res.send(user.email)
+		res.status(201).send(user.email);
 	} catch (error) {
 		res.status(500).send({ message: `${error}` })
 	}

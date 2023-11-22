@@ -12,7 +12,6 @@ exports.validateAuthToken = (req, res, next) => {
 	jwt.verify(token, process.env.AUTH_TOKEN_SECRET, (error, decoded) => {
 		if (error) next(myCustomError(error, 403))
 		req.userId = decoded.user._id
-		console.log(decoded)
 		next()
 	})
 }
@@ -47,9 +46,9 @@ exports.validateNoEmailDuplicates = async (req, res, next) => {
 	try {
 		const user = await User.findOne({ email: req.body.email })
 		if (user) throw myCustomError('E-Mail bereits in Gebrauch', 409)
+
 		next()
 	} catch (error) {
-		next('FIDDLE STCISK')
+		next(error)
 	}
-	next()
 }

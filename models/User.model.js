@@ -29,9 +29,9 @@ const userSchema = new Schema({
 	},
 	authCode: { type: String },
 	// Where is the date below created?
-	emailVerificationTokenExp: { type: Date },
-	resetPasswordToken: { type: String },
-	resetPasswordTokenExp: { type: Date },
+	// emailVerificationTokenExp: { type: Date },
+	// resetPasswordToken: { type: String },
+	// resetPasswordTokenExp: { type: Date },
 	gender: {
 		type: String,
 	},
