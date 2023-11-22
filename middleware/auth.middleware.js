@@ -7,12 +7,11 @@ const jwt = require('jsonwebtoken')
 
 exports.validateAuthToken = (req, res, next) => {
 	const authHeader = req.headers.authorization || req.headers.Authorization
-	console.log(authHeader)
 	if (!authHeader?.startsWith('Bearer ')) return res.sendStatus(401)
 	const token = authHeader.split(' ')[1]
 	jwt.verify(token, process.env.AUTH_TOKEN_SECRET, (error, decoded) => {
 		if (error) next(myCustomError(error, 403))
-		req.userId = decoded.id
+		req.userId = decoded.user._id
 		next()
 	})
 }
@@ -29,17 +28,14 @@ exports.validateScheme =
 		async (req, res, next) => {
 			const { error } = Joi.object(schema).validate(compareTo || req.body)
 			if (error) next(myCustomError(error.details[0].message, 400))
-
 			next()
 		}
 
 exports.validateResetPassword = async (req, res, next) => {
 	const { error } = Joi.object({
 		password: passwordComplexity().required().label('Password'),
-		resetPasswordToken: Joi.string().required().label('resetPasswordToken'),
 	}).validate({
 		password: req.body.password,
-		resetPasswordToken: req.params.resetPasswordToken,
 	})
 	if (error) next(myCustomError(error.details[0].message, 400))
 
@@ -55,5 +51,4 @@ exports.validateNoEmailDuplicates = async (req, res, next) => {
 	} catch (error) {
 		next(error)
 	}
-	next()
 }

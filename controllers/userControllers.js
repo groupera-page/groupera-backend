@@ -1,113 +1,156 @@
+/* eslint-disable no-mixed-spaces-and-tabs */
 const { User } = require('../models/User.model')
 const { Group } = require('../models/Group.model')
 
+const bcrypt = require('bcryptjs')
+
 const myCustomError = require('../utils/myCustomError')
 const { getEvents, deleteEvent } = require('../utils/googleCalendar')
+const sendEmail = require('../utils/sendEmail')
+
+const emailTemplates = require('../lib/emailTemplates')
+
+const hashSomething = async (thingToHash) => {
+	const salt = await bcrypt.genSalt(Number(process.env.SALT));
+  
+	return bcrypt.hash(thingToHash, salt);
+}
 
 exports.findOne = async (req, res, next) => {
-	const { userId } = req.params
+	const { userId } = req.params;
+	const allGroupMeetings = await getEvents();
+  
 	try {
-		const user = await User.findOne({ _id: userId })
-		if (!user) throw myCustomError('User could not be found', 400)
-
-		res.send(user)
+	  let user = await User.findOne({ _id: userId });
+	  if (!user) throw myCustomError('User could not be found', 400);
+  
+	  let groups = await Group.find();
+	  groups = groups.filter(
+			(group) => group.users.includes(user.id) || group.moderatorId == user.id
+	  );
+  
+	  user = {
+			id: user.id,
+			alias: user.alias,
+			email: user.email,
+			dob: user.dob,
+			questions: user.questions,
+			emailVerified: user.emailVerified,
+			gender: user.gender,
+			groups: groups.map((group) => {
+		  return (group = {
+					id: group.id,
+					verified: group.verified,
+					name: group.name,
+					description: group.description,
+					topic: group.topic,
+					moderator: group.moderatorId,
+					meeting: allGroupMeetings.filter((groupMeeting) =>
+			  groupMeeting.id.includes(group.meeting)
+					),
+		  });
+			}),
+	  };
+  
+	  res.send(user);
 	} catch (error) {
-		next(error)
+	  next(error)
 	}
 }
-
-exports.meetings = async (req, res, next) => {
-	const { userId } = req.params
-	try {
-		let user = await User.findOne({ _id: userId })
-		let start = '2023-10-03T00:00:00.000Z'
-		let end = '2026-10-06T00:00:00.000Z'
-		let event = await getEvents(start, end)
-		let mappedEvent = user.meetings.map((meetings) =>
-			event.filter((events) => events.id.includes(meetings))
-		)
-		res.send(mappedEvent)
-	} catch (error) {
-		next(error)
-	}
-}
-
-exports.groups = async (req, res, next) => {
-	const { userId } = req.params
-	try {
-		let groups = await Group.find()
-
-		let foundGroups = groups.filter(
-			(groups) =>
-				groups.users.includes(userId) || groups.moderatorId === userId
-		)
-		res.send(foundGroups)
-	} catch (error) {
-		next(error)
-	}
-}
-
+  
 exports.edit = async (req, res, next) => {
-	const { userId } = req.params
+	const { userId } = req.params;
+	const { password, email } = req.body;
+	const createExpirationDate = () =>
+	  new Date(+new Date() + 24 * 60 * 60 * 1000);
+  
 	try {
-		let user = await User.findOne({ _id: userId })
-		if (!user) throw myCustomError('User could not be found', 400)
-
-		await User.updateOne({ _id: userId }, { ...req.body })
-
-		res.send({ message: 'Benutzer erfolgreich aktualisiert' })
+	  const user = await User.findOne({ _id: userId });
+	  if (!user) throw myCustomError('User could not be found', 400)
+  
+	  const hashPassword = await hashSomething(password);
+  
+	  const newUser = await User.findOneAndUpdate(
+			{ _id: userId },
+			{ ...req.body, email: email.toLowerCase(), passwordHash: hashPassword },
+			{ returnOriginal: false }
+	  );
+  
+	  if (newUser.email !== user.email) {
+			const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
+			const hashCode = await hashSomething(randomCode);
+  
+			await User.updateOne(
+		  { _id: userId },
+		  {
+					emailVerified: false,
+					authCode: hashCode,
+					emailVerificationExpires: createExpirationDate(),
+					refreshToken: '',
+		  }
+			);
+  
+			await sendEmail(
+		  newUser.email,
+		  'Verify Email',
+		  emailTemplates.emailVerification(randomCode)
+			);
+  
+			return res.status(200).send(newUser.email);
+	  }
+  
+	  res.send({ message: 'Benutzer erfolgreich aktualisiert' });
 	} catch (error) {
-		next(error)
+	  next(error)
 	}
 }
-
+  
 exports.delete = async (req, res, next) => {
-	const { userId } = req.params
+	const { userId } = req.params;
+  
 	try {
-		const user = await User.findOne({ _id: userId })
-		if (!user) throw myCustomError('User could not be found', 400)
-
-		await Group.updateMany(
+	  const user = await User.findOne({ _id: userId });
+	  if (!user) throw myCustomError('User could not be found', 400);
+  
+	  await Group.updateMany(
 			{
-				users: {
+		  users: {
 					$in: [userId],
-				},
-				// moderator: req.params.id
+		  },
 			},
 			{
-				$pull: {
+		  $pull: {
 					users: userId,
-					// moderator: req.params.id
-				},
+		  },
 			}
-		)
-
-		user.moderatedGroups.map(async (groupIds) => {
-			const specGroup = await Group.findOne({ _id: groupIds })
-
+	  );
+  
+	  user.moderatedGroups.map(async (groupId) => {
+			const specGroup = await Group.findOne({ _id: groupId });
+  
+			await deleteEvent(specGroup.meeting);
+  
 			await User.updateMany(
-				{
+		  {
 					joinedGroups: {
-						$in: [groupIds],
+			  $in: [groupId],
 					},
-				},
-				{
+		  },
+		  {
 					$pull: {
-						joinedGroups: groupIds,
-						meetings: specGroup.meeting,
+			  joinedGroups: groupId,
+			  meetings: specGroup.meeting,
 					},
-				}
-			)
-		})
-
-		user.meetings.map((meeting) => deleteEvent(meeting))
-
-		await Group.deleteMany({ moderator: userId })
-
-		await User.deleteOne({ _id: userId })
-
-		res.send({ message: 'Benutzer erfolgreich gelöscht' })
+		  }
+			);
+  
+			await specGroup.delete();
+	  });
+  
+	  await user.delete();
+  
+	  res.send({ message: 'Benutzer erfolgreich gelöscht' });
 	} catch (error) {
-		next(error)
+	  next(error)
 	}
 }

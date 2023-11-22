@@ -1,43 +1,63 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { v4: uuidv4 } = require('uuid')
+// const { v4: uuidv4 } = require('uuid')
 
 const { User } = require('../models/User.model')
 
 const myCustomError = require('../utils/myCustomError')
+const sendEmail = require('../utils/sendEmail')
 const {
-	calcExpirationDate,
-	tokenExpired,
+	// calcExpirationDate,
+	// tokenExpired,
 	getAuthTokens,
 	cookieOptions,
 } = require('../utils/auth.helpers')
 
-exports.signup = async (req, res, next) => {
+const emailTemplates = require('../lib/emailTemplates')
+
+const hashSomething = async (thingToHash) => {
+	const salt = await bcrypt.genSalt(Number(process.env.SALT))
+
+	return bcrypt.hash(thingToHash, salt)
+}
+
+exports.signup = async (req, res) => {
 	const { email, password } = req.body
+
 	try {
-		const salt = await bcrypt.genSalt(Number(process.env.SALT))
-
-		const hashedPassword = await bcrypt.hash(password, salt)
-
 		const randomCode = Math.floor(1000 + Math.random() * 9000).toString()
-		const hashedRandomCode = await bcrypt.hash(randomCode, salt)
+		console.log(randomCode)
+		const hashPassword = await hashSomething(password)
+		const hashCode = await hashSomething(randomCode)
 
-		await new User({
+		const user = await new User({
 			...req.body,
-			passwordHash: hashedPassword,
-			authCode: hashedRandomCode,
+			email: email.toLowerCase(),
+			passwordHash: hashPassword,
+			authCode: hashCode,
+			questions: {
+				Themes: ['Depression', 'Anxiety'],
+				Experience: 'None',
+			},
 		}).save()
 
-		res.locals.user = { email }
-		res.locals.authCode = randomCode
-		next()
+		await sendEmail(
+			user.email,
+			'Verify Email',
+			emailTemplates.emailVerification(randomCode)
+		)
+
+		res.status(201).send(user.email)
 	} catch (error) {
-		next(error)
+		res.status(500).send({ message: `${error}` })
 	}
 }
 
 exports.verifyEmail = async (req, res, next) => {
-	const { code, email } = req.body
+	const {
+		body: { code },
+		params: { email },
+	} = req
 	try {
 		let user = await User.findOne({ email: email })
 		if (!user) throw myCustomError('Ungültiger Email', 401)
@@ -46,7 +66,9 @@ exports.verifyEmail = async (req, res, next) => {
 		if (!validAuthCode) throw myCustomError('Incorrect code!', 401)
 
 		user.emailVerified = true
-		user.emailVerificationTokenExp = true
+		// Why were we changing a date type to boolean type below? It crashed...
+		// user.emailVerificationTokenExp = true
+		user.emailVerificationExpires = null
 		user.authCode = ''
 
 		const { userObject, authToken, refreshToken } = getAuthTokens(user)
@@ -54,12 +76,38 @@ exports.verifyEmail = async (req, res, next) => {
 		await user.save()
 
 		// should I send the Mongo formatted ID as the user ID or just the string?!
-		res.cookie('refreshToken', refreshToken, cookieOptions)
-			.send({
-				authToken,
-				user: userObject,
-				message: 'Bentzer erfolgreich verfiziert',
-			})
+
+		// I had the same question, actually. Is mongo formatted better practice?
+		res.cookie('refreshToken', refreshToken, cookieOptions).send({
+			authToken,
+			user: userObject,
+			message: 'Bentzer erfolgreich verfiziert',
+		})
+	} catch (error) {
+		next(error)
+	}
+}
+
+exports.resendEmailVerification = async (req, res, next) => {
+	const { email } = req.params
+	try {
+		let user = await User.findOne({ email: email })
+		if (!user) throw myCustomError('Ungültiger Email', 401)
+
+		const randomCode = Math.floor(1000 + Math.random() * 9000).toString()
+		console.log(randomCode)
+		const hashCode = await hashSomething(randomCode)
+
+		user.authCode = hashCode
+		await user.save()
+
+		await sendEmail(
+			user.email,
+			'Verify Email',
+			emailTemplates.emailVerification(randomCode)
+		)
+
+		res.send(user.email)
 	} catch (error) {
 		next(error)
 	}
@@ -85,79 +133,74 @@ exports.login = async (req, res, next) => {
 		const { userObject, authToken, refreshToken } = getAuthTokens(user)
 
 		// should I send the Mongo formatted ID as the user ID or just the string?!
-		res.cookie('refreshToken', refreshToken, cookieOptions)
-			.send({
-				authToken,
-				user: userObject,
-				message: 'Erfolgreich eingeloggt',
-			})
+		res.cookie('refreshToken', refreshToken, cookieOptions).send({
+			authToken,
+			user: userObject,
+			message: 'Erfolgreich eingeloggt',
+		})
 	} catch (error) {
 		next(error)
 	}
 }
 
-exports.setResetPasswordToken = async (req, res, next) => {
+exports.resetPasswordRequest = async (req, res) => {
 	const { email } = req.body
+
 	try {
 		let user = await User.findOne({ email: email })
-		// As security measure we respond always with status code of 200 and the same message
 		if (!user)
-			throw myCustomError(
+			return res.status(409).send({
+				message:
+					'Der Benutzer mit der angegebenen E-Mail-Adresse existiert nicht',
+			})
+
+		const url = `${process.env.BASE_URL}password-reset/${user._id}`
+		await sendEmail(
+			user.email,
+			'Password Reset',
+			emailTemplates.passwordReset(user.alias, user.email, url)
+		)
+
+		res.status(200).send({
+			message:
 				'Der Link zum Zurücksetzen des Passworts wurde an Ihre E-Mail-Adresse gesendet',
-				200
-			)
-
-		user.resetPasswordToken = uuidv4()
-		user.resetPasswordTokenExp = calcExpirationDate('ResetPasswordToken')
-
-		await user.save()
-
-		const url = `${process.env.FRONTEND_BASE_URL}/auth/resetPassword/${user.resetPasswordToken}`
-
-		res.locals.user = user
-		res.locals.resetPasswordToken = user.resetPasswordToken
-		res.locals.resetPasswordTokenExp = user.resetPasswordTokenExp
-		res.locals.url = url
-
-		next()
+		})
 	} catch (error) {
-		next(error)
+		res.status(500).send({ message: error })
 	}
 }
 
-exports.resetPassword = async (req, res, next) => {
+exports.verifyResetPasswordLink = async (req, res) => {
+	const { userId } = req.params
+
 	try {
-		const {
-			body: { password },
-			params: { resetPasswordToken },
-		} = req
+		const user = await User.findOne({ _id: userId })
+		if (!user) return res.status(400).send({ message: 'Invalid link' })
 
-		const user = await User.findOne({ resetPasswordToken })
-		if (
-			!user ||
-			!user.resetPasswordTokenExp ||
-			tokenExpired(user.resetPasswordTokenExp)
-		)
-			throw myCustomError('Invalid Token', 400)
+		res.status(200).send({ message: 'Valid url ' })
+	} catch (error) {
+		res.status(500).send({ message: `${error}` })
+	}
+}
 
-		const salt = await bcrypt.genSalt(Number(process.env.SALT))
-		const hashPassword = await bcrypt.hash(password, salt)
+exports.resetPassword = async (req, res) => {
+	const {
+		body: { password },
+		params: { userId },
+	} = req
 
-		user.resetPasswordTokenExp = undefined
-		user.resetPasswordToken = undefined
-		user.password = hashPassword
+	try {
+		const user = await User.findOne({ _id: userId })
+		if (!user)
+			return res.status(400).send({ message: 'Ungültiger Benutzer' })
+
+		const hashPassword = await hashSomething(password)
+		user.passwordHash = hashPassword
 		await user.save()
 
-		const { userObject, authToken, refreshToken } = getAuthTokens(user)
-		// should I send the Mongo formatted ID as the user ID or just the string?!
-		res.cookie('refreshToken', refreshToken, cookieOptions)
-			.send({
-				authToken,
-				user: userObject,
-				message: 'Passwort erfolgreich zurückgesetzt.',
-			})
+		res.status(200).send({ message: 'Passwort erfolgreich zurückgesetzt' })
 	} catch (error) {
-		next(error)
+		res.status(500).send({ message: `${error}` })
 	}
 }
 
@@ -190,11 +233,12 @@ exports.refresh = async (req, res, next) => {
 					refreshToken: newRefreshToken,
 				} = getAuthTokens(decoded.user)
 
-				res.cookie('refreshToken', newRefreshToken, cookieOptions)
-					.send({
+				res.cookie('refreshToken', newRefreshToken, cookieOptions).send(
+					{
 						authToken: newAuthToken,
 						user: decoded.user,
-					})
+					}
+				)
 			}
 		)
 	} catch (error) {

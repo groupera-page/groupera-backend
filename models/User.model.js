@@ -21,16 +21,17 @@ const userSchema = new Schema({
 	},
 	emailVerificationExpires: {
 		type: Date,
-		default: () => new Date(+new Date() + 15 * 60 * 1000), //3 minutes
+		default: () => new Date(+new Date() + 24 * 60 * 60 * 1000), // 24 hours
 	},
 	emailVerified: {
 		type: Boolean,
 		default: false,
 	},
 	authCode: { type: String },
-	emailVerificationTokenExp: { type: Date },
-	resetPasswordToken: { type: String },
-	resetPasswordTokenExp: { type: Date },
+	// Where is the date below created?
+	// emailVerificationTokenExp: { type: Date },
+	// resetPasswordToken: { type: String },
+	// resetPasswordTokenExp: { type: Date },
 	gender: {
 		type: String,
 	},
