@@ -6,6 +6,7 @@ const verifyCurrentUser = async (req, res, next) => {
 		userId: currentUserId,
 		params: { userId: paramsUserId },
 	} = req
+	console.log(currentUserId)
 	if (!currentUserId || currentUserId !== paramsUserId){
 		return next(myCustomError('Unauthorized', 401)) 
 	}

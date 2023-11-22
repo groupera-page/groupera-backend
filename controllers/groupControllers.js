@@ -53,14 +53,16 @@ exports.create = async (req, res, next) => {
 				dateTime: dateTime['end'],
 				timeZone: 'Europe/Berlin',
 			},
-			recurrence: [`RRULE:FREQ=WEEKLY;REPEAT=2;INTERVAL=${+frequency}`],
+			recurrence: [`RRULE:FREQ=WEEKLY;COUNT=2;INTERVAL=${+frequency}`],
 		}
 		const newEvent = await insertEvent(event)
 		if (newEvent) {
 			group.meeting = newEvent.id
 			group.moderatorId = user._id
 			// generateRoom(token, group._id, length);
-			if (moderationType === 'Selbstmoderiert') group.verified = true
+			if (moderationType == 'Selbstmoderiert') group.verified = true
+
+			group.save()
 
 			res.send({ message: 'all good here, boss' })
 		}
