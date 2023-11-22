@@ -3,10 +3,9 @@ const { User } = require('../models/User.model')
 
 exports.join = async (req, res, next) => {
 	const {
-		userId: { currentUserId },
+		userId: currentUserId,
 		params: { groupId },
 	} = req
-	console.log(currentUserId)
 	try {
 		let group = await Group.findOne({ _id: groupId })
 		if (!group)
@@ -38,7 +37,7 @@ exports.join = async (req, res, next) => {
 
 exports.leave = async (req, res, next) => {
 	const {
-		body: { currentUserId },
+		userId: currentUserId,
 		params: { groupId },
 	} = req
 

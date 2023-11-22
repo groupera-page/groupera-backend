@@ -1,30 +1,31 @@
 const nodemailer = require('nodemailer')
 
-const { emailVerification, passwordReset } = require('../lib/emailTemplates')
+// const { template } = require('../emailTemplate')
 const myCustomError = require('../utils/myCustomError')
 
 exports.sendEmail = (emailType) => async (req, res, next) => {
 	if (!res.locals)
 		next(myCustomError('Something went wrong with setting locals', 500))
 	const {
-		// user: { email, alias },
-		user,
+		user: { email, alias },
 		authCode,
 		url,
-	} = await res.locals
-
-	console.log('Supposed to be last')
-
+	} = res.locals
+	console.log(res.locals)
 	let subject // case emailType === "Verify email"
+	let template
 	switch (emailType) {
 		case 'Invitation email':
 			subject = 'Invitation to groupera'
+			template = 'insert template here'
 			break
 		case 'Reset Password Instructions':
 			subject = 'Reset password instructions'
+			template = 'insert template here'
 			break
 		default:
 			subject = 'Verify your email address'
+			template = 'insert template here'
 	}
 
 	try {
@@ -40,10 +41,9 @@ exports.sendEmail = (emailType) => async (req, res, next) => {
 
 		const info = await transporter.sendMail({
 			from: `${process.env.SEND_TRANSACTIONAL_EMAILS_FROM_NAME} <${process.env.SEND_TRANSACTIONAL_EMAILS_FROM_EMAIL}>`,
-			// to: `${alias} <${email}>`,
-			to: `John <${user}>`,
+			to: `${alias} <${email}>`,
 			subject: subject,
-			html: subject === 'Verify your email Address' ? emailVerification(authCode) : passwordReset(url)
+			html: template(authCode || url),
 		})
 
 		if (!info.messageId)
@@ -55,7 +55,7 @@ exports.sendEmail = (emailType) => async (req, res, next) => {
 			)
 
 		res.send({
-			message: `Email gesendet an: ${user}`,
+			message: `Email gesendet an: ${email}`,
 		})
 	} catch (error) {
 		next(error)
