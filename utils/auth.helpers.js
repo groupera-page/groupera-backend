@@ -51,6 +51,8 @@ exports.getAuthTokens = (user) => {
 		jwtAlgorithm('1d')
 	)
 
+	console.log(userObject)
+
 	return { authToken, refreshToken, userObject }
 }
 
