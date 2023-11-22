@@ -127,8 +127,8 @@ exports.delete = async (req, res, next) => {
   
 	  user.moderatedGroups.map(async (groupId) => {
 			const specGroup = await Group.findOne({ _id: groupId });
-  
-			await deleteEvent(specGroup.meeting);
+
+			if (specGroup.meeting.length > 0) await deleteEvent(specGroup.meeting);
   
 			await User.updateMany(
 		  {

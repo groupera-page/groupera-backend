@@ -57,6 +57,11 @@ exports.create = async (req, res, next) => {
 		}
 		const newEvent = await insertEvent(event)
 		if (newEvent) {
+			await User.updateOne(
+				{ _id: user._id },
+				{ $push: { moderatedGroups: group._id, meetings: newEvent.id } }
+			)
+
 			group.meeting = newEvent.id
 			group.moderatorId = user._id
 			// generateRoom(token, group._id, length);
@@ -164,7 +169,7 @@ exports.edit = async (req, res, next) => {
 				dateTime: dateTime['end'],
 				timeZone: 'Europe/Berlin',
 			},
-			recurrence: [`RRULE:FREQ=WEEKLY;INTERVAL=${+frequency}`],
+			recurrence: [`RRULE:FREQ=WEEKLY;COUNT=2;INTERVAL=${+frequency}`],
 		}
 
 		await editEvent(group.meeting, event)

@@ -20,7 +20,7 @@ const verifyGroupModerator = async (req, res, next) => {
 	const group = await Group.findOne({ _id: params.groupId })
 	if (!group) next(myCustomError('Group not found', 400))
 
-	if (currentUserId !== group.moderatorId)
+	if (currentUserId != group.moderatorId)
 		next(myCustomError('Unauthorized', 401))
 
 	next()

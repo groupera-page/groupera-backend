@@ -12,7 +12,7 @@ const {
 	validateAuthToken,
 } = require('../middleware/auth.middleware')
 
-router.post('/:userId', validateAuthToken, verifyCurrentUser, validateScheme(groupSchema), groupControllers.create)
+router.post('/:userId', validateScheme(groupSchema), validateAuthToken, verifyCurrentUser, groupControllers.create)
 
 router.get('/findAll', groupControllers.findAll)
 

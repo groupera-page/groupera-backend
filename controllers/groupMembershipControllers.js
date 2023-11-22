@@ -3,17 +3,17 @@ const { User } = require('../models/User.model')
 
 exports.join = async (req, res, next) => {
 	const {
-		body: { currentUserId },
+		userId: { currentUserId },
 		params: { groupId },
 	} = req
-
+	console.log(currentUserId)
 	try {
 		let group = await Group.findOne({ _id: groupId })
 		if (!group)
 			return res
 				.status(400)
 				.send({ message: 'Die Gruppe existiert nicht' })
-
+		if (!currentUserId) res.status(400)
 		if (!group.users.includes(currentUserId)) {
 			await User.updateOne(
 				{ _id: currentUserId },
