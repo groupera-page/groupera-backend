@@ -6,29 +6,26 @@ const {
 	insertEvent,
 	getEvents,
 	deleteEvent,
-	// getEvent,
 	editEvent,
 } = require('../utils/googleCalendar')
-// const fetch = require("node-fetch");
 // const generateRoom = require("../utils/videoSDK");
 
 exports.create = async (req, res, next) => {
 	const {
-		// img,
-		frequency,
-		date,
-		time,
-		length,
-		// token,
-		currentUserId,
-		name,
-	} = req.body
+		body: {
+			// img,
+			frequency,
+			date,
+			time,
+			length,
+			// token,
+			name,
+			moderationType,
+		},
+		params: { userId },
+	} = req
 
 	try {
-		const { error } = validate(req.body)
-		if (error)
-			return res.status(400).send({ message: error.details[0].message })
-
 		let group = await Group.findOne({ name: name })
 		if (group)
 			return res.status(409).send({
@@ -43,7 +40,7 @@ exports.create = async (req, res, next) => {
 			...req.body,
 			// img: uploadRes
 		}).save()
-		const user = await User.findOne({ _id: currentUserId })
+		const user = await User.findOne({ _id: userId })
 		const dateTime = dateTimeForCalender(date, time, length)
 		const event = {
 			summary: group.name,
@@ -60,19 +57,13 @@ exports.create = async (req, res, next) => {
 		}
 		const newEvent = await insertEvent(event)
 		if (newEvent) {
-			await User.updateOne(
-				{ _id: user._id },
-				{ $push: { moderatedGroups: group._id, meetings: newEvent.id } }
-			)
-			await Group.updateOne(
-				{ _id: group._id },
-				{ meeting: newEvent.id, verified: true, moderatorId: user._id }
-			)
+			group.meeting = newEvent.id
+			group.moderatorId = user._id
+			// generateRoom(token, group._id, length);
+			if (moderationType === 'Selbstmoderiert') group.verified = true
+
+			res.send({ message: 'all good here, boss' })
 		}
-		// generateRoom(token, group._id, length);
-		// }
-		res.send({ message: 'all good here, boss' })
-		// }
 	} catch (error) {
 		next(error)
 	}
