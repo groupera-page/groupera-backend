@@ -1,11 +1,18 @@
 const router = require('express').Router()
+
+const { groupSchema } = require('../models/Group.model')
+
 const groupControllers = require('../controllers/groupControllers')
 const {
+	verifyCurrentUser,
 	verifyGroupModerator,
 } = require('../middleware/userAuthentication.middleware.js')
-const { validateAuthToken } = require('../middleware/auth.middleware')
+const {
+	validateScheme,
+	validateAuthToken,
+} = require('../middleware/auth.middleware')
 
-router.post('', groupControllers.create)
+router.post('/:userId', verifyCurrentUser, validateScheme(groupSchema), groupControllers.create)
 
 router.get('/findAll', groupControllers.findAll)
 

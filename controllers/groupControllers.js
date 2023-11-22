@@ -1,4 +1,4 @@
-const { Group, validate } = require('../models/Group.model')
+const { Group } = require('../models/Group.model')
 const { User } = require('../models/User.model')
 // const cloudinary = require("../utils/cloudinary");
 const {
@@ -28,14 +28,14 @@ exports.create = async (req, res, next) => {
 	try {
 		let group = await Group.findOne({ name: name })
 		if (group)
-			return res.status(409).send({
+			res.status(409).send({
 				message: 'Gruppe mit dem angegebenen Namen existiert bereits',
 			})
 		// if (img) {
 		//   const uploadRes = await cloudinary.uploader.upload(img, {
 		//     folder: "test",
 		//   });
-		//   if (uploadRes) {
+		//   if (!uploadRes) res.sendStatus(400)
 		group = await new Group({
 			...req.body,
 			// img: uploadRes
