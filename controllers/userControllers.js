@@ -85,7 +85,7 @@ exports.edit = async (req, res, next) => {
 		  {
 					emailVerified: false,
 					authCode: hashCode,
-					emailVerificationExpiration: createExpirationDate(),
+					emailVerificationExpires: createExpirationDate(),
 					refreshToken: '',
 		  }
 			);

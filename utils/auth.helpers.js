@@ -32,7 +32,7 @@ exports.jwtAlgorithm = jwtAlgorithm
 
 exports.getAuthTokens = (user) => {
 	const userObject = {
-		id: user.id,
+		_id: user._id,
 		alias: user.alias,
 		email: user.email,
 		dob: user.dob,
@@ -50,8 +50,6 @@ exports.getAuthTokens = (user) => {
 		process.env.REFRESH_TOKEN_SECRET,
 		jwtAlgorithm('1d')
 	)
-
-	console.log(userObject)
 
 	return { authToken, refreshToken, userObject }
 }

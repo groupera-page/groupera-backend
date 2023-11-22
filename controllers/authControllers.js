@@ -21,7 +21,7 @@ const hashSomething = async (thingToHash) => {
 	return bcrypt.hash(thingToHash, salt)
 }
 
-exports.signup = async (req, res) => {
+exports.signup = async (req, res, next) => {
 	const { email, password } = req.body
 
 	try {
@@ -53,7 +53,7 @@ exports.signup = async (req, res) => {
 			emailTemplates.emailVerification(randomCode)
 		)
 
-		res.send(user.email)
+		next()
 	} catch (error) {
 		res.status(500).send({ message: `${error}` })
 	}
@@ -74,6 +74,7 @@ exports.verifyEmail = async (req, res, next) => {
 		user.emailVerified = true
 		// Why were we changing a date type to boolean type below? It crashed...
 		// user.emailVerificationTokenExp = true
+		user.emailVerificationExpires = null
 		user.authCode = ''
 
 		const { userObject, authToken, refreshToken } = getAuthTokens(user)
