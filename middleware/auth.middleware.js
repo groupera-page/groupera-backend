@@ -12,8 +12,7 @@ exports.validateAuthToken = (req, res, next) => {
 	const token = authHeader.split(' ')[1]
 	jwt.verify(token, process.env.AUTH_TOKEN_SECRET, (error, decoded) => {
 		if (error) next(myCustomError(error, 403))
-		req.userId = decoded.id
-		console.log(req.userId)
+		req.userId = decoded.user._id
 		next()
 	})
 }
