@@ -19,29 +19,26 @@ exports.create = async (req, res, next) => {
 			time,
 			length,
 			// token,
-			name,
 			moderationType,
 		},
-		params: { userId },
+		userId: userId,
 	} = req
 
 	try {
-		let group = await Group.findOne({ name: name })
-		if (group)
-			res.status(409).send({
-				message: 'Gruppe mit dem angegebenen Namen existiert bereits',
-			})
 		// if (img) {
 		//   const uploadRes = await cloudinary.uploader.upload(img, {
 		//     folder: "test",
 		//   });
 		//   if (!uploadRes) res.sendStatus(400)
-		group = await new Group({
+		let group = await new Group({
 			...req.body,
 			// img: uploadRes
 		}).save()
+
 		const user = await User.findOne({ _id: userId })
+
 		const dateTime = dateTimeForCalender(date, time, length)
+
 		const event = {
 			summary: group.name,
 			description: `Join code: ${group._id}`,
@@ -56,21 +53,20 @@ exports.create = async (req, res, next) => {
 			recurrence: [`RRULE:FREQ=WEEKLY;COUNT=2;INTERVAL=${+frequency}`],
 		}
 		const newEvent = await insertEvent(event)
-		if (newEvent) {
-			await User.updateOne(
-				{ _id: user._id },
-				{ $push: { moderatedGroups: group._id, meetings: newEvent.id } }
-			)
 
-			group.meeting = newEvent.id
-			group.moderatorId = user._id
-			// generateRoom(token, group._id, length);
-			if (moderationType == 'Selbstmoderiert') group.verified = true
+		await User.updateOne(
+			{ _id: user._id },
+			{ $push: { moderatedGroups: group._id, meetings: newEvent.id } }
+		)
 
-			group.save()
+		group.meeting = newEvent.id
+		group.moderatorId = user._id
+		// generateRoom(token, group._id, length);
+		if (moderationType == 'Selbstmoderiert') group.verified = true
 
-			res.send({ message: 'all good here, boss' })
-		}
+		group.save()
+
+		res.send({ message: 'all good here, boss' })
 	} catch (error) {
 		next(error)
 	}

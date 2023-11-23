@@ -10,9 +10,10 @@ const {
 const {
 	validateScheme,
 	validateAuthToken,
+	validateNoGroupDuplicates
 } = require('../middleware/auth.middleware')
 
-router.post('/:userId', validateScheme(groupSchema), validateAuthToken, verifyCurrentUser, groupControllers.create)
+router.post('', validateScheme(groupSchema), validateAuthToken, validateNoGroupDuplicates, groupControllers.create)
 
 router.get('/findAll', groupControllers.findAll)
 
