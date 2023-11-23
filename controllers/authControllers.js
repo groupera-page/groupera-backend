@@ -22,7 +22,7 @@ const hashSomething = async (thingToHash) => {
 }
 
 exports.signup = async (req, res, next) => {
-	const { email, password } = req.body
+	const { password } = req.body
 
 	try {
 		const randomCode = Math.floor(1000 + Math.random() * 9000).toString()
@@ -30,16 +30,15 @@ exports.signup = async (req, res, next) => {
 		const hashPassword = await hashSomething(password)
 		const hashCode = await hashSomething(randomCode)
 
-		await new User({
+		const user = await new User({
 			...req.body,
 			// email: email.toLowerCase(),
 			passwordHash: hashPassword,
 			authCode: hashCode,
 		}).save()
 
-		res.locals.user = { email }
+		res.locals.user = user
 		res.locals.authCode = randomCode
-		console.log(res.locals)
 		next()
 	} catch (error) {
 		next(error)
@@ -91,14 +90,10 @@ exports.resendEmailVerification = async (req, res, next) => {
 
 		user.authCode = hashCode
 		await user.save()
-
-		// await sendEmail(
-		// 	user.email,
-		// 	'Verify Email',
-		// 	emailTemplates.emailVerification(randomCode)
-		// )
-
-		res.send(user.email)
+		
+		res.locals.user = user
+		res.locals.authCode = randomCode
+		next()
 	} catch (error) {
 		next(error)
 	}

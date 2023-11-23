@@ -38,7 +38,8 @@ router.patch(
 
 router.patch(
 	'/:email/resendEmailVerification',
-	authControllers.resendEmailVerification
+	authControllers.resendEmailVerification,
+	emailControllers.sendEmail('Verify email')
 )
 
 router.post('/login', validateScheme(loginBodySchema), authControllers.login)
