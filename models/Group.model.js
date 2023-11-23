@@ -38,33 +38,29 @@ const groupSchema = new Schema({
 
 const Group = model('Group', groupSchema)
 
-const validate = (data) => {
-	const schema = Joi.object({
-		name: Joi.string().min(1).max(70).required().label('Name').messages({
+const schema = {
+	name: Joi.string().min(1).max(70).required().label('Name').messages({
+		'string.max': 'Bitte halten Sie den Namen auf weniger als 70 Zeichen',
+		'string.empty': 'Bitte Name eingeben',
+	}),
+	description: Joi.string()
+		.min(3)
+		.max(500)
+		.required()
+		.label('Description')
+		.messages({
+			'string.min':
+				'Bitte geben Sie eine Beschreibung mit mindestens 3 Zeichen ein',
 			'string.max':
-				'Bitte halten Sie den Namen auf weniger als 70 Zeichen',
-			'string.empty': 'Bitte Name eingeben',
+				'Bitte halten Sie den Description auf weniger als 500 Zeichen',
+			'string.empty': 'Bitte Description eingeben',
 		}),
-		description: Joi.string()
-			.min(3)
-			.max(500)
-			.required()
-			.label('Description')
-			.messages({
-				'string.min':
-					'Bitte geben Sie eine Beschreibung mit mindestens 3 Zeichen ein',
-				'string.max':
-					'Bitte halten Sie den Description auf weniger als 500 Zeichen',
-				'string.empty': 'Bitte Description eingeben',
-			}),
-		topic: Joi.string().required().label('Topic'),
-		time: Joi.string().required().label('Time'),
-		date: Joi.date().required().label('Date'),
-		frequency: Joi.number().required().label('Frequency'),
-		length: Joi.number().required().label('Length'),
-		moderationType: Joi.string().label('Moderation-type'),
-	})
-	return schema.validate(data)
+	topic: Joi.string().required().label('Topic'),
+	time: Joi.string().required().label('Time'),
+	date: Joi.date().required().label('Date'),
+	frequency: Joi.number().required().label('Frequency'),
+	length: Joi.number().required().label('Length'),
+	moderationType: Joi.string().label('Moderation-type'),
 }
 
-module.exports = { Group, validate }
+module.exports = { Group, groupSchema: schema }
