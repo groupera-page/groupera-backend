@@ -3,17 +3,23 @@ const router = require('express').Router()
 const { groupSchema } = require('../models/Group.model')
 
 const groupControllers = require('../controllers/groupControllers')
+
 const {
-	verifyCurrentUser,
 	verifyGroupModerator,
 } = require('../middleware/userAuthentication.middleware.js')
 const {
 	validateScheme,
 	validateAuthToken,
-	validateNoGroupDuplicates
+	validateNoGroupDuplicates,
 } = require('../middleware/auth.middleware')
 
-router.post('', validateScheme(groupSchema), validateAuthToken, validateNoGroupDuplicates, groupControllers.create)
+router.post(
+	'',
+	validateScheme(groupSchema),
+	validateAuthToken,
+	validateNoGroupDuplicates,
+	groupControllers.create
+)
 
 router.get('/findAll', groupControllers.findAll)
 
@@ -21,6 +27,7 @@ router.get('/:groupId', groupControllers.findOne)
 
 router.patch(
 	'/:groupId',
+	validateScheme(groupSchema),
 	validateAuthToken,
 	verifyGroupModerator,
 	groupControllers.edit
