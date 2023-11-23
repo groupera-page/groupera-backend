@@ -14,7 +14,7 @@ const {
 } = require('../middleware/auth.middleware')
 
 const loginBodySchema = {
-	email: Joi.string().email().lowercase().required().label('Email'),
+	email: Joi.string().email().required().label('Email'),
 	password: Joi.string().required().label('Password'),
 }
 

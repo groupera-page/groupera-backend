@@ -22,7 +22,7 @@ const hashSomething = async (thingToHash) => {
 }
 
 exports.signup = async (req, res, next) => {
-	const { password } = req.body
+	const { email, password } = req.body
 
 	try {
 		const randomCode = Math.floor(1000 + Math.random() * 9000).toString()
@@ -32,7 +32,7 @@ exports.signup = async (req, res, next) => {
 
 		const user = await new User({
 			...req.body,
-			// email: email.toLowerCase(),
+			email: email.toLowerCase(),
 			passwordHash: hashPassword,
 			authCode: hashCode,
 		}).save()
@@ -81,7 +81,7 @@ exports.verifyEmail = async (req, res, next) => {
 exports.resendEmailVerification = async (req, res, next) => {
 	const { email } = req.params
 	try {
-		let user = await User.findOne({ email: email })
+		let user = await User.findOne({ email: email.toLowerCase() })
 		if (!user) throw myCustomError('Ungültiger Email', 401)
 
 		const randomCode = Math.floor(1000 + Math.random() * 9000).toString()
@@ -103,7 +103,7 @@ exports.login = async (req, res, next) => {
 	try {
 		const { email, password } = req.body
 
-		const user = await User.findOne({ email })
+		const user = await User.findOne({ email: email.toLowerCase() })
 		if (!user) throw myCustomError('Ungültige E-Mail oder Passwort', 401)
 
 		const validPassword = await bcrypt.compare(password, user.passwordHash)
@@ -132,7 +132,7 @@ exports.login = async (req, res, next) => {
 exports.setResetPasswordToken = async (req, res, next) => {
 	const { email } = req.body
 	try {
-		let user = await User.findOne({ email: email })
+		let user = await User.findOne({ email: email.toLowerCase() })
 		// As security measure we respond always with status code of 200 and the same message
 		if (!user)
 			throw myCustomError(

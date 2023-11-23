@@ -10,9 +10,6 @@ exports.calcExpirationDate = (type) => {
 
 	let secsToAdd
 	switch (type) {
-		case 'RefreshToken':
-			secsToAdd = authConfig.refreshTokenExpiration
-			break
 		case 'InvitationToken':
 			secsToAdd = authConfig.invitationTokenExpiration
 			break
