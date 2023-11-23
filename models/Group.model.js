@@ -58,11 +58,10 @@ const validate = (data) => {
 				'string.empty': 'Bitte Description eingeben',
 			}),
 		topic: Joi.string().required().label('Topic'),
-		time: Joi.string().label('Time'),
-		date: Joi.date().label('Date'),
-		frequency: Joi.number().label('Frequency'),
-		length: Joi.number().label('Length'),
-		currentUserId: Joi.string().label('Currentuser'),
+		time: Joi.string().required().label('Time'),
+		date: Joi.date().required().label('Date'),
+		frequency: Joi.number().required().label('Frequency'),
+		length: Joi.number().required().label('Length'),
 		moderationType: Joi.string().label('Moderation-type'),
 	})
 	return schema.validate(data)

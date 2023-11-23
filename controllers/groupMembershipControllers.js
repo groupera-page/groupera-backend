@@ -1,6 +1,8 @@
 const { Group } = require('../models/Group.model')
 const { User } = require('../models/User.model')
 
+const myCustomError = require('../utils/myCustomError')
+
 exports.join = async (req, res, next) => {
 	const {
 		userId: currentUserId,
@@ -8,28 +10,24 @@ exports.join = async (req, res, next) => {
 	} = req
 	try {
 		let group = await Group.findOne({ _id: groupId })
-		if (!group)
-			return res
-				.status(400)
-				.send({ message: 'Die Gruppe existiert nicht' })
-		if (!currentUserId) res.status(400)
-		if (!group.users.includes(currentUserId)) {
-			await User.updateOne(
-				{ _id: currentUserId },
-				{ $push: { joinedGroups: group._id, meetings: group.meeting } }
-			)
+		if (!group) throw myCustomError('Die Gruppe existiert nicht', 400)
 
-			await Group.updateOne(
-				{ _id: groupId },
-				{ $push: { users: currentUserId } }
-			)
+		if (!currentUserId) throw myCustomError('User could not be found', 400)
 
-			res.send({ message: 'Gruppe erfolgreich beigetreten' })
-		} else {
-			res.status(400).send({
-				message: 'Sie sind bereits in dieser Gruppe',
-			})
-		}
+		if (group.users.includes(currentUserId))
+			throw myCustomError(`You're already in this group, sweetie`, 400)
+
+		await User.updateOne(
+			{ _id: currentUserId },
+			{ $push: { joinedGroups: group._id, meetings: group.meeting } }
+		)
+
+		await Group.updateOne(
+			{ _id: groupId },
+			{ $push: { users: currentUserId } }
+		)
+
+		res.send({ message: 'Gruppe erfolgreich beigetreten' })
 	} catch (error) {
 		next(error)
 	}
@@ -43,10 +41,7 @@ exports.leave = async (req, res, next) => {
 
 	try {
 		let group = await Group.findOne({ _id: groupId })
-		if (!group)
-			return res
-				.status(400)
-				.send({ message: 'Die Gruppe existiert nicht' })
+		if (!group) throw myCustomError('Die Gruppe existiert nicht', 400)
 
 		await Group.updateOne(
 			{ _id: groupId },
