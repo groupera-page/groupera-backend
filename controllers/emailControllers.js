@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer')
 
-// const { template } = require('../emailTemplate')
+const { emailVerification, passwordReset  } = require('..lib//emailTemplates')
 const myCustomError = require('../utils/myCustomError')
 
 exports.sendEmail = (emailType) => async (req, res, next) => {
@@ -14,18 +14,22 @@ exports.sendEmail = (emailType) => async (req, res, next) => {
 	console.log(res.locals)
 	let subject // case emailType === "Verify email"
 	let template
+	let content
 	switch (emailType) {
 		case 'Invitation email':
 			subject = 'Invitation to groupera'
 			template = 'insert template here'
+			content = 'insert content here'
 			break
 		case 'Reset Password Instructions':
 			subject = 'Reset password instructions'
-			template = 'insert template here'
+			template = passwordReset
+			content = url
 			break
 		default:
 			subject = 'Verify your email address'
-			template = 'insert template here'
+			template = emailVerification
+			content = authCode
 	}
 
 	try {
@@ -43,7 +47,7 @@ exports.sendEmail = (emailType) => async (req, res, next) => {
 			from: `${process.env.SEND_TRANSACTIONAL_EMAILS_FROM_NAME} <${process.env.SEND_TRANSACTIONAL_EMAILS_FROM_EMAIL}>`,
 			to: `${alias} <${email}>`,
 			subject: subject,
-			html: template(authCode || url),
+			html: template(content),
 		})
 
 		if (!info.messageId)
