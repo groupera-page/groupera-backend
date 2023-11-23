@@ -87,7 +87,7 @@ const schema = {
 		'string.max': 'Bitte halten Sie den Namen auf weniger als 70 Zeichen',
 		'string.empty': 'Bitte Name eingeben',
 	}),
-	email: Joi.string().email().required().label('Email').messages({
+	email: Joi.string().email().lowercase().required().label('Email').messages({
 		'string.email': 'Bitte geben Sie eine gültige E-Mail Adresse ein',
 		'string.empty': 'Bitte geben Sie eine E-Mail Adresse ein',
 	}),
