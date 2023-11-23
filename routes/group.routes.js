@@ -17,9 +17,6 @@ router.post('', validateScheme(groupSchema), validateAuthToken, validateNoGroupD
 
 router.get('/findAll', groupControllers.findAll)
 
-// pretty sure I made this obsolete
-router.get('/:groupId/meetings', groupControllers.meetings)
-
 router.get('/:groupId', groupControllers.findOne)
 
 router.patch(

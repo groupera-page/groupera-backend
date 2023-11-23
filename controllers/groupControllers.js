@@ -1,6 +1,10 @@
 const { Group } = require('../models/Group.model')
 const { User } = require('../models/User.model')
+
 // const cloudinary = require("../utils/cloudinary");
+// const generateRoom = require("../utils/videoSDK");
+const myCustomError = require('../utils/myCustomError')
+
 const {
 	dateTimeForCalender,
 	insertEvent,
@@ -8,7 +12,6 @@ const {
 	deleteEvent,
 	editEvent,
 } = require('../utils/googleCalendar')
-// const generateRoom = require("../utils/videoSDK");
 
 exports.create = async (req, res, next) => {
 	const {
@@ -21,7 +24,7 @@ exports.create = async (req, res, next) => {
 			// token,
 			moderationType,
 		},
-		userId: userId,
+		userId: currentUserId,
 	} = req
 
 	try {
@@ -35,7 +38,7 @@ exports.create = async (req, res, next) => {
 			// img: uploadRes
 		}).save()
 
-		const user = await User.findOne({ _id: userId })
+		const user = await User.findOne({ _id: currentUserId })
 
 		const dateTime = dateTimeForCalender(date, time, length)
 
@@ -73,45 +76,26 @@ exports.create = async (req, res, next) => {
 }
 
 exports.findAll = async (req, res, next) => {
+	const allGroupMeetings = await getEvents()
+
 	try {
 		let groups = await Group.find()
 
-		const start = '2023-10-03T00:00:00.000Z'
-		const end = '2036-10-06T00:00:00.000Z'
-		const allGroupMeetings = await getEvents(start, end)
-
 		groups = await groups.map((group) => {
 			return {
-				_id: group._id,
+				id: group.id,
 				name: group.name,
 				description: group.description,
 				img: group.img,
 				topic: group.topic,
+				users: group.users.length,
 				meetings: allGroupMeetings.filter((groupMeeting) =>
 					groupMeeting.id.includes(group.meeting)
 				),
 			}
 		})
 
-		res.send(groups)
-	} catch (error) {
-		next(error)
-	}
-}
-
-// pretty sure I made this obsolete
-exports.meetings = async (req, res, next) => {
-	const { groupId } = req.params
-	try {
-		const group = await Group.findOne({ _id: groupId })
-		const start = '2023-10-03T00:00:00.000Z'
-		const end = '2036-10-06T00:00:00.000Z'
-		const events = await getEvents(start, end)
-		const groupEvents = events.filter((event) =>
-			event.id.includes(group.meeting)
-		)
-
-		res.send(groupEvents)
+		res.status(200).send(groups)
 	} catch (error) {
 		next(error)
 	}
@@ -119,19 +103,39 @@ exports.meetings = async (req, res, next) => {
 
 exports.findOne = async (req, res, next) => {
 	const { groupId } = req.params
+	const allGroupMeetings = await getEvents()
+
 	try {
 		let group = await Group.findOne({ _id: groupId })
-		if (!group)
-			return res
-				.status(400)
-				.send({ message: 'Die Gruppe existiert nicht' })
-		const start = '2023-10-03T00:00:00.000Z'
-		const end = '2036-10-06T00:00:00.000Z'
-		const allGroupMeetings = await getEvents(start, end)
-		const groupMeetings = allGroupMeetings.filter((groupMeeting) =>
-			groupMeeting.id.includes(group.meeting)
+		if (!group) throw myCustomError('Group could not be found', 400)
+
+		let moderator = await User.findOne({ _id: group.moderatorId })
+
+		moderator = {
+			id: moderator.id,
+			alias: moderator.alias,
+		}
+
+		let users = await Promise.all(
+			group.users.map(async (user) => {
+				let foundUser = await User.findOne({ _id: user })
+				return foundUser.alias
+			})
 		)
-		res.send({ group, groupMeetings })
+
+		group = {
+			id: group.id,
+			verified: group.verified,
+			name: group.name,
+			description: group.description,
+			topic: group.topic,
+			moderator: moderator,
+			users: users,
+			meeting: allGroupMeetings.filter((groupMeeting) =>
+				groupMeeting.id.includes(group.meeting)
+			),
+		}
+		res.status(200).send(group)
 	} catch (error) {
 		next(error)
 	}
@@ -145,10 +149,7 @@ exports.edit = async (req, res, next) => {
 
 	try {
 		let group = await Group.findOne({ _id: groupId })
-		if (!group)
-			return res
-				.status(400)
-				.send({ message: 'Die Gruppe existiert nicht' })
+		if (!group) throw myCustomError('Group could not be found', 400)
 
 		await Group.updateOne({ _id: groupId }, { ...req.body })
 
@@ -180,10 +181,7 @@ exports.delete = async (req, res, next) => {
 	const { groupId } = req.params
 	try {
 		let group = await Group.findOne({ _id: groupId })
-		if (!group)
-			return res
-				.status(400)
-				.send({ message: 'Die Gruppe existiert nicht' })
+		if (!group) throw myCustomError('Group could not be found', 400)
 
 		await User.updateMany(
 			{
