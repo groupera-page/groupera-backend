@@ -4,6 +4,7 @@ const Joi = require('joi')
 const { userSchema } = require('../models/User.model')
 
 const authControllers = require('../controllers/authControllers')
+const emailControllers = require('../controllers/emailControllers')
 
 const {
 	validateRefreshToken,
@@ -25,8 +26,8 @@ router.post(
 	'/signup',
 	validateScheme(userSchema),
 	validateNoEmailDuplicates,
-	authControllers.signup
-	// emailControllers.sendEmail('Verify email')
+	authControllers.signup,
+	emailControllers.sendEmail('Verify email')
 )
 
 router.patch(
@@ -42,12 +43,14 @@ router.patch(
 
 router.post('/login', validateScheme(loginBodySchema), authControllers.login)
 
-router.post('/resetPasswordRequest', authControllers.resetPasswordRequest)
-
-router.get('/verifyResetPasswordLink', authControllers.verifyResetPasswordLink)
+router.post(
+	'/resetPasswordRequest',
+	authControllers.setResetPasswordToken,
+	emailControllers.sendEmail('Reset Password Instructions')
+)
 
 router.patch(
-	'/:userId/resetPassword',
+	'/resetPassword/:resetPasswordToken',
 	validateResetPassword,
 	authControllers.resetPassword
 )
