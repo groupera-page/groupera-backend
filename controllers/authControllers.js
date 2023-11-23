@@ -199,67 +199,6 @@ exports.resetPassword = async (req, res, next) => {
 	}
 }
 
-// exports.resetPasswordRequest = async (req, res) => {
-// 	const { email } = req.body
-
-// 	try {
-// 		let user = await User.findOne({ email: email })
-// 		if (!user)
-// 			return res.status(409).send({
-// 				message:
-// 					'Der Benutzer mit der angegebenen E-Mail-Adresse existiert nicht',
-// 			})
-
-// 		const url = `${process.env.BASE_URL}password-reset/${user._id}`
-// 		await sendEmail(
-// 			user.email,
-// 			'Password Reset',
-// 			emailTemplates.passwordReset(user.alias, user.email, url)
-// 		)
-
-// 		res.status(200).send({
-// 			message:
-// 				'Der Link zum Zurücksetzen des Passworts wurde an Ihre E-Mail-Adresse gesendet',
-// 		})
-// 	} catch (error) {
-// 		res.status(500).send({ message: error })
-// 	}
-// }
-
-// exports.verifyResetPasswordLink = async (req, res) => {
-// 	const { userId } = req.params
-
-// 	try {
-// 		const user = await User.findOne({ _id: userId })
-// 		if (!user) return res.status(400).send({ message: 'Invalid link' })
-
-// 		res.status(200).send({ message: 'Valid url ' })
-// 	} catch (error) {
-// 		res.status(500).send({ message: `${error}` })
-// 	}
-// }
-
-// exports.resetPassword = async (req, res) => {
-// 	const {
-// 		body: { password },
-// 		params: { userId },
-// 	} = req
-
-// 	try {
-// 		const user = await User.findOne({ _id: userId })
-// 		if (!user)
-// 			return res.status(400).send({ message: 'Ungültiger Benutzer' })
-
-// 		const hashPassword = await hashSomething(password)
-// 		user.passwordHash = hashPassword
-// 		await user.save()
-
-// 		res.status(200).send({ message: 'Passwort erfolgreich zurückgesetzt' })
-// 	} catch (error) {
-// 		res.status(500).send({ message: `${error}` })
-// 	}
-// }
-
 exports.logout = async (req, res, next) => {
 	try {
 		res.cookie('refreshToken', '')
