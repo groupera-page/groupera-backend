@@ -138,11 +138,12 @@ exports.findOne = async (req, res, next) => {
 			topic: group.topic,
 			moderator: moderator,
 			users: users,
-			meetings: await Promise.all(group.meetings.map(async (thisGroupMeeting) => await getEvent(thisGroupMeeting))
-				// allGroupMeetings.filter((groupMeeting) =>
-				// 	groupMeeting.id.includes(thisGroupMeeting)
-				// )
-			),
+			meetings: await Promise.all(group.meetings.map((thisGroupMeeting) =>
+				allGroupMeetings.filter((groupMeeting) =>
+					groupMeeting.id.includes(thisGroupMeeting)
+				)
+			
+			)),
 		}
 		res.status(200).send(group)
 	} catch (error) {

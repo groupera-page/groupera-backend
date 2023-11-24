@@ -56,7 +56,7 @@ const insertEvent = async (event) => {
 	}
 }
 
-const getEvents = async (thisId) => {
+const getEvents = async () => {
 	try {
 		const response = await calendar.events.list({
 			auth: auth,
@@ -64,7 +64,6 @@ const getEvents = async (thisId) => {
 			timeMin: '2023-10-03T00:00:00.000Z',
 			timeMax: '2025-10-06T00:00:00.000Z',
 			timeZone: 'Europe/Berlin',
-			eventId: thisId,
 			singleEvents: true,
 		})
 
