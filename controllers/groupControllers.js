@@ -9,6 +9,7 @@ const {
 	dateTimeForCalender,
 	insertEvent,
 	getEvents,
+	getEvent,
 	deleteEvent,
 	editEvent,
 } = require('../utils/googleCalendar')
@@ -64,8 +65,7 @@ exports.create = async (req, res, next) => {
 
 		await Group.updateOne(
 			{ _id: group._id },
-			{ moderatorId: user._id },
-			{ $push: { meetings: newEvent.id } }
+			{ $push: { meetings: newEvent.id }, moderatorId: user._id }
 		)
 		// group.meeting = newEvent.id
 		// group.moderatorId = user._id
@@ -138,10 +138,10 @@ exports.findOne = async (req, res, next) => {
 			topic: group.topic,
 			moderator: moderator,
 			users: users,
-			meetings: group.meetings.map((thisGroupMeeting) =>
-				allGroupMeetings.filter((groupMeeting) =>
-					groupMeeting.id.includes(thisGroupMeeting)
-				)
+			meetings: await Promise.all(group.meetings.map(async (thisGroupMeeting) => await getEvent(thisGroupMeeting))
+				// allGroupMeetings.filter((groupMeeting) =>
+				// 	groupMeeting.id.includes(thisGroupMeeting)
+				// )
 			),
 		}
 		res.status(200).send(group)

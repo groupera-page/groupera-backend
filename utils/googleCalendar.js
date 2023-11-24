@@ -1,4 +1,5 @@
 const { google } = require('googleapis')
+const { ideahub } = require('googleapis/build/src/apis/ideahub')
 require('dotenv').config()
 
 // Provide the required configuration
@@ -55,7 +56,7 @@ const insertEvent = async (event) => {
 	}
 }
 
-const getEvents = async () => {
+const getEvents = async (thisId) => {
 	try {
 		const response = await calendar.events.list({
 			auth: auth,
@@ -63,6 +64,7 @@ const getEvents = async () => {
 			timeMin: '2023-10-03T00:00:00.000Z',
 			timeMax: '2025-10-06T00:00:00.000Z',
 			timeZone: 'Europe/Berlin',
+			eventId: thisId,
 			singleEvents: true,
 		})
 
