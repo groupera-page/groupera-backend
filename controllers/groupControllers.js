@@ -2,7 +2,6 @@ const { Group } = require('../models/Group.model')
 const { User } = require('../models/User.model')
 
 // const cloudinary = require("../utils/cloudinary");
-// const generateRoom = require("../utils/videoSDK");
 const myCustomError = require('../utils/myCustomError')
 
 const {
@@ -23,7 +22,7 @@ exports.create = async (req, res, next) => {
 			time,
 			length,
 			// token,
-			// moderationType,
+			moderationType,
 		},
 		userId: currentUserId,
 	} = req
@@ -41,42 +40,14 @@ exports.create = async (req, res, next) => {
 
 		const user = await User.findOne({ _id: currentUserId })
 
-		// const dateTime = dateTimeForCalender(date, time, length)
-
-		// const event = {
-		// 	summary: group.name,
-		// 	description: `Join code: ${group._id}`,
-		// 	start: {
-		// 		dateTime: dateTime['start'],
-		// 		timeZone: 'Europe/Berlin',
-		// 	},
-		// 	end: {
-		// 		dateTime: dateTime['end'],
-		// 		timeZone: 'Europe/Berlin',
-		// 	},
-		// 	recurrence: [`RRULE:FREQ=WEEKLY;COUNT=2;INTERVAL=${+frequency}`],
-		// }
-		// const newEvent = await insertEvent(event)
-
-		// await User.updateOne(
-		// 	{ _id: user._id },
-		// 	{ $push: { moderatedGroups: group._id, meetings: newEvent.id } }
-		// )
-
-		// await Group.updateOne(
-		// 	{ _id: group._id },
-		// 	{ $push: { meetings: newEvent.id }, moderatorId: user._id }
-		// )
-		// // group.meeting = newEvent.id
-		// // group.moderatorId = user._id
-		// // generateRoom(token, group._id, length);
-
-		// if (moderationType == 'Selbstmoderiert') group.verified = true
-		// group.save()
+		if (moderationType == 'Selbstmoderiert') group.verified = true
+		group.save()
 
 		res.locals.meetingParameters = { frequency, date, time, length }
 		res.locals.user = user
 		res.locals.group = group
+		// res.locals.token = token
+
 		next()
 		// res.send({ message: 'all good here, boss' })
 	} catch (error) {

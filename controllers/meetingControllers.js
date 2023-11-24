@@ -2,6 +2,7 @@ const { Group } = require('../models/Group.model')
 const { User } = require('../models/User.model')
 
 const myCustomError = require('../utils/myCustomError')
+// const generateRoom = require("../utils/videoSDK");
 
 const {
 	dateTimeForCalender,
@@ -17,6 +18,7 @@ exports.createMeeting = async (req, res, next) => {
 		meetingParameters: { frequency, date, time, length },
 		user,
 		group,
+		// token
 	} = res.locals
 
 	try {
@@ -49,6 +51,8 @@ exports.createMeeting = async (req, res, next) => {
 			{ _id: group._id },
 			{ $push: { meetings: newEvent.id }, moderatorId: user._id }
 		)
+
+		// generateRoom(token, group._id, length);
 
 		res.send({ message: 'all good here, boss' })
 	} catch (error) {
