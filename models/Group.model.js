@@ -18,9 +18,11 @@ const groupSchema = new Schema({
 	topic: {
 		type: String,
 	},
-	meeting: {
-		type: String,
-	},
+	meetings: [
+		{
+			type: String,
+		},
+	],
 	moderatorId: {
 		type: Schema.Types.ObjectId,
 		ref: 'Moderator',

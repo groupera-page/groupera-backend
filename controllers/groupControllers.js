@@ -62,11 +62,16 @@ exports.create = async (req, res, next) => {
 			{ $push: { moderatedGroups: group._id, meetings: newEvent.id } }
 		)
 
-		group.meeting = newEvent.id
-		group.moderatorId = user._id
+		await Group.updateOne(
+			{ _id: group._id },
+			{ moderatorId: user._id },
+			{ $push: { meetings: newEvent.id } }
+		)
+		// group.meeting = newEvent.id
+		// group.moderatorId = user._id
 		// generateRoom(token, group._id, length);
-		if (moderationType == 'Selbstmoderiert') group.verified = true
 
+		if (moderationType == 'Selbstmoderiert') group.verified = true
 		group.save()
 
 		res.send({ message: 'all good here, boss' })
@@ -89,8 +94,10 @@ exports.findAll = async (req, res, next) => {
 				img: group.img,
 				topic: group.topic,
 				users: group.users.length,
-				meetings: allGroupMeetings.filter((groupMeeting) =>
-					groupMeeting.id.includes(group.meeting)
+				meetings: group.meetings.map((thisGroupMeeting) =>
+					allGroupMeetings.filter((groupMeeting) =>
+						groupMeeting.id.includes(thisGroupMeeting)
+					)
 				),
 			}
 		})
@@ -131,8 +138,10 @@ exports.findOne = async (req, res, next) => {
 			topic: group.topic,
 			moderator: moderator,
 			users: users,
-			meeting: allGroupMeetings.filter((groupMeeting) =>
-				groupMeeting.id.includes(group.meeting)
+			meetings: group.meetings.map((thisGroupMeeting) =>
+				allGroupMeetings.filter((groupMeeting) =>
+					groupMeeting.id.includes(thisGroupMeeting)
+				)
 			),
 		}
 		res.status(200).send(group)
