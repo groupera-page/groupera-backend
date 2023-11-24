@@ -15,15 +15,13 @@ const {
 exports.createMeeting = async (req, res, next) => {
 	const {
 		meetingParameters: { frequency, date, time, length },
-		currentUserId,
+		user,
 		group,
 	} = res.locals
 
 	try {
 		if (!res.locals)
 			next(myCustomError('Something went wrong with setting locals', 500))
-
-		const user = await User.findOne({ _id: currentUserId })
 
 		const dateTime = dateTimeForCalender(date, time, length)
 

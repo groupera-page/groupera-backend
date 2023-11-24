@@ -3,6 +3,7 @@ const router = require('express').Router()
 const { groupSchema } = require('../models/Group.model')
 
 const groupControllers = require('../controllers/groupControllers')
+const meetingControllers = require('../controllers/meetingControllers')
 
 const {
 	verifyGroupModerator,
@@ -18,7 +19,8 @@ router.post(
 	validateScheme(groupSchema),
 	validateAuthToken,
 	validateNoGroupDuplicates,
-	groupControllers.create
+	groupControllers.create,
+	meetingControllers.createMeeting
 )
 
 router.get('/findAll', groupControllers.findAll)
