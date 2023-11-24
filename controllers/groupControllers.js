@@ -128,36 +128,17 @@ exports.findOne = async (req, res, next) => {
 }
 
 exports.edit = async (req, res, next) => {
-	const {
-		body: { date, time, length, frequency },
-		params: { groupId },
-	} = req
+	const { groupId } = req.params
 
 	try {
-		let group = await Group.findOne({ _id: groupId })
+		let group = await Group.findOneAndUpdate(
+			{ _id: groupId },
+			{ ...req.body },
+			{ returnOriginal: false }
+		)
 		if (!group) throw myCustomError('Group could not be found', 400)
 
-		await Group.updateOne({ _id: groupId }, { ...req.body })
-
-		const dateTime = dateTimeForCalender(date, time, length)
-
-		const event = {
-			summary: group.name,
-			description: `Join code: ${group._id}`,
-			start: {
-				dateTime: dateTime['start'],
-				timeZone: 'Europe/Berlin',
-			},
-			end: {
-				dateTime: dateTime['end'],
-				timeZone: 'Europe/Berlin',
-			},
-			recurrence: [`RRULE:FREQ=WEEKLY;COUNT=2;INTERVAL=${+frequency}`],
-		}
-
-		await editEvent(group.meeting, event)
-
-		res.send({ message: 'Gruppe erfolgreich aktualisiert' })
+		res.send(group)
 	} catch (error) {
 		next(error)
 	}

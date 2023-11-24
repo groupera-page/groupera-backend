@@ -27,7 +27,7 @@ exports.createMeeting = async (req, res, next) => {
 
 		const dateTime = dateTimeForCalender(date, time, length)
 
-		const event = {
+		const meeting = {
 			summary: group.name,
 			description: `Join code: ${group._id}`,
 			start: {
@@ -40,21 +40,54 @@ exports.createMeeting = async (req, res, next) => {
 			},
 			recurrence: [`RRULE:FREQ=WEEKLY;COUNT=2;INTERVAL=${+frequency}`],
 		}
-		const newEvent = await insertEvent(event)
+		const newMeeting = await insertEvent(meeting)
 
 		await User.updateOne(
 			{ _id: user._id },
-			{ $push: { moderatedGroups: group._id, meetings: newEvent.id } }
+			{ $push: { moderatedGroups: group._id, meetings: newMeeting.id } }
 		)
 
 		await Group.updateOne(
 			{ _id: group._id },
-			{ $push: { meetings: newEvent.id }, moderatorId: user._id }
+			{ $push: { meetings: newMeeting.id }, moderatorId: user._id }
 		)
 
 		// generateRoom(token, group._id, length);
 
 		res.send({ message: 'all good here, boss' })
+	} catch (error) {
+		next(error)
+	}
+}
+
+exports.editMeeting = async (req, res, next) => {
+	const {
+		params: { meetingId, groupId },
+		body: { date, time, length, frequency },
+	} = req
+
+	try {
+		const dateTime = dateTimeForCalender(date, time, length)
+
+		const group = await Group.findOne({ _id: groupId })
+
+		const meeting = {
+			summary: group.name,
+			description: `Join code: ${group._id}`,
+			start: {
+				dateTime: dateTime['start'],
+				timeZone: 'Europe/Berlin',
+			},
+			end: {
+				dateTime: dateTime['end'],
+				timeZone: 'Europe/Berlin',
+			},
+			recurrence: [`RRULE:FREQ=WEEKLY;COUNT=2;INTERVAL=${+frequency}`],
+		}
+
+		const editedMeeting = await editEvent(meetingId, meeting)
+
+		res.send(editedMeeting)
 	} catch (error) {
 		next(error)
 	}
