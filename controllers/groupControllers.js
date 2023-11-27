@@ -1,5 +1,6 @@
 const { Group } = require('../models/Group.model')
 const { User } = require('../models/User.model')
+const { Meeting } = require('../models/Meeting.model')
 
 // const cloudinary = require("../utils/cloudinary");
 const myCustomError = require('../utils/myCustomError')
@@ -38,11 +39,13 @@ exports.create = async (req, res, next) => {
 			// img: uploadRes
 		}).save()
 
+		let meeting = await new Meeting().save()
+
 		const dateTime = dateTimeForCalender(date, time, length)
 
-		const meeting = {
+		let calendarEvent = {
 			summary: group.name,
-			description: `Join code: ${group._id}`,
+			description: `Join code: ${meeting._id}`,
 			start: {
 				dateTime: dateTime['start'],
 				timeZone: 'Europe/Berlin',
@@ -53,28 +56,31 @@ exports.create = async (req, res, next) => {
 			},
 			recurrence: [`RRULE:FREQ=WEEKLY;COUNT=2;INTERVAL=${+frequency}`],
 		}
-		const newMeeting = await insertEvent(meeting)
 
-		const user = await User.findOneAndUpdate(
+		const calendarMeeting = await insertEvent(calendarEvent)
+
+		await Meeting.updateOne(
+			{ _id: meeting._id },
+			{
+				calendarId: calendarMeeting.id,
+				$push: { members: currentUserId },
+			}
+		)
+
+		await User.updateOne(
 			{ _id: currentUserId },
-			{ $push: { moderatedGroups: group._id, meetings: newMeeting.id } },
-			{ returnOriginal: false }
+			{ $push: { moderatedGroups: group._id, meetings: meeting._id } }
 		)
 
 		await Group.updateOne(
 			{ _id: group._id },
-			{ $push: { meetings: newMeeting.id }, moderatorId: user._id }
+			{ $push: { meetings: meeting._id }, moderatorId: currentUserId }
 		)
 
 		// generateRoom(token, group._id, length);
 
 		if (moderationType == 'Selbstmoderiert') group.verified = true
 		group.save()
-
-		// res.locals.meetingParameters = { frequency, date, time, length }
-		// res.locals.user = user
-		// res.locals.group = group
-		// res.locals.token = token
 
 		res.send({ message: 'all good here, boss' })
 	} catch (error) {

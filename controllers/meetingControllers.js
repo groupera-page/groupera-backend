@@ -1,5 +1,6 @@
 const { Group } = require('../models/Group.model')
 const { User } = require('../models/User.model')
+const { Meeting } = require('../models/Meeting.model')
 
 const myCustomError = require('../utils/myCustomError')
 // const generateRoom = require("../utils/videoSDK");
@@ -28,12 +29,16 @@ exports.createMeeting = async (req, res, next) => {
 
 	try {
 		const group = await Group.findOne({ _id: groupId })
+		if (!group) throw myCustomError('Group could not be found', 400)
+		const user = await User.findOne({ _id: group.moderatorId })
+
+		let meeting = await new Meeting().save()
 
 		const dateTime = dateTimeForCalender(date, time, length)
 
-		const meeting = {
+		let calendarEvent = {
 			summary: group.name,
-			description: `Join code: ${group._id}`,
+			description: `Join code: ${meeting._id}`,
 			start: {
 				dateTime: dateTime['start'],
 				timeZone: 'Europe/Berlin',
@@ -44,16 +49,22 @@ exports.createMeeting = async (req, res, next) => {
 			},
 			recurrence: [`RRULE:FREQ=WEEKLY;COUNT=2;INTERVAL=${+frequency}`],
 		}
-		const newMeeting = await insertEvent(meeting)
+
+		const calendarMeeting = await insertEvent(calendarEvent)
+
+		await Meeting.updateOne(
+			{ _id: meeting._id },
+			{ calendarId: calendarMeeting.id, $push: { members: user._id } }
+		)
 
 		await User.updateOne(
-			{ _id: group.moderatorId },
-			{ $push: { meetings: newMeeting.id } }
+			{ _id: user._id },
+			{ $push: { meetings: meeting._id } }
 		)
 
 		await Group.updateOne(
 			{ _id: group._id },
-			{ $push: { meetings: newMeeting.id } }
+			{ $push: { meetings: meeting._id } }
 		)
 
 		// generateRoom(token, group._id, length);
