@@ -19,7 +19,7 @@ exports.join = async (req, res, next) => {
 
 		await User.updateOne(
 			{ _id: currentUserId },
-			{ $push: { joinedGroups: group._id, meetings: group.meeting } }
+			{ $push: { joinedGroups: group._id } }
 		)
 
 		await Group.updateOne(
@@ -50,7 +50,7 @@ exports.leave = async (req, res, next) => {
 
 		await User.updateOne(
 			{ _id: currentUserId },
-			{ $pull: { joinedGroups: groupId, meetings: group.meeting } }
+			{ $pull: { joinedGroups: groupId, meetings: group.meetings } }
 		)
 		res.send({ message: 'Gruppe erfolgreich verlassen' })
 	} catch (error) {

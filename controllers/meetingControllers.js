@@ -21,7 +21,10 @@ exports.createMeeting = async (req, res, next) => {
 	// 	// token
 	// } = res.locals
 
-	const { body: { frequency, date, time, length }, params: { groupId } } = req
+	const {
+		body: { frequency, date, time, length },
+		params: { groupId },
+	} = req
 
 	try {
 		const group = await Group.findOne({ _id: groupId })
@@ -95,12 +98,46 @@ exports.editMeeting = async (req, res, next) => {
 	}
 }
 
+exports.joinMeeting = async (req, res, next) => {
+	const {
+		params: { meetingId },
+		userId: userId,
+	} = req
+
+	try {
+		console.log(userId)
+		let users = await User.find()
+		users = users.filter((user) => user.meetings.includes(meetingId))
+
+		if (users.length >= 15) throw myCustomError('Group is full', 400)
+
+		await User.updateOne(
+			{ _id: userId },
+			{ $push: { meetings: meetingId } }
+		)
+
+		res.sendStatus(200)
+	} catch (error) {
+		next(error)
+	}
+}
+
+exports.leaveMeeting = async (req, res, next) => {
+	const { meetingId, groupId } = req.params
+
+	try {
+	} catch (error) {
+		next(error)
+	}
+}
+
 exports.deleteMeeting = async (req, res, next) => {
 	const { meetingId, groupId } = req.params
 
 	try {
 		const group = await Group.findOne({ _id: groupId })
-		if (group.meetings.length === 1) throw myCustomError('Group must have at least one meeting', 400)
+		if (group.meetings.length === 1)
+			throw myCustomError('Group must have at least one meeting', 400)
 
 		await User.updateMany(
 			{
@@ -127,7 +164,6 @@ exports.deleteMeeting = async (req, res, next) => {
 		await deleteEvent(meetingId)
 
 		res.send({ message: 'Termin erfolgreich gelöscht' })
-
 	} catch (error) {
 		next(error)
 	}
