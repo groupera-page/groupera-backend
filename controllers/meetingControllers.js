@@ -14,16 +14,17 @@ const {
 } = require('../utils/googleCalendar')
 
 exports.createMeeting = async (req, res, next) => {
-	const {
-		meetingParameters: { frequency, date, time, length },
-		user,
-		group,
-		// token
-	} = res.locals
+	// const {
+	// 	meetingParameters: { frequency, date, time, length },
+	// 	user,
+	// 	group,
+	// 	// token
+	// } = res.locals
+
+	const { body: { frequency, date, time, length }, params: { groupId } } = req
 
 	try {
-		if (!res.locals)
-			next(myCustomError('Something went wrong with setting locals', 500))
+		const group = await Group.findOne({ _id: groupId })
 
 		const dateTime = dateTimeForCalender(date, time, length)
 
@@ -43,13 +44,13 @@ exports.createMeeting = async (req, res, next) => {
 		const newMeeting = await insertEvent(meeting)
 
 		await User.updateOne(
-			{ _id: user._id },
-			{ $push: { moderatedGroups: group._id, meetings: newMeeting.id } }
+			{ _id: group.moderatorId },
+			{ $push: { meetings: newMeeting.id } }
 		)
 
 		await Group.updateOne(
 			{ _id: group._id },
-			{ $push: { meetings: newMeeting.id }, moderatorId: user._id }
+			{ $push: { meetings: newMeeting.id } }
 		)
 
 		// generateRoom(token, group._id, length);

@@ -38,18 +38,45 @@ exports.create = async (req, res, next) => {
 			// img: uploadRes
 		}).save()
 
-		const user = await User.findOne({ _id: currentUserId })
+		const dateTime = dateTimeForCalender(date, time, length)
+
+		const meeting = {
+			summary: group.name,
+			description: `Join code: ${group._id}`,
+			start: {
+				dateTime: dateTime['start'],
+				timeZone: 'Europe/Berlin',
+			},
+			end: {
+				dateTime: dateTime['end'],
+				timeZone: 'Europe/Berlin',
+			},
+			recurrence: [`RRULE:FREQ=WEEKLY;COUNT=2;INTERVAL=${+frequency}`],
+		}
+		const newMeeting = await insertEvent(meeting)
+
+		const user = await User.findOneAndUpdate(
+			{ _id: currentUserId },
+			{ $push: { moderatedGroups: group._id, meetings: newMeeting.id } },
+			{ returnOriginal: false }
+		)
+
+		await Group.updateOne(
+			{ _id: group._id },
+			{ $push: { meetings: newMeeting.id }, moderatorId: user._id }
+		)
+
+		// generateRoom(token, group._id, length);
 
 		if (moderationType == 'Selbstmoderiert') group.verified = true
 		group.save()
 
-		res.locals.meetingParameters = { frequency, date, time, length }
-		res.locals.user = user
-		res.locals.group = group
+		// res.locals.meetingParameters = { frequency, date, time, length }
+		// res.locals.user = user
+		// res.locals.group = group
 		// res.locals.token = token
 
-		next()
-		// res.send({ message: 'all good here, boss' })
+		res.send({ message: 'all good here, boss' })
 	} catch (error) {
 		next(error)
 	}
