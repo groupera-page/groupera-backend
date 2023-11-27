@@ -15,13 +15,6 @@ const {
 } = require('../utils/googleCalendar')
 
 exports.createMeeting = async (req, res, next) => {
-	// const {
-	// 	meetingParameters: { frequency, date, time, length },
-	// 	user,
-	// 	group,
-	// 	// token
-	// } = res.locals
-
 	const {
 		body: { frequency, date, time, length },
 		params: { groupId },
@@ -30,6 +23,7 @@ exports.createMeeting = async (req, res, next) => {
 	try {
 		const group = await Group.findOne({ _id: groupId })
 		if (!group) throw myCustomError('Group could not be found', 400)
+
 		const user = await User.findOne({ _id: group.moderatorId })
 
 		let meeting = await new Meeting().save()
@@ -82,12 +76,15 @@ exports.editMeeting = async (req, res, next) => {
 	} = req
 
 	try {
-		const dateTime = dateTimeForCalender(date, time, length)
-
 		const group = await Group.findOne({ _id: groupId })
 		if (!group) throw myCustomError('Group could not be found', 400)
 
-		const meeting = {
+		const meeting = await Meeting.findOne({ _id: meetingId })
+		if (!meeting) throw myCustomError('Meeting could not be found', 400)
+
+		const dateTime = dateTimeForCalender(date, time, length)
+
+		const calendarEvent = {
 			summary: group.name,
 			description: `Join code: ${group._id}`,
 			start: {
@@ -101,7 +98,7 @@ exports.editMeeting = async (req, res, next) => {
 			recurrence: [`RRULE:FREQ=WEEKLY;COUNT=2;INTERVAL=${+frequency}`],
 		}
 
-		const editedMeeting = await editEvent(meetingId, meeting)
+		const editedMeeting = await editEvent(meetingId, calendarEvent)
 
 		res.send(editedMeeting)
 	} catch (error) {
@@ -116,15 +113,24 @@ exports.joinMeeting = async (req, res, next) => {
 	} = req
 
 	try {
-		console.log(userId)
-		let users = await User.find()
-		users = users.filter((user) => user.meetings.includes(meetingId))
+		const meeting = await Meeting.findOne({ _id: meetingId })
+		if (!meeting || meeting.members.length >= 15) throw myCustomError(400)
 
-		if (users.length >= 15) throw myCustomError('Group is full', 400)
+		const user = await User.findOne({ _id: userId })
+		if (user.meetings.includes(meetingId))
+			throw myCustomError(
+				'You are already signed up for this meeting',
+				400
+			)
+
+		await Meeting.updateOne(
+			{ _id: meeting._id },
+			{ $push: { members: user._id } }
+		)
 
 		await User.updateOne(
-			{ _id: userId },
-			{ $push: { meetings: meetingId } }
+			{ _id: user._id },
+			{ $push: { meetings: meeting._id } }
 		)
 
 		res.sendStatus(200)
@@ -134,9 +140,28 @@ exports.joinMeeting = async (req, res, next) => {
 }
 
 exports.leaveMeeting = async (req, res, next) => {
-	const { meetingId, groupId } = req.params
+	const {
+		params: { meetingId },
+		userId: userId,
+	} = req
 
 	try {
+		const meeting = await Meeting.findOne({ _id: meetingId })
+		if (!meeting) throw myCustomError('Meeting could not be found', 400)
+
+		const user = await User.findOne({ _id: userId })
+		if (!user.meetings.includes(meetingId))
+			throw myCustomError('You are not signed up for this meeting', 400)
+
+		await Meeting.updateOne(
+			{ _id: meeting._id },
+			{ $pull: { members: user._id } }
+		)
+
+		await User.updateOne(
+			{ _id: user._id },
+			{ $pull: { meetings: meeting._id } }
+		)
 	} catch (error) {
 		next(error)
 	}
