@@ -70,6 +70,7 @@ exports.editMeeting = async (req, res, next) => {
 		const dateTime = dateTimeForCalender(date, time, length)
 
 		const group = await Group.findOne({ _id: groupId })
+		if (!group) throw myCustomError('Group could not be found', 400)
 
 		const meeting = {
 			summary: group.name,
@@ -88,6 +89,44 @@ exports.editMeeting = async (req, res, next) => {
 		const editedMeeting = await editEvent(meetingId, meeting)
 
 		res.send(editedMeeting)
+	} catch (error) {
+		next(error)
+	}
+}
+
+exports.deleteMeeting = async (req, res, next) => {
+	const { meetingId, groupId } = req.params
+
+	try {
+		const group = await Group.findOne({ _id: groupId })
+		if (group.meetings.length === 1) throw myCustomError('Group must have at least one meeting', 400)
+
+		await User.updateMany(
+			{
+				meetings: {
+					$in: [meetingId],
+				},
+			},
+			{
+				$pull: {
+					meetings: meetingId,
+				},
+			}
+		)
+
+		await Group.updateOne(
+			{ _id: groupId },
+			{
+				$pull: {
+					meetings: meetingId,
+				},
+			}
+		)
+
+		await deleteEvent(meetingId)
+
+		res.send({ message: 'Termin erfolgreich gelöscht' })
+
 	} catch (error) {
 		next(error)
 	}
