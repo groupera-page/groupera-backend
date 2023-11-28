@@ -206,7 +206,7 @@ exports.deleteMeeting = async (req, res, next) => {
 
 		meeting.delete()
 
-		await deleteEvent(meetingId)
+		await deleteEvent(meeting.calendarId)
 
 		res.send({ message: 'Termin erfolgreich gelöscht' })
 	} catch (error) {
