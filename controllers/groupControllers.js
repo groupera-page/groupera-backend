@@ -185,12 +185,6 @@ exports.delete = async (req, res, next) => {
 		let group = await Group.findOne({ _id: groupId })
 		if (!group) throw myCustomError('Group could not be found', 400)
 
-		const allMeetings = await Meeting.find()
-
-		const groupMeetings = allMeetings.filter(
-			(meeting) => meeting.groupId == groupId
-		)
-
 		await User.updateMany(
 			{
 				joinedGroups: {
@@ -221,17 +215,17 @@ exports.delete = async (req, res, next) => {
 		}
 
 		for (let i = 0; i < group.meetings.length; i++) {
-			await deleteEvent(groupMeetings[i].calendarId)
-			await Meeting.deleteOne({ _id: groupMeetings[i]._id })
+			const meeting = await Meeting.findOneAndDelete({ _id: group.meetings[i] })
+			await deleteEvent(meeting.calendarId)
 			await User.updateMany(
 				{
 					meetings: {
-						$in: [group.meetings[i]],
+						$in: [meeting.id],
 					},
 				},
 				{
 					$pull: {
-						meetings: group.meetings[i],
+						meetings: meeting.id,
 					},
 				}
 			)
