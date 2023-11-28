@@ -185,19 +185,23 @@ exports.delete = async (req, res, next) => {
 		let group = await Group.findOne({ _id: groupId })
 		if (!group) throw myCustomError('Group could not be found', 400)
 
+		const blah = await Meeting.find()
+
+		const groupMeetings = blah.filter(
+			(meeting) => meeting.groupId == groupId
+		)
+
+		console.log(groupMeetings)
+
 		await User.updateMany(
 			{
 				joinedGroups: {
 					$in: [groupId],
 				},
-				meetings: {
-					$in: [group.meeting],
-				},
 			},
 			{
 				$pull: {
 					joinedGroups: groupId,
-					meetings: group.meeting,
 				},
 			}
 		)
@@ -207,7 +211,6 @@ exports.delete = async (req, res, next) => {
 			{
 				$pull: {
 					moderatedGroups: groupId,
-					meetings: group.meeting,
 				},
 			}
 		)
@@ -219,9 +222,25 @@ exports.delete = async (req, res, next) => {
 			await user.save()
 		}
 
-		await deleteEvent(group.meeting)
+		for (let i = 0; i < group.meetings.length; i++) {
+			await deleteEvent(groupMeetings[i].calendarId)
+			await Meeting.deleteOne({ _id: groupMeetings[i]._id })
+			await User.updateMany(
+				{
+					meetings: {
+						$in: [group.meetings[i]],
+					},
+				},
+				{
+					$pull: {
+						meetings: [group.meetings[i]],
+					},
+				}
+			)
+		}
 
 		await Group.deleteOne({ _id: groupId })
+
 		res.send({ message: 'Gruppe erfolgreich gelöscht' })
 	} catch (error) {
 		next(error)
