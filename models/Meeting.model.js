@@ -8,6 +8,10 @@ const meetingSchema = new Schema({
 			ref: 'Member',
 		},
 	],
+	groupId: {
+		type: Schema.Types.ObjectId,
+		ref: 'Group',
+	},
 	calendarId: {
 		type: String,
 	},

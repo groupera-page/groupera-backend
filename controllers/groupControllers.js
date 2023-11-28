@@ -62,6 +62,7 @@ exports.create = async (req, res, next) => {
 		await Meeting.updateOne(
 			{ _id: meeting._id },
 			{
+				groupId: group._id,
 				calendarId: calendarMeeting.id,
 				$push: { members: currentUserId },
 			}
