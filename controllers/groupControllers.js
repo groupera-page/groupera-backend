@@ -45,7 +45,7 @@ exports.create = async (req, res, next) => {
 
 		let calendarEvent = {
 			summary: group.name,
-			description: `Join code: ${meeting._id}`,
+			description: `Join code: ${group._id}`,
 			start: {
 				dateTime: dateTime['start'],
 				timeZone: 'Europe/Berlin',

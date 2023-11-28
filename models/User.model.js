@@ -57,6 +57,7 @@ const userSchema = new Schema({
 			ref: 'Group',
 		},
 	],
+	// change below to ObjectId?
 	meetings: [
 		{
 			type: String,

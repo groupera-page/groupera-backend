@@ -101,9 +101,9 @@ exports.editMeeting = async (req, res, next) => {
 			recurrence: [`RRULE:FREQ=WEEKLY;COUNT=2;INTERVAL=${+frequency}`],
 		}
 
-		const editedMeeting = await editEvent(meetingId, calendarEvent)
+		await editEvent(meeting.calendarId, calendarEvent)
 
-		res.send(editedMeeting)
+		res.sendStatus(200)
 	} catch (error) {
 		next(error)
 	}

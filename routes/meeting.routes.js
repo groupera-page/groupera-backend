@@ -8,8 +8,8 @@ router.post('/createMeeting/:groupId', meetingControllers.createMeeting)
 
 router.put('/:meetingId/joinMeeting', validateAuthToken, meetingControllers.joinMeeting)
 
-router.patch('/:meetingId/editMeeting/:groupId', meetingControllers.editMeeting)
+router.patch('/:meetingId/editMeeting', meetingControllers.editMeeting)
 
-router.delete('/:meetingId/deleteMeeting/:groupId', meetingControllers.deleteMeeting)
+router.delete('/:meetingId/deleteMeeting', meetingControllers.deleteMeeting)
 
 module.exports = router
