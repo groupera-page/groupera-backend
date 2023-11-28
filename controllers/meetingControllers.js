@@ -165,6 +165,8 @@ exports.leaveMeeting = async (req, res, next) => {
 			{ _id: user._id },
 			{ $pull: { meetings: meeting._id } }
 		)
+
+		res.sendStatus(200)
 	} catch (error) {
 		next(error)
 	}
