@@ -51,15 +51,11 @@ exports.verifyEmail = async (req, res, next) => {
 		params: { email },
 	} = req
 	try {
-		console.log(code)
-
 		let user = await User.findOne({ email: email })
 		if (!user) throw myCustomError('Ungültiger Email', 401)
 
 		const validAuthCode = await bcrypt.compare(code, user.authCode)
 		if (!validAuthCode) throw myCustomError('Incorrect code!', 401)
-
-		console.log(validAuthCode)
 
 		user.emailVerified = true
 		user.emailVerificationExpires = null
@@ -94,7 +90,7 @@ exports.resendEmailVerification = async (req, res, next) => {
 
 		user.authCode = hashCode
 		await user.save()
-		
+
 		res.locals.user = user
 		res.locals.authCode = randomCode
 		next()
@@ -187,12 +183,11 @@ exports.resetPassword = async (req, res, next) => {
 
 		const { userObject, authToken, refreshToken } = getAuthTokens(user)
 		// should I send the Mongo formatted ID as the user ID or just the string?!
-		res.cookie('refreshToken', refreshToken, cookieOptions)
-			.send({
-				authToken,
-				user: userObject,
-				message: 'Passwort erfolgreich zurückgesetzt.',
-			})
+		res.cookie('refreshToken', refreshToken, cookieOptions).send({
+			authToken,
+			user: userObject,
+			message: 'Passwort erfolgreich zurückgesetzt.',
+		})
 	} catch (error) {
 		next(error)
 	}
