@@ -51,11 +51,15 @@ exports.verifyEmail = async (req, res, next) => {
 		params: { email },
 	} = req
 	try {
+		console.log(code)
+
 		let user = await User.findOne({ email: email })
 		if (!user) throw myCustomError('Ungültiger Email', 401)
 
-		const validAuthCode = bcrypt.compare(code, user.authCode)
+		const validAuthCode = await bcrypt.compare(code, user.authCode)
 		if (!validAuthCode) throw myCustomError('Incorrect code!', 401)
+
+		console.log(validAuthCode)
 
 		user.emailVerified = true
 		user.emailVerificationExpires = null
