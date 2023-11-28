@@ -132,6 +132,7 @@ exports.findOne = async (req, res, next) => {
 			alias: moderator.alias,
 		}
 
+		// add a conditional so that only group members see this (probably through a req.memberId or some shit)
 		let users = await Promise.all(
 			group.users.map(async (user) => {
 				let foundUser = await User.findOne({ _id: user })
