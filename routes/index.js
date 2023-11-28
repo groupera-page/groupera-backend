@@ -6,6 +6,7 @@ const groupMembershipRoutes = require('./groupMembership.routes')
 const videoRoutes = require('./video.routes')
 const paymentRoutes = require('./payment.routes')
 const meetingRoutes = require('./meeting.routes')
+const meetingMembershipRoutes = require('./meetingMembership.routes')
 
 const router = express.Router()
 
@@ -16,5 +17,6 @@ router.use('/groupMembership', groupMembershipRoutes)
 router.use('/video', videoRoutes)
 router.use('/payment', paymentRoutes)
 router.use('/meeting', meetingRoutes)
+router.use('/meetingMembership', meetingMembershipRoutes)
 
 module.exports = router
