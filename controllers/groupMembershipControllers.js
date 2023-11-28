@@ -1,4 +1,5 @@
 const { Group } = require('../models/Group.model')
+const { Meeting } = require('../models/Meeting.model')
 const { User } = require('../models/User.model')
 
 const myCustomError = require('../utils/myCustomError')
@@ -40,8 +41,9 @@ exports.leave = async (req, res, next) => {
 	} = req
 
 	try {
-		let group = await Group.findOne({ _id: groupId })
+		const group = await Group.findOne({ _id: groupId })
 		if (!group) throw myCustomError('Die Gruppe existiert nicht', 400)
+		const user = await User.findOne({ _id: currentUserId })
 
 		await Group.updateOne(
 			{ _id: groupId },
@@ -49,9 +51,26 @@ exports.leave = async (req, res, next) => {
 		)
 
 		await User.updateOne(
-			{ _id: currentUserId },
-			{ $pull: { joinedGroups: groupId, meetings: group.meetings } }
+			{ _id: user._id },
+			{ $pull: { joinedGroups: groupId } }
 		)
+
+		for (let i = 0; i < user.meetings.length; i++) {
+			const meeting = await Meeting.findOne({ _id: user.meetings[i] })
+
+			if (group.meetings.includes(meeting.id)) {
+				await User.updateOne(
+					{ _id: user._id },
+					{ $pull: { meetings: meeting.id } }
+				)
+
+				await Meeting.updateOne(
+					{ _id: meeting._id },
+					{ $pull: { members: user._id } }
+				)
+			}
+		}
+
 		res.send({ message: 'Gruppe erfolgreich verlassen' })
 	} catch (error) {
 		next(error)
