@@ -121,7 +121,7 @@ exports.findAll = async (req, res, next) => {
 }
 
 exports.findOne = async (req, res, next) => {
-	const { groupId } = req.params
+	const { params: { groupId }, userId } = req
 	const allGroupMeetings = await getEvents()
 
 	try {
@@ -150,8 +150,8 @@ exports.findOne = async (req, res, next) => {
 			name: group.name,
 			description: group.description,
 			topic: group.topic,
-			moderator: moderator,
-			users: users,
+			moderator: userId === 1 ? null : moderator,
+			users: userId === 1 ? null : users,
 			meetings: await Promise.all(
 				group.meetings.map(async (event) => {
 					const meetingObject = await Meeting.findOne({ _id: event })

@@ -5,12 +5,13 @@ const { groupSchema } = require('../models/Group.model')
 const groupControllers = require('../controllers/groupControllers')
 
 const {
-	verifyGroupModerator,
+	verifyGroupModerator, verifyGroupMember,
 } = require('../middleware/userAuthentication.middleware.js')
 const {
 	validateScheme,
 	validateAuthToken,
 	validateNoGroupDuplicates,
+	verifyForUserInfo,
 } = require('../middleware/auth.middleware')
 
 router.post(
@@ -23,7 +24,7 @@ router.post(
 
 router.get('/findAll', groupControllers.findAll)
 
-router.get('/:groupId', groupControllers.findOne)
+router.get('/:groupId', validateAuthToken, verifyForUserInfo, groupControllers.findOne)
 
 router.patch(
 	'/:groupId',
