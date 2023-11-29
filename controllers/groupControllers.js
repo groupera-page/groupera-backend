@@ -239,7 +239,7 @@ exports.delete = async (req, res, next) => {
 			)
 		}
 
-		await Group.deleteOne({ _id: groupId })
+		await group.delete()
 
 		res.send({ message: 'Gruppe erfolgreich gelöscht' })
 	} catch (error) {

@@ -39,25 +39,31 @@ exports.findOne = async (req, res, next) => {
 			questions: user.questions,
 			emailVerified: user.emailVerified,
 			gender: user.gender,
-			groups: await Promise.all(groups.map(async (group) => {
-				return (group = {
-					id: group.id,
-					verified: group.verified,
-					name: group.name,
-					description: group.description,
-					topic: group.topic,
-					moderator: group.moderatorId,
-					meetings: await Promise.all(
-						group.meetings.map(async (event) => {
-							const meetingObject = await Meeting.findOne({ _id: event })
-		
-							return allGroupMeetings.filter((groupMeeting) =>
-								groupMeeting.id.includes(meetingObject.calendarId)
-							)
-						})
-					),
+			groups: await Promise.all(
+				groups.map(async (group) => {
+					return (group = {
+						id: group.id,
+						verified: group.verified,
+						name: group.name,
+						description: group.description,
+						topic: group.topic,
+						moderator: group.moderatorId,
+						meetings: await Promise.all(
+							group.meetings.map(async (event) => {
+								const meetingObject = await Meeting.findOne({
+									_id: event,
+								})
+
+								return allGroupMeetings.filter((groupMeeting) =>
+									groupMeeting.id.includes(
+										meetingObject.calendarId
+									)
+								)
+							})
+						),
+					})
 				})
-			})),
+			),
 		}
 
 		res.send(user)
@@ -139,7 +145,24 @@ exports.delete = async (req, res, next) => {
 		user.moderatedGroups.map(async (groupId) => {
 			const specGroup = await Group.findOne({ _id: groupId })
 
-			await deleteEvent(specGroup.meeting)
+			for (let i = 0; i < specGroup.meetings.length; i++) {
+				const meeting = await Meeting.findOneAndDelete({
+					_id: specGroup.meetings[i],
+				})
+				await deleteEvent(meeting.calendarId)
+				await User.updateMany(
+					{
+						meetings: {
+							$in: [meeting.id],
+						},
+					},
+					{
+						$pull: {
+							meetings: meeting.id,
+						},
+					}
+				)
+			}
 
 			await User.updateMany(
 				{
@@ -150,7 +173,6 @@ exports.delete = async (req, res, next) => {
 				{
 					$pull: {
 						joinedGroups: groupId,
-						meetings: specGroup.meeting,
 					},
 				}
 			)
