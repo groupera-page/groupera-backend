@@ -24,7 +24,7 @@ router.post(
 
 router.get('/findAll', groupControllers.findAll)
 
-router.get('/:groupId', validateAuthToken, verifyForUserInfo, groupControllers.findOne)
+router.get('/:groupId', verifyForUserInfo, verifyGroupMember, groupControllers.findOne)
 
 router.patch(
 	'/:groupId',
