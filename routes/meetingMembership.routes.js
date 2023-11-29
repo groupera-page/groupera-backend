@@ -17,7 +17,6 @@ router.put(
 router.put(
 	'/:meetingId/leaveMeeting/:groupId',
 	validateAuthToken,
-	verifyGroupMember,
 	meetingMembershipControllers.leaveMeeting
 )
 
