@@ -1,6 +1,7 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 const { User } = require('../models/User.model')
 const { Group } = require('../models/Group.model')
+const { Meeting } = require('../models/Meeting.model')
 
 const bcrypt = require('bcryptjs')
 
@@ -18,7 +19,7 @@ const hashSomething = async (thingToHash) => {
 
 exports.findOne = async (req, res, next) => {
 	const { userId } = req.params
-	const allMeetings = await getEvents()
+	const allGroupMeetings = await getEvents()
 
 	try {
 		let user = await User.findOne({ _id: userId })
@@ -38,7 +39,7 @@ exports.findOne = async (req, res, next) => {
 			questions: user.questions,
 			emailVerified: user.emailVerified,
 			gender: user.gender,
-			groups: groups.map((group) => {
+			groups: await Promise.all(groups.map(async (group) => {
 				return (group = {
 					id: group.id,
 					verified: group.verified,
@@ -46,13 +47,17 @@ exports.findOne = async (req, res, next) => {
 					description: group.description,
 					topic: group.topic,
 					moderator: group.moderatorId,
-					meetings: group.meetings.map((thisGroupMeeting) =>
-						allMeetings.filter((groupMeeting) =>
-							groupMeeting.id.includes(thisGroupMeeting)
-						)
+					meetings: await Promise.all(
+						group.meetings.map(async (event) => {
+							const meetingObject = await Meeting.findOne({ _id: event })
+		
+							return allGroupMeetings.filter((groupMeeting) =>
+								groupMeeting.id.includes(meetingObject.calendarId)
+							)
+						})
 					),
 				})
-			}),
+			})),
 		}
 
 		res.send(user)

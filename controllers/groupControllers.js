@@ -90,26 +90,29 @@ exports.create = async (req, res, next) => {
 }
 
 exports.findAll = async (req, res, next) => {
-	const allGroupMeetings = await getEvents()
+	const meetings = await Meeting.find()
 
 	try {
 		let groups = await Group.find()
 
-		groups = await groups.map((group) => {
-			return {
-				id: group.id,
-				name: group.name,
-				description: group.description,
-				img: group.img,
-				topic: group.topic,
-				users: group.users.length,
-				meetings: group.meetings.map((thisGroupMeeting) =>
-					allGroupMeetings.filter((groupMeeting) =>
-						groupMeeting.id.includes(thisGroupMeeting)
-					)
-				),
-			}
-		})
+		// As only the days, how often, and what time a group meets is displayed, only the initial event is needed using getEvent
+		groups = await Promise.all(
+			groups.map(async (group) => {
+				return {
+					id: group.id,
+					name: group.name,
+					description: group.description,
+					img: group.img,
+					topic: group.topic,
+					users: group.users.length,
+					meetings: await Promise.all(
+						meetings
+							.filter((meeting) => meeting.groupId == group.id)
+							.map((event) => getEvent(event.calendarId))
+					),
+				}
+			})
+		)
 
 		res.status(200).send(groups)
 	} catch (error) {
@@ -140,6 +143,7 @@ exports.findOne = async (req, res, next) => {
 			})
 		)
 
+		// Because all meetings must be shown, filtering through all the events returned via getEvents is necessary
 		group = {
 			id: group.id,
 			verified: group.verified,
@@ -149,11 +153,13 @@ exports.findOne = async (req, res, next) => {
 			moderator: moderator,
 			users: users,
 			meetings: await Promise.all(
-				group.meetings.map((thisGroupMeeting) =>
-					allGroupMeetings.filter((groupMeeting) =>
-						groupMeeting.id.includes(thisGroupMeeting)
+				group.meetings.map(async (event) => {
+					const meetingObject = await Meeting.findOne({ _id: event })
+
+					return allGroupMeetings.filter((groupMeeting) =>
+						groupMeeting.id.includes(meetingObject.calendarId)
 					)
-				)
+				})
 			),
 		}
 		res.status(200).send(group)
@@ -215,7 +221,9 @@ exports.delete = async (req, res, next) => {
 		}
 
 		for (let i = 0; i < group.meetings.length; i++) {
-			const meeting = await Meeting.findOneAndDelete({ _id: group.meetings[i] })
+			const meeting = await Meeting.findOneAndDelete({
+				_id: group.meetings[i],
+			})
 			await deleteEvent(meeting.calendarId)
 			await User.updateMany(
 				{
