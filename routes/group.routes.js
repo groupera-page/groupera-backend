@@ -11,7 +11,7 @@ const {
 	validateScheme,
 	validateAuthToken,
 	validateNoGroupDuplicates,
-	verifyForUserInfo,
+	verifyUser,
 } = require('../middleware/auth.middleware')
 
 router.post(
@@ -24,7 +24,7 @@ router.post(
 
 router.get('/findAll', groupControllers.findAll)
 
-router.get('/:groupId', verifyForUserInfo, verifyGroupMember, groupControllers.findOne)
+router.get('/:groupId', verifyUser, verifyGroupMember, groupControllers.findOne)
 
 router.patch(
 	'/:groupId',

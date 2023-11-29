@@ -9,18 +9,14 @@ const jwt = require('jsonwebtoken')
 
 exports.validateAuthToken = (req, res, next) => {
 	const authHeader = req.headers.authorization || req.headers.Authorization
-	if (!authHeader?.startsWith('Bearer ')) {
-		req.userId = 1
+	if (!authHeader?.startsWith('Bearer ')) return res.sendStatus(401)
+	const token = authHeader.split(' ')[1]
+	jwt.verify(token, process.env.AUTH_TOKEN_SECRET, (error, decoded) => {
+		if (error) next(myCustomError(error, 403))
+		req.userId = decoded.user._id
+		console.log(req.userId)
 		next()
-	} else {
-		const token = authHeader.split(' ')[1]
-		jwt.verify(token, process.env.AUTH_TOKEN_SECRET, (error, decoded) => {
-			if (error) next(myCustomError(error, 403))
-			req.userId = decoded.user._id
-			console.log(req.userId)
-			next()
-		})
-	}
+	})
 }
 
 exports.validateRefreshToken = async (req, res, next) => {
@@ -71,7 +67,7 @@ exports.validateNoGroupDuplicates = async (req, res, next) => {
 	}
 }
 
-exports.verifyForUserInfo = (req, res, next) => {
+exports.verifyUser = (req, res, next) => {
 	const authHeader = req.headers.authorization || req.headers.Authorization
 	if (!authHeader?.startsWith('Bearer ')) {
 		req.userId = 1

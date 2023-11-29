@@ -10,7 +10,6 @@ exports.joinMeeting = async (req, res, next) => {
 	} = req
 
 	try {
-		// if (userId === 1) throw myCustomError('Please create an account and join this group first', 401)
 		const meeting = await Meeting.findOne({ _id: meetingId })
 		if (!meeting || meeting.members.length >= 15) throw myCustomError(400)
 
@@ -44,7 +43,6 @@ exports.leaveMeeting = async (req, res, next) => {
 	} = req
 
 	try {
-		// if (userId === 1) throw myCustomError('Please create an account and join this group first', 401)
 		const meeting = await Meeting.findOne({ _id: meetingId })
 		if (!meeting) throw myCustomError('Meeting could not be found', 400)
 
