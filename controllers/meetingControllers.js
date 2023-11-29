@@ -60,15 +60,6 @@ exports.createMeeting = async (req, res, next) => {
 			{ $push: { meetings: meeting._id } }
 		)
 
-		await User.updateMany(
-			{
-				joinedGroups: {
-					$in: [group._id],
-				},
-			},
-			{ $push: { meetings: meeting._id } }
-		)
-
 		await Group.updateOne(
 			{ _id: group._id },
 			{ $push: { meetings: meeting._id } }
