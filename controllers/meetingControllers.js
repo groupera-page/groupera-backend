@@ -60,6 +60,15 @@ exports.createMeeting = async (req, res, next) => {
 			{ $push: { meetings: meeting._id } }
 		)
 
+		await User.updateMany(
+			{
+				joinedGroups: {
+					$in: [group._id],
+				},
+			},
+			{ $push: { meetings: meeting._id } }
+		)
+
 		await Group.updateOne(
 			{ _id: group._id },
 			{ $push: { meetings: meeting._id } }
@@ -75,7 +84,7 @@ exports.createMeeting = async (req, res, next) => {
 
 exports.editMeeting = async (req, res, next) => {
 	const {
-		params: { meetingId },
+		params: { meetingId, groupId },
 		body: { date, time, length, frequency },
 	} = req
 
@@ -83,7 +92,7 @@ exports.editMeeting = async (req, res, next) => {
 		const meeting = await Meeting.findOne({ _id: meetingId })
 		if (!meeting) throw myCustomError('Meeting could not be found', 400)
 
-		const group = await Group.findOne({ _id: meeting.groupId })
+		const group = await Group.findOne({ _id: groupId })
 
 		const dateTime = dateTimeForCalender(date, time, length)
 
@@ -110,12 +119,13 @@ exports.editMeeting = async (req, res, next) => {
 }
 
 exports.deleteMeeting = async (req, res, next) => {
-	const { meetingId } = req.params
+	const { meetingId, groupId } = req.params
 
 	try {
 		const meeting = await Meeting.findOne({ _id: meetingId })
 
-		const group = await Group.findOne({ _id: meeting.groupId })
+		const group = await Group.findOne({ _id: groupId })
+		
 		if (group.meetings.length === 1)
 			throw myCustomError('Group must have at least one meeting', 400)
 

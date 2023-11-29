@@ -13,8 +13,6 @@ exports.join = async (req, res, next) => {
 		let group = await Group.findOne({ _id: groupId })
 		if (!group) throw myCustomError('Die Gruppe existiert nicht', 400)
 
-		if (!currentUserId) throw myCustomError('User could not be found', 400)
-
 		if (group.users.includes(currentUserId))
 			throw myCustomError(`You're already in this group, sweetie`, 400)
 
@@ -43,6 +41,7 @@ exports.leave = async (req, res, next) => {
 	try {
 		const group = await Group.findOne({ _id: groupId })
 		if (!group) throw myCustomError('Die Gruppe existiert nicht', 400)
+		
 		const user = await User.findOne({ _id: currentUserId })
 
 		await Group.updateOne(

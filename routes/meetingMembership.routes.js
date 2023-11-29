@@ -8,14 +8,14 @@ const {
 const { validateAuthToken } = require('../middleware/auth.middleware')
 
 router.put(
-	'/:meetingId/joinMeeting',
+	'/:meetingId/joinMeeting/:groupId',
 	validateAuthToken,
 	verifyGroupMember,
 	meetingMembershipControllers.joinMeeting
 )
 
 router.put(
-	'/:meetingId/leaveMeeting',
+	'/:meetingId/leaveMeeting/:groupId',
 	validateAuthToken,
 	verifyGroupMember,
 	meetingMembershipControllers.leaveMeeting
