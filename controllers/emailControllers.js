@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer')
 
-const { emailVerification, passwordReset  } = require('..lib//emailTemplates')
+const { emailVerification, passwordReset  } = require('../lib/emailTemplates')
 const myCustomError = require('../utils/myCustomError')
 
 exports.sendEmail = (emailType) => async (req, res, next) => {
