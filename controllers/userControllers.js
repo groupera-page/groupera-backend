@@ -18,7 +18,7 @@ const hashSomething = async (thingToHash) => {
 
 exports.findOne = async (req, res, next) => {
 	const { userId } = req.params
-	const allGroupMeetings = await getEvents()
+	const allMeetings = await getEvents()
 
 	try {
 		let user = await User.findOne({ _id: userId })
@@ -46,8 +46,10 @@ exports.findOne = async (req, res, next) => {
 					description: group.description,
 					topic: group.topic,
 					moderator: group.moderatorId,
-					meeting: allGroupMeetings.filter((groupMeeting) =>
-						groupMeeting.id.includes(group.meeting)
+					meetings: group.meetings.map((thisGroupMeeting) =>
+						allMeetings.filter((groupMeeting) =>
+							groupMeeting.id.includes(thisGroupMeeting)
+						)
 					),
 				})
 			}),
