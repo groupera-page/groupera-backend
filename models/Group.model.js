@@ -70,8 +70,8 @@ groupSchema.pre('remove', async function () {
 		const testProject = await this.model('Meeting').findOne({
 			groupId: this._id,
 		})
-		deleteEvent(testProject.calendarId)
-		testProject.deleteOne()
+		await deleteEvent(testProject.calendarId)
+		await testProject.deleteOne()
 	}
 	console.log('KILLEDER. HUSBAND. WHACKEDIM')
 })
