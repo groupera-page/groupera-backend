@@ -1,5 +1,8 @@
 const { Schema, model } = require('mongoose')
 const Joi = require('joi')
+const {
+	deleteEvent,
+} = require('../utils/googleCalendar')
 
 const groupSchema = new Schema({
 	verified: {
@@ -39,35 +42,37 @@ const groupSchema = new Schema({
 })
 
 groupSchema.pre('remove', async function () {
-	// await this.model('User').updateOne(
-	// 	{ _id: this.moderatorId },
-	// 	{
-	// 		$pull: {
-	// 			moderatedGroups: this._id,
-	// 		},
-	// 	}
-	// )
-	// await this.model('User').updateMany(
-	// 	{
-	// 		joinedGroups: {
-	// 			$in: [this._id],
-	// 		},
-	// 		// moderatedGroups: {
-	// 		// 	$in: [this._id]
-	// 		// }
-	// 	},
-	// 	{
-	// 		$pull: {
-	// 			joinedGroups: this._id,
-	// 			// moderatedGroups: this._id
-	// 		},
-	// 	}
-	// )
-	await this.model('Meeting').deleteMany(
+	await this.model('User').updateOne(
+		{ _id: this.moderatorId },
 		{
-			groupId: this._id
+			$pull: {
+				moderatedGroups: this._id,
+			},
 		}
 	)
+	await this.model('User').updateMany(
+		{
+			joinedGroups: {
+				$in: [this._id],
+			},
+			// moderatedGroups: {
+			// 	$in: [this._id]
+			// }
+		},
+		{
+			$pull: {
+				joinedGroups: this._id,
+				// moderatedGroups: this._id
+			},
+		}
+	)
+	for (let i = 0; i < this.meetings.length; i++) {
+		const testProject = await this.model('Meeting').findOne({
+			groupId: this._id,
+		})
+		deleteEvent(testProject.calendarId)
+		testProject.deleteOne()
+	}
 	console.log('KILLEDER. HUSBAND. WHACKEDIM')
 })
 
