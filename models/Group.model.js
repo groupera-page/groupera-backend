@@ -38,6 +38,39 @@ const groupSchema = new Schema({
 	},
 })
 
+groupSchema.pre('remove', async function () {
+	// await this.model('User').updateOne(
+	// 	{ _id: this.moderatorId },
+	// 	{
+	// 		$pull: {
+	// 			moderatedGroups: this._id,
+	// 		},
+	// 	}
+	// )
+	// await this.model('User').updateMany(
+	// 	{
+	// 		joinedGroups: {
+	// 			$in: [this._id],
+	// 		},
+	// 		// moderatedGroups: {
+	// 		// 	$in: [this._id]
+	// 		// }
+	// 	},
+	// 	{
+	// 		$pull: {
+	// 			joinedGroups: this._id,
+	// 			// moderatedGroups: this._id
+	// 		},
+	// 	}
+	// )
+	await this.model('Meeting').deleteMany(
+		{
+			groupId: this._id
+		}
+	)
+	console.log('KILLEDER. HUSBAND. WHACKEDIM')
+})
+
 const Group = model('Group', groupSchema)
 
 const schema = {

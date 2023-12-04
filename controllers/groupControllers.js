@@ -191,53 +191,55 @@ exports.delete = async (req, res, next) => {
 		let group = await Group.findOne({ _id: groupId })
 		if (!group) throw myCustomError('Group could not be found', 400)
 
-		await User.updateMany(
-			{
-				joinedGroups: {
-					$in: [groupId],
-				},
-			},
-			{
-				$pull: {
-					joinedGroups: groupId,
-				},
-			}
-		)
+		// await User.updateMany(
+		// 	{
+		// 		joinedGroups: {
+		// 			$in: [groupId],
+		// 		},
+		// 	},
+		// 	{
+		// 		$pull: {
+		// 			joinedGroups: groupId,
+		// 		},
+		// 	}
+		// )
 
-		await User.updateOne(
-			{ _id: group.moderatorId },
-			{
-				$pull: {
-					moderatedGroups: groupId,
-				},
-			}
-		)
+		// await User.updateOne(
+		// 	{ _id: group.moderatorId },
+		// 	{
+		// 		$pull: {
+		// 			moderatedGroups: groupId,
+		// 		},
+		// 	}
+		// )
 
-		const user = await User.findOne({ _id: group.moderatorId })
+		// const user = await User.findOne({ _id: group.moderatorId })
 
-		if (user.moderatedGroups.length === 0) {
-			user.moderator = false
-			await user.save()
-		}
+		// if (user.moderatedGroups.length === 0) {
+		// 	user.moderator = false
+		// 	await user.save()
+		// }
 
-		for (let i = 0; i < group.meetings.length; i++) {
-			const meeting = await Meeting.findOneAndDelete({
-				_id: group.meetings[i],
-			})
-			await deleteEvent(meeting.calendarId)
-			await User.updateMany(
-				{
-					meetings: {
-						$in: [meeting.id],
-					},
-				},
-				{
-					$pull: {
-						meetings: meeting.id,
-					},
-				}
-			)
-		}
+		// for (let i = 0; i < group.meetings.length; i++) {
+		// 	const meeting = await Meeting.findOneAndDelete({
+		// 		_id: group.meetings[i],
+		// 	})
+		// 	await deleteEvent(meeting.calendarId)
+		// 	await User.updateMany(
+		// 		{
+		// 			meetings: {
+		// 				$in: [meeting.id],
+		// 			},
+		// 		},
+		// 		{
+		// 			$pull: {
+		// 				meetings: meeting.id,
+		// 			},
+		// 		}
+		// 	)
+		// }
+
+	
 
 		await group.delete()
 

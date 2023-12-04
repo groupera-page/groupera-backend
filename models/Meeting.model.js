@@ -17,31 +17,31 @@ const meetingSchema = new Schema({
 	},
 })
 
-meetingSchema.pre('remove', async function () {
-	await this.model('User').updateMany(
-		{
-			meetings: {
-				$in: [this._id],
-			},
-		},
-		{
-			$pull: {
-				meetings: this._id,
-			},
-		}
-	)
-	await this.model('Group').updateMany(
-		{
-			meetings: {
-				$in: [this._id],
-			},
-		},
-		{
-			$pull: {
-				meetings: this._id,
-			},
-		}
-	)
+meetingSchema.pre('deleteMany', async function () {
+	// await this.model('User').updateMany(
+	// 	{
+	// 		meetings: {
+	// 			$in: [this._id],
+	// 		},
+	// 	},
+	// 	{
+	// 		$pull: {
+	// 			meetings: this._id,
+	// 		},
+	// 	}
+	// )
+	// await this.model('Group').updateMany(
+	// 	{
+	// 		meetings: {
+	// 			$in: [this._id],
+	// 		},
+	// 	},
+	// 	{
+	// 		$pull: {
+	// 			meetings: this._id,
+	// 		},
+	// 	}
+	// )
 	console.log('CAROL BASKEN')
 })
 
