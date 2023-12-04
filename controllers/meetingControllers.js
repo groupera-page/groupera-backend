@@ -120,31 +120,9 @@ exports.deleteMeeting = async (req, res, next) => {
 		if (group.meetings.length === 1)
 			throw myCustomError('Group must have at least one meeting', 400)
 
-		await User.updateMany(
-			{
-				meetings: {
-					$in: [meetingId],
-				},
-			},
-			{
-				$pull: {
-					meetings: meetingId,
-				},
-			}
-		)
-
-		await Group.updateOne(
-			{ _id: group._id },
-			{
-				$pull: {
-					meetings: meetingId,
-				},
-			}
-		)
+		await deleteEvent(meeting.calendarId)
 
 		meeting.delete()
-
-		await deleteEvent(meeting.calendarId)
 
 		res.send({ message: 'Termin erfolgreich gelöscht' })
 	} catch (error) {
