@@ -41,40 +41,40 @@ const groupSchema = new Schema({
 	},
 })
 
-groupSchema.pre('remove', async function () {
-	await this.model('User').updateOne(
-		{ _id: this.moderatorId },
-		{
-			$pull: {
-				moderatedGroups: this._id,
-			},
-		}
-	)
-	await this.model('User').updateMany(
-		{
-			joinedGroups: {
-				$in: [this._id],
-			},
-			// moderatedGroups: {
-			// 	$in: [this._id]
-			// }
-		},
-		{
-			$pull: {
-				joinedGroups: this._id,
-				// moderatedGroups: this._id
-			},
-		}
-	)
-	for (let i = 0; i < this.meetings.length; i++) {
-		const testProject = await this.model('Meeting').findOne({
-			groupId: this._id,
-		})
-		await deleteEvent(testProject.calendarId)
-		await testProject.deleteOne()
-	}
-	console.log('Group deleted')
-})
+// groupSchema.pre('remove', async function () {
+// 	await this.model('User').updateOne(
+// 		{ _id: this.moderatorId },
+// 		{
+// 			$pull: {
+// 				moderatedGroups: this._id,
+// 			},
+// 		}
+// 	)
+// 	await this.model('User').updateMany(
+// 		{
+// 			joinedGroups: {
+// 				$in: [this._id],
+// 			},
+// 			// moderatedGroups: {
+// 			// 	$in: [this._id]
+// 			// }
+// 		},
+// 		{
+// 			$pull: {
+// 				joinedGroups: this._id,
+// 				// moderatedGroups: this._id
+// 			},
+// 		}
+// 	)
+// 	for (let i = 0; i < this.meetings.length; i++) {
+// 		const testProject = await this.model('Meeting').findOne({
+// 			groupId: this._id,
+// 		})
+// 		await deleteEvent(testProject.calendarId)
+// 		await testProject.deleteOne()
+// 	}
+// 	console.log('Group deleted')
+// })
 
 const Group = model('Group', groupSchema)
 

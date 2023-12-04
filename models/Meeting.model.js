@@ -17,34 +17,34 @@ const meetingSchema = new Schema({
 	},
 })
 
-meetingSchema.pre('deleteOne', { document: true, query: false }, async function () {
-	console.log(this._id)
-	await this.model('User').updateMany(
-		{
-			meetings: {
-				$in: [this._id],
-			},
-		},
-		{
-			$pull: {
-				meetings: this._id,
-			},
-		}
-	)
-	await this.model('Group').updateMany(
-		{
-			meetings: {
-				$in: [this._id],
-			},
-		},
-		{
-			$pull: {
-				meetings: this._id,
-			},
-		}
-	)
-	console.log('Meeting + event deleted')
-})
+// meetingSchema.pre('deleteOne', { document: true, query: false }, async function () {
+// 	console.log(this._id)
+// 	await this.model('User').updateMany(
+// 		{
+// 			meetings: {
+// 				$in: [this._id],
+// 			},
+// 		},
+// 		{
+// 			$pull: {
+// 				meetings: this._id,
+// 			},
+// 		}
+// 	)
+// 	await this.model('Group').updateMany(
+// 		{
+// 			meetings: {
+// 				$in: [this._id],
+// 			},
+// 		},
+// 		{
+// 			$pull: {
+// 				meetings: this._id,
+// 			},
+// 		}
+// 	)
+// 	console.log('Meeting + event deleted')
+// })
 
 const Meeting = model('Meeting', meetingSchema)
 
