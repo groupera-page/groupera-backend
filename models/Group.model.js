@@ -73,7 +73,7 @@ groupSchema.pre('remove', async function () {
 		await deleteEvent(testProject.calendarId)
 		await testProject.deleteOne()
 	}
-	console.log('KILLEDER. HUSBAND. WHACKEDIM')
+	console.log('Group deleted')
 })
 
 const Group = model('Group', groupSchema)

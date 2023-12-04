@@ -43,7 +43,7 @@ meetingSchema.pre('deleteOne', { document: true, query: false }, async function 
 			},
 		}
 	)
-	console.log('CAROL BASKEN')
+	console.log('Meeting + event deleted')
 })
 
 const Meeting = model('Meeting', meetingSchema)
