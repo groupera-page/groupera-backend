@@ -10,8 +10,8 @@ const {
 	insertEvent,
 	getEvents,
 	getEvent,
-	deleteEvent,
-	editEvent,
+	// deleteEvent,
+	// editEvent,
 } = require('../utils/googleCalendar')
 
 exports.create = async (req, res, next) => {
