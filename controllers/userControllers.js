@@ -1,5 +1,5 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
-const { User } = require('../models/User.model')
+const { User, userSchema } = require('../models/User.model')
 const { Group } = require('../models/Group.model')
 const { Meeting } = require('../models/Meeting.model')
 
@@ -180,9 +180,11 @@ exports.delete = async (req, res, next) => {
 			await specGroup.delete()
 		})
 
+		res.locals.user = user
+
 		await user.delete()
 
-		res.send({ message: 'Benutzer erfolgreich gelöscht' })
+		next()
 	} catch (error) {
 		next(error)
 	}

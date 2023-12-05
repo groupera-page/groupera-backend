@@ -66,7 +66,7 @@ exports.verifyEmail = async (req, res, next) => {
 		await user.save()
 
 		res.locals.user = user
-		next()
+
 		// should I send the Mongo formatted ID as the user ID or just the string?!
 
 		// I had the same question, actually. Is mongo formatted better practice?
@@ -75,6 +75,8 @@ exports.verifyEmail = async (req, res, next) => {
 			user: userObject,
 			message: 'Bentzer erfolgreich verfiziert',
 		})
+		
+		next()
 	} catch (error) {
 		next(error)
 	}
@@ -183,6 +185,8 @@ exports.resetPassword = async (req, res, next) => {
 		user.password = hashPassword
 		await user.save()
 
+		res.locals.user = user
+
 		const { userObject, authToken, refreshToken } = getAuthTokens(user)
 		// should I send the Mongo formatted ID as the user ID or just the string?!
 		res.cookie('refreshToken', refreshToken, cookieOptions).send({
@@ -190,6 +194,8 @@ exports.resetPassword = async (req, res, next) => {
 			user: userObject,
 			message: 'Passwort erfolgreich zurückgesetzt.',
 		})
+
+		next()
 	} catch (error) {
 		next(error)
 	}
