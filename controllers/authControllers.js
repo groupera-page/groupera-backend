@@ -2,6 +2,8 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { v4: uuidv4 } = require('uuid')
 
+const { sendEmail } = require('../controllers/emailControllers')
+
 const { User } = require('../models/User.model')
 
 const myCustomError = require('../utils/myCustomError')
@@ -65,14 +67,13 @@ exports.verifyEmail = async (req, res, next) => {
 
 		await user.save()
 
-		// should I send the Mongo formatted ID as the user ID or just the string?!
+		res.locals.user = user
+		res.locals.userObject = userObject
+		res.locals.authToken = authToken
+		res.locals.refreshToken = refreshToken
+		res.locals.cookieOptions = cookieOptions
 
-		// I had the same question, actually. Is mongo formatted better practice?
-		res.cookie('refreshToken', refreshToken, cookieOptions).send({
-			authToken,
-			user: userObject,
-			message: 'Bentzer erfolgreich verfiziert',
-		})
+		next()
 	} catch (error) {
 		next(error)
 	}
@@ -93,6 +94,7 @@ exports.resendEmailVerification = async (req, res, next) => {
 
 		res.locals.user = user
 		res.locals.authCode = randomCode
+
 		next()
 	} catch (error) {
 		next(error)
@@ -179,15 +181,18 @@ exports.resetPassword = async (req, res, next) => {
 		user.resetPasswordTokenExp = undefined
 		user.resetPasswordToken = undefined
 		user.password = hashPassword
+
 		await user.save()
 
 		const { userObject, authToken, refreshToken } = getAuthTokens(user)
-		// should I send the Mongo formatted ID as the user ID or just the string?!
-		res.cookie('refreshToken', refreshToken, cookieOptions).send({
-			authToken,
-			user: userObject,
-			message: 'Passwort erfolgreich zurückgesetzt.',
-		})
+
+		res.locals.user = user
+		res.locals.userObject = userObject
+		res.locals.authToken = authToken
+		res.locals.refreshToken = refreshToken
+		res.locals.cookieOptions = cookieOptions
+
+		next()
 	} catch (error) {
 		next(error)
 	}

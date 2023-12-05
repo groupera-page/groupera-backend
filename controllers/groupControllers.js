@@ -34,16 +34,16 @@ exports.create = async (req, res, next) => {
 		//     folder: "test",
 		//   });
 		//   if (!uploadRes) res.sendStatus(400)
-		let group = await new Group({
+		const group = await new Group({
 			...req.body,
 			// img: uploadRes
 		}).save()
 
-		let meeting = await new Meeting().save()
+		const meeting = await new Meeting().save()
 
 		const dateTime = dateTimeForCalender(date, time, length)
 
-		let calendarEvent = {
+		const calendarEvent = {
 			summary: group.name,
 			description: `Join code: ${group._id}`,
 			start: {
@@ -68,9 +68,10 @@ exports.create = async (req, res, next) => {
 			}
 		)
 
-		await User.updateOne(
+		const user = await User.findOneAndUpdate(
 			{ _id: currentUserId },
-			{ $push: { moderatedGroups: group._id, meetings: meeting._id } }
+			{ $push: { moderatedGroups: group._id, meetings: meeting._id } },
+			{ returnOriginal: false }
 		)
 
 		await Group.updateOne(
@@ -83,7 +84,9 @@ exports.create = async (req, res, next) => {
 		if (moderationType == 'Selbstmoderiert') group.verified = true
 		group.save()
 
-		res.send({ message: 'all good here, boss' })
+		res.locals.user = user
+
+		next()
 	} catch (error) {
 		next(error)
 	}
@@ -121,7 +124,10 @@ exports.findAll = async (req, res, next) => {
 }
 
 exports.findOne = async (req, res, next) => {
-	const { params: { groupId }, userId } = req
+	const {
+		params: { groupId },
+		userId,
+	} = req
 	const allGroupMeetings = await getEvents()
 
 	try {
@@ -172,7 +178,7 @@ exports.edit = async (req, res, next) => {
 	const { groupId } = req.params
 
 	try {
-		let group = await Group.findOneAndUpdate(
+		const group = await Group.findOneAndUpdate(
 			{ _id: groupId },
 			{ ...req.body },
 			{ returnOriginal: false }
@@ -188,7 +194,7 @@ exports.edit = async (req, res, next) => {
 exports.delete = async (req, res, next) => {
 	const { groupId } = req.params
 	try {
-		let group = await Group.findOne({ _id: groupId })
+		const group = await Group.findOne({ _id: groupId })
 		if (!group) throw myCustomError('Group could not be found', 400)
 
 		await User.updateMany(
@@ -238,8 +244,6 @@ exports.delete = async (req, res, next) => {
 				}
 			)
 		}
-
-	
 
 		await group.delete()
 

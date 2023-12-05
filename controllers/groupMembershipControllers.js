@@ -16,9 +16,10 @@ exports.join = async (req, res, next) => {
 		if (group.users.includes(currentUserId))
 			throw myCustomError(`You're already in this group, sweetie`, 400)
 
-		await User.updateOne(
+		const user = await User.findOneAndUpdate(
 			{ _id: currentUserId },
-			{ $push: { joinedGroups: group._id } }
+			{ $push: { joinedGroups: group._id } },
+			{ returnOriginal: false }
 		)
 
 		await Group.updateOne(
@@ -26,7 +27,10 @@ exports.join = async (req, res, next) => {
 			{ $push: { users: currentUserId } }
 		)
 
-		res.send({ message: 'Gruppe erfolgreich beigetreten' })
+		res.locals.user = user
+		res.locals.groupName = group.name
+
+		next()
 	} catch (error) {
 		next(error)
 	}
@@ -41,7 +45,7 @@ exports.leave = async (req, res, next) => {
 	try {
 		const group = await Group.findOne({ _id: groupId })
 		if (!group) throw myCustomError('Die Gruppe existiert nicht', 400)
-		
+
 		const user = await User.findOne({ _id: currentUserId })
 
 		await Group.updateOne(

@@ -1,14 +1,14 @@
 const router = require('express').Router()
 
 const userControllers = require('../controllers/userControllers')
-const emailControllers = require('../controllers/emailControllers')
+const { userSchema } = require('../models/User.model')
 
 const {
 	verifyCurrentUser,
 } = require('../middleware/userAuthentication.middleware.js')
 const { validateAuthToken, validateScheme } = require('../middleware/auth.middleware.js')
 
-const { userSchema } = require('../models/User.model')
+const { sendEmail } = require('../controllers/emailControllers')
 
 router.get(
 	'/:userId',
@@ -23,14 +23,15 @@ router.patch(
 	validateAuthToken,
 	verifyCurrentUser,
 	userControllers.edit,
-	emailControllers.sendEmail('Verify email')
+	sendEmail('Verify email')
 )
 
 router.delete(
 	'/:userId',
 	validateAuthToken,
 	verifyCurrentUser,
-	userControllers.delete
+	userControllers.delete,
+	sendEmail('Delete account')
 )
 
 module.exports = router
