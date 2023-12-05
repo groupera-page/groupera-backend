@@ -1,6 +1,14 @@
 const nodemailer = require('nodemailer')
 
-const { emailVerification, passwordReset  } = require('../lib/emailTemplates')
+const {
+	emailVerification,
+	passwordReset,
+	passwordResetSuccessful,
+	welcome,
+	deletedAccount,
+	groupJoin,
+	groupCreate,
+} = require('../lib/emailTemplates')
 const myCustomError = require('../utils/myCustomError')
 
 exports.sendEmail = (emailType) => async (req, res, next) => {
@@ -10,21 +18,38 @@ exports.sendEmail = (emailType) => async (req, res, next) => {
 		user: { email, alias },
 		authCode,
 		url,
+		groupName,
 	} = res.locals
 	console.log(res.locals)
 	let subject // case emailType === "Verify email"
 	let template
 	switch (emailType) {
-		case 'Invitation email':
-			subject = 'Invitation to groupera'
-			template = 'insert template here'
+		case 'Welcome email':
+			subject = 'Herzlich Wilkommen bei Groupera!'
+			template = welcome(alias)
 			break
-		case 'Reset Password Instructions':
-			subject = 'Reset password instructions'
+		case 'Reset password instructions':
+			subject = 'Passwortzurücksetzung für Dein Groupera-Konto'
 			template = passwordReset(alias, email, url)
 			break
+		case 'Reset password successful':
+			subject = 'Erfolgreiche Passwortänderung'
+			template = passwordResetSuccessful(alias)
+			break
+		case 'Delete account':
+			subject = 'Bestätigung der Kontolöschung'
+			template = deletedAccount(alias)
+			break
+		case 'Join group':
+			subject = 'Dein Beitritt in einer Gruppe'
+			template = groupJoin(alias, groupName)
+			break
+		case 'Create group':
+			subject = 'Deine neue Gruppe bei Groupera'
+			template = groupCreate(alias)
+			break
 		default:
-			subject = 'Verify your email address'
+			subject = 'Dein Bestätigungscode für Groupera'
 			template = emailVerification(authCode)
 	}
 
@@ -43,7 +68,7 @@ exports.sendEmail = (emailType) => async (req, res, next) => {
 			from: `${process.env.SEND_TRANSACTIONAL_EMAILS_FROM_NAME} <${process.env.SEND_TRANSACTIONAL_EMAILS_FROM_EMAIL}>`,
 			to: `${alias} <${email}>`,
 			subject: subject,
-			html: template
+			html: template,
 		})
 
 		if (!info.messageId)

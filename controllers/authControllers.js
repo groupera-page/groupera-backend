@@ -65,6 +65,8 @@ exports.verifyEmail = async (req, res, next) => {
 
 		await user.save()
 
+		res.locals.user = user
+		next()
 		// should I send the Mongo formatted ID as the user ID or just the string?!
 
 		// I had the same question, actually. Is mongo formatted better practice?
