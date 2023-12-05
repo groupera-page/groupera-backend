@@ -13,8 +13,8 @@ const createStripeSession = async (planId) => {
 					quantity: 1,
 				},
 			],
-			success_url: `${process.env.FRONTEND_BASE_URL}payment/success`,
-			cancel_url: `${process.env.FRONTEND_BASE_URL}payment/cancel`,
+			success_url: `${process.env.FRONTEND_BASE_URL}/payment/success`,
+			cancel_url: `${process.env.FRONTEND_BASE_URL}/payment/cancel`,
 		})
 	} catch (error) {
 		return error

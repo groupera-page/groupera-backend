@@ -22,21 +22,22 @@ exports.sendEmail = (emailType) => async (req, res, next) => {
 		refreshToken,
 		authToken,
 		userObject,
-		cookieOptions
+		cookieOptions,
 	} = res.locals
-	console.log(res.locals)
 	let subject // case emailType === "Verify email"
 	let template
 	let send
 	switch (emailType) {
 		case 'Welcome email':
 			subject = 'Herzlich Wilkommen bei Groupera!'
-			template = welcome(alias)
-			send = res.cookie('refreshToken', refreshToken, cookieOptions).send({
-				authToken,
-				user: userObject,
-				message: 'Bentzer erfolgreich verfiziert',
-			})			
+			template = welcome(alias, email)
+			send = res
+				.cookie('refreshToken', refreshToken, cookieOptions)
+				.send({
+					authToken,
+					user: userObject,
+					message: 'Bentzer erfolgreich verfiziert',
+				})
 			break
 		case 'Reset password instructions':
 			subject = 'Passwortzurücksetzung für Dein Groupera-Konto'
@@ -47,7 +48,7 @@ exports.sendEmail = (emailType) => async (req, res, next) => {
 			break
 		case 'Reset password successful':
 			subject = 'Erfolgreiche Passwortänderung'
-			template = passwordResetSuccessful(alias)
+			template = passwordResetSuccessful(alias, email)
 			res.cookie('refreshToken', refreshToken, cookieOptions).send({
 				authToken,
 				user: userObject,
@@ -56,33 +57,35 @@ exports.sendEmail = (emailType) => async (req, res, next) => {
 			break
 		case 'Delete account':
 			subject = 'Bestätigung der Kontolöschung'
-			template = deletedAccount(alias)
+			template = deletedAccount(alias, email)
 			send = res.send({
 				message: `Email gesendet an: ${email}`,
 			})
 			break
 		case 'Join group':
 			subject = 'Dein Beitritt in einer Gruppe'
-			template = groupJoin(alias, groupName)
+			template = groupJoin(alias, groupName, email)
 			send = res.send({
 				message: `Email gesendet an: ${email}`,
 			})
 			break
 		case 'Create group':
 			subject = 'Deine neue Gruppe bei Groupera'
-			template = groupCreate(alias)
+			template = groupCreate(alias, email)
 			send = res.send({
 				message: `Email gesendet an: ${email}`,
 			})
 			break
 		default:
 			subject = 'Dein Bestätigungscode für Groupera'
-			template = emailVerification(authCode)
-			send = res.cookie('refreshToken', refreshToken, cookieOptions).send({
-				authToken,
-				user: userObject,
-				message: 'Bentzer erfolgreich verfiziert',
-			})
+			template = emailVerification(authCode, email)
+			send = res
+				.cookie('refreshToken', refreshToken, cookieOptions)
+				.send({
+					authToken,
+					user: userObject,
+					message: 'Bentzer erfolgreich verfiziert',
+				})
 	}
 
 	try {
@@ -111,9 +114,6 @@ exports.sendEmail = (emailType) => async (req, res, next) => {
 				)
 			)
 
-		// res.send({
-		// 	message: `Email gesendet an: ${email}`,
-		// })
 		send
 	} catch (error) {
 		next(error)
