@@ -1,8 +1,5 @@
 const { Schema, model } = require('mongoose')
 const Joi = require('joi')
-const {
-	deleteEvent,
-} = require('../utils/googleCalendar')
 
 const groupSchema = new Schema({
 	verified: {
