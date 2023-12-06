@@ -11,7 +11,6 @@ const {
 	getEvents,
 	getEvent,
 	deleteEvent,
-	// editEvent,
 } = require('../utils/googleCalendar')
 
 exports.create = async (req, res, next) => {

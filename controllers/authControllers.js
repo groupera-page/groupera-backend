@@ -5,15 +5,13 @@ const { v4: uuidv4 } = require('uuid')
 const { User } = require('../models/User.model')
 
 const myCustomError = require('../utils/myCustomError')
-// const sendEmail = require('../utils/sendEmail')
+
 const {
 	calcExpirationDate,
 	tokenExpired,
 	getAuthTokens,
 	cookieOptions,
 } = require('../utils/auth.helpers')
-
-// const emailTemplates = require('../lib/emailTemplates')
 
 const hashSomething = async (thingToHash) => {
 	const salt = await bcrypt.genSalt(Number(process.env.SALT))
@@ -84,7 +82,6 @@ exports.resendEmailVerification = async (req, res, next) => {
 		if (!user) throw myCustomError('Ungültiger Email', 401)
 
 		const randomCode = Math.floor(1000 + Math.random() * 9000).toString()
-		console.log(randomCode)
 		const hashCode = await hashSomething(randomCode)
 
 		user.authCode = hashCode
@@ -92,6 +89,7 @@ exports.resendEmailVerification = async (req, res, next) => {
 
 		res.locals.user = user
 		res.locals.authCode = randomCode
+		console.log(res.locals)
 
 		next()
 	} catch (error) {

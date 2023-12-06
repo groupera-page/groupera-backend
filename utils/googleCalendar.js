@@ -37,19 +37,6 @@ exports.dateTimeForCalender = (date, time, length) => {
 	}
 }
 
-exports.getInstance = async (event) => {
-	try {
-		const response = await calendar.events.instances({
-			auth: auth,
-			calendarId: calendarId,
-			eventId: event
-		})
-
-		return response.data
-	} catch (error) {
-		console.log(error)
-	}
-}
 
 exports.insertEvent = async (event) => {
 	try {

@@ -8,8 +8,6 @@ const myCustomError = require('../utils/myCustomError')
 const {
 	dateTimeForCalender,
 	insertEvent,
-	getEvents,
-	getEvent,
 	deleteEvent,
 	editEvent,
 } = require('../utils/googleCalendar')
