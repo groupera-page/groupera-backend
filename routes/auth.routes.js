@@ -19,6 +19,7 @@ const loginBodySchema = {
 }
 
 const codeSchema = {
+	email: Joi.string().email().required().label('Email'),
 	code: Joi.string().required().min(4).length(4).label('authCode'),
 }
 
@@ -31,7 +32,7 @@ router.post(
 )
 
 router.patch(
-	'/:email/verifyEmail',
+	'/verifyEmail',
 	validateScheme(codeSchema),
 	authControllers.verifyEmail
 )

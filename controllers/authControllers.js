@@ -47,8 +47,7 @@ exports.signup = async (req, res, next) => {
 
 exports.verifyEmail = async (req, res, next) => {
 	const {
-		body: { code },
-		params: { email },
+		body: { code, email },
 	} = req
 	try {
 		let user = await User.findOne({ email: email })
