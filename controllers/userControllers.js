@@ -1,5 +1,5 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
-const { User, userSchema } = require('../models/User.model')
+const { User } = require('../models/User.model')
 const { Group } = require('../models/Group.model')
 const { Meeting } = require('../models/Meeting.model')
 
@@ -7,9 +7,6 @@ const bcrypt = require('bcryptjs')
 
 const myCustomError = require('../utils/myCustomError')
 const { getEvents, deleteEvent } = require('../utils/googleCalendar')
-// const sendEmail = require('../utils/sendEmail')
-
-// const emailTemplates = require('../lib/emailTemplates')
 
 const hashSomething = async (thingToHash) => {
 	const salt = await bcrypt.genSalt(Number(process.env.SALT))

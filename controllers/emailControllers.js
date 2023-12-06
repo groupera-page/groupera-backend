@@ -79,13 +79,9 @@ exports.sendEmail = (emailType) => async (req, res, next) => {
 		default:
 			subject = 'Dein Bestätigungscode für Groupera'
 			template = emailVerification(authCode, email)
-			send = res
-				.cookie('refreshToken', refreshToken, cookieOptions)
-				.send({
-					authToken,
-					user: userObject,
-					message: 'Bentzer erfolgreich verfiziert',
-				})
+			send = res.send({
+				message: `Email gesendet an: ${email}`,
+			})
 	}
 
 	try {

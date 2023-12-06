@@ -26,7 +26,6 @@ exports.signup = async (req, res, next) => {
 
 	try {
 		const randomCode = Math.floor(1000 + Math.random() * 9000).toString()
-		console.log(randomCode)
 		const hashPassword = await hashSomething(password)
 		const hashCode = await hashSomething(randomCode)
 
@@ -39,6 +38,7 @@ exports.signup = async (req, res, next) => {
 
 		res.locals.user = user
 		res.locals.authCode = randomCode
+		console.log(res.locals)
 		next()
 	} catch (error) {
 		next(error)
