@@ -139,6 +139,17 @@ exports.delete = async (req, res, next) => {
 			}
 		)
 
+		await Meeting.updateMany({
+			members: {
+				$in: [userId],
+			},
+		},
+		{
+			$pull: {
+				members: userId,
+			},
+		})
+
 		user.moderatedGroups.map(async (groupId) => {
 			const specGroup = await Group.findOne({ _id: groupId })
 
