@@ -1,5 +1,5 @@
 const { google } = require('googleapis')
-const { ideahub } = require('googleapis/build/src/apis/ideahub')
+// const { ideahub } = require('googleapis/build/src/apis/ideahub')
 require('dotenv').config()
 
 // Provide the required configuration
@@ -20,7 +20,7 @@ const auth = new google.auth.JWT(
 // Your TIMEOFFSET Offset
 const TIMEOFFSET = '+01:00'
 
-const dateTimeForCalender = (date, time, length) => {
+exports.dateTimeForCalender = (date, time, length) => {
 	const newDateTime = `${date}T${time}:00.000${TIMEOFFSET}`
 
 	const startDate = new Date(Date.parse(newDateTime))
@@ -37,7 +37,21 @@ const dateTimeForCalender = (date, time, length) => {
 	}
 }
 
-const insertEvent = async (event) => {
+exports.getInstance = async (event) => {
+	try {
+		const response = await calendar.events.instances({
+			auth: auth,
+			calendarId: calendarId,
+			eventId: event
+		})
+
+		return response.data
+	} catch (error) {
+		console.log(error)
+	}
+}
+
+exports.insertEvent = async (event) => {
 	try {
 		const response = await calendar.events.insert({
 			auth: auth,
@@ -56,7 +70,7 @@ const insertEvent = async (event) => {
 	}
 }
 
-const getEvents = async () => {
+exports.getEvents = async () => {
 	try {
 		const response = await calendar.events.list({
 			auth: auth,
@@ -74,7 +88,7 @@ const getEvents = async () => {
 	}
 }
 
-const getEvent = async (eventId) => {
+exports.getEvent = async (eventId) => {
 	try {
 		return await calendar.events.get({
 			auth: auth,
@@ -88,7 +102,7 @@ const getEvent = async (eventId) => {
 	}
 }
 
-const editEvent = async (eventId, event) => {
+exports.editEvent = async (eventId, event) => {
 	try {
 		const response = await calendar.events.update({
 			auth: auth,
@@ -108,7 +122,7 @@ const editEvent = async (eventId, event) => {
 	}
 }
 
-const deleteEvent = async (eventId) => {
+exports.deleteEvent = async (eventId) => {
 	try {
 		const response = await calendar.events.delete({
 			auth: auth,
@@ -125,13 +139,4 @@ const deleteEvent = async (eventId) => {
 		console.log(`Error at deleteEvent --> ${error}`)
 		return 0
 	}
-}
-
-module.exports = {
-	deleteEvent,
-	dateTimeForCalender,
-	insertEvent,
-	getEvents,
-	getEvent,
-	editEvent,
 }

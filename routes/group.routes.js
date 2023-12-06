@@ -28,6 +28,8 @@ router.get('/findAll', groupControllers.findAll)
 
 router.get('/:groupId', verifyUser, verifyGroupMember, groupControllers.findOne)
 
+router.get('/:groupId/meetings', groupControllers.groupMeetings)
+
 router.patch(
 	'/:groupId',
 	validateScheme(groupSchema),

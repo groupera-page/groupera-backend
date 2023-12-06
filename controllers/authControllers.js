@@ -2,8 +2,6 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { v4: uuidv4 } = require('uuid')
 
-const { sendEmail } = require('../controllers/emailControllers')
-
 const { User } = require('../models/User.model')
 
 const myCustomError = require('../utils/myCustomError')
