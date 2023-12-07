@@ -10,9 +10,7 @@ const {
 } = require('../utils/googleCalendar')
 const bcrypt = require('bcryptjs');
 const {hashSomething} = require('./authControllers');
-// const sendEmail = require('../utils/sendEmail')
 
-// const emailTemplates = require('../lib/emailTemplates')
 
 exports.find = async (req, res, next) => {
 	const { userId } = req
