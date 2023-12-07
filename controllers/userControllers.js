@@ -131,6 +131,17 @@ exports.delete = async (req, res, next) => {
 			}
 		)
 
+		await Meeting.updateMany({
+			members: {
+				$in: [userId],
+			},
+		},
+		{
+			$pull: {
+				members: userId,
+			},
+		})
+
 		user.moderatedGroups.map(async (groupId) => {
 			const specGroup = await Group.findOne({ _id: groupId })
 
@@ -169,9 +180,11 @@ exports.delete = async (req, res, next) => {
 			await specGroup.delete()
 		})
 
+		res.locals.user = user
+
 		await user.delete()
 
-		res.send({ message: 'Benutzer erfolgreich gelöscht' })
+		next()
 	} catch (error) {
 		next(error)
 	}

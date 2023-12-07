@@ -22,7 +22,7 @@ exports.create = async (req, res, next) => {
 			verified: selfModerated || false
 		})
 
-		await User.updateOne(
+		const user = await User.findOneAndUpdate(
 			{ _id: currentUserId },
 			{ $push: { moderatedGroups: group._id } }
 		)
@@ -63,6 +63,28 @@ exports.findOne = async (req, res, next) => {
 		if(!group.members || !group.members.some(m => m.id === userId)) await group.depopulate('members')
 
 		res.status(200).send(group)
+	} catch (error) {
+		next(error)
+	}
+}
+
+exports.groupMeetings = async (req, res, next) => {
+	const { groupId } = req.params
+	const allGroupMeetings = await getEvents()
+
+	try {
+		const group = await Group.findOne({ _id: groupId })
+		if (!group) throw myCustomError('Group could not be found', 400)
+
+		const meetings = await Promise.all(group.meetings.map(async (event) => {
+			const meetingObject = await Meeting.findOne({ _id: event })
+
+			return allGroupMeetings.filter((groupMeeting) =>
+				groupMeeting.id.includes(meetingObject.calendarId)
+			)
+		}))
+
+		res.send(meetings)
 	} catch (error) {
 		next(error)
 	}

@@ -8,8 +8,6 @@ const myCustomError = require('../utils/myCustomError')
 const {
 	dateTimeForCalender,
 	insertEvent,
-	getEvents,
-	getEvent,
 	deleteEvent,
 	editEvent,
 } = require('../utils/googleCalendar')
@@ -116,7 +114,7 @@ exports.deleteMeeting = async (req, res, next) => {
 		const meeting = await Meeting.findOne({ _id: meetingId })
 
 		const group = await Group.findOne({ _id: groupId })
-		
+
 		if (group.meetings.length === 1)
 			throw myCustomError('Group must have at least one meeting', 400)
 
@@ -142,9 +140,9 @@ exports.deleteMeeting = async (req, res, next) => {
 			}
 		)
 
-		meeting.delete()
-
 		await deleteEvent(meeting.calendarId)
+
+		meeting.delete()
 
 		res.send({ message: 'Termin erfolgreich gelöscht' })
 	} catch (error) {

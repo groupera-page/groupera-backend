@@ -5,6 +5,7 @@ const userControllers = require('../controllers/userControllers')
 const {
 	verifyCurrentUser,
 } = require('../middleware/userAuthentication.middleware.js')
+
 const { validateAuthToken } = require('../middleware/auth.middleware.js')
 
 router.get(
@@ -18,7 +19,7 @@ router.patch(
 	'/:userId',
 	validateAuthToken,
 	verifyCurrentUser,
-	userControllers.edit,
+	userControllers.edit
 )
 
 // router.patch(
@@ -34,7 +35,8 @@ router.delete(
 	'/:userId',
 	validateAuthToken,
 	verifyCurrentUser,
-	userControllers.delete
+	userControllers.delete,
+	sendEmail('Delete account')
 )
 
 module.exports = router
