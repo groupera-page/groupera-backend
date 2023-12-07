@@ -45,7 +45,7 @@ exports.find = async (req, res, next) => {
 }
 
 exports.editPassword = async (req, res, next) => {
-	const { userId } = req.params
+	const { userId } = req
 	const { currentPassword, newPassword } = req.body
 
 	try {
@@ -67,7 +67,7 @@ exports.editPassword = async (req, res, next) => {
 }
 
 exports.editEmail = async (req, res, next) => {
-	const { userId } = req.params
+	const { userId } = req
 	const { password, email: newEmail } = req.body
 
 	try {
@@ -89,7 +89,7 @@ exports.editEmail = async (req, res, next) => {
 }
 
 exports.edit = async (req, res, next) => {
-	const { userId } = req.params
+	const { userId } = req
 
 	try {
 		const userUpdateInfo = await User.updateOne(
@@ -106,7 +106,7 @@ exports.edit = async (req, res, next) => {
 }
 
 exports.delete = async (req, res, next) => {
-	const { userId } = req.params
+	const { userId } = req
 
 	try {
 		const user = await User.findOne({ _id: userId })

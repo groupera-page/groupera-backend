@@ -13,9 +13,6 @@ exports.join = async (req, res, next) => {
 		let group = await Group.findOne({ _id: groupId })
 		if (!group) throw myCustomError('Die Gruppe existiert nicht', 400)
 
-		console.log(group.moderator)
-		console.log(currentUserId)
-
 		if (
 			group.members.includes(currentUserId) ||
 			group.moderator == currentUserId
