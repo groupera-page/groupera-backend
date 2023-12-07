@@ -4,7 +4,25 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="415cef89-44f6-4b78-98ab-93465421566e" name="Changes" comment="Added api documentation with aglio package" />
+    <list default="true" id="415cef89-44f6-4b78-98ab-93465421566e" name="Changes" comment="updated verifyEmailRoute">
+      <change afterPath="$PROJECT_DIR$/controllers/profileControllers.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/routes/profile.routes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers/authControllers.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/authControllers.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers/groupControllers.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/groupControllers.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers/groupMembershipControllers.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/groupMembershipControllers.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers/meetingControllers.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/meetingControllers.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers/userControllers.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/userControllers.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/middleware/auth.middleware.js" beforeDir="false" afterPath="$PROJECT_DIR$/middleware/auth.middleware.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/middleware/userAuthentication.middleware.js" beforeDir="false" afterPath="$PROJECT_DIR$/middleware/userAuthentication.middleware.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Group.model.js" beforeDir="false" afterPath="$PROJECT_DIR$/models/Group.model.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Meeting.model.js" beforeDir="false" afterPath="$PROJECT_DIR$/models/Meeting.model.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/User.model.js" beforeDir="false" afterPath="$PROJECT_DIR$/models/User.model.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/auth.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/auth.routes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/group.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/group.routes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/user.routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/user.routes.js" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -23,17 +41,24 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "/Users/fritzmeyer/groupera/backend",
+    "last_opened_file_path": "/Users/fritzmeyer/groupera/backend/routes",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
+    "prettierjs.PrettierConfiguration.Package": "/Users/fritzmeyer/groupera/backend/node_modules/prettier",
     "settings.editor.selected.configurable": "preferences.keymap",
     "ts.external.directory.path": "/Applications/WebStorm.app/Contents/plugins/javascript-impl/jsLanguageServicesImpl/external",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/routes" />
+      <recent name="$PROJECT_DIR$/controllers" />
+    </key>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -60,7 +85,14 @@
       <option name="project" value="LOCAL" />
       <updated>1699864737279</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="updated verifyEmailRoute">
+      <created>1701853329738</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1701853329738</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -80,6 +112,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Add env.example file" />
     <MESSAGE value="Added api documentation with aglio package" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added api documentation with aglio package" />
+    <MESSAGE value="updated verifyEmailRoute" />
+    <option name="LAST_COMMIT_MESSAGE" value="updated verifyEmailRoute" />
   </component>
 </project>

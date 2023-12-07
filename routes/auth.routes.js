@@ -20,7 +20,8 @@ const loginBodySchema = {
 
 const codeSchema = {
 	email: Joi.string().email().required().label('Email'),
-	code: Joi.string().required().min(4).length(4).label('authCode'),
+	authCode: Joi.string().required().min(4).length(4).label('authCode'),
+	joinedGroups: Joi.array().label('joinedGroups')
 }
 
 router.post(

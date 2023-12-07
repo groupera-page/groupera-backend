@@ -5,31 +5,34 @@ const { groupSchema } = require('../models/Group.model')
 const groupControllers = require('../controllers/groupControllers')
 
 const {
-	verifyGroupModerator, verifyGroupMember,
+	verifyGroupModerator,
 } = require('../middleware/userAuthentication.middleware.js')
 const {
 	validateScheme,
 	validateAuthToken,
-	validateNoGroupDuplicates,
-	verifyUser,
+	// validateNoGroupDuplicates,
 } = require('../middleware/auth.middleware')
 
 router.post(
 	'',
-	validateScheme(groupSchema),
 	validateAuthToken,
-	validateNoGroupDuplicates,
+	validateScheme(groupSchema),
+	// validateNoGroupDuplicates,
 	groupControllers.create,
 )
 
-router.get('/findAll', groupControllers.findAll)
+router.get('/', validateAuthToken, groupControllers.findAll)
 
-router.get('/:groupId', verifyUser, verifyGroupMember, groupControllers.findOne)
+router.get('/:groupId',
+	validateAuthToken,
+	// verifyGroupMember,
+	groupControllers.findOne
+)
 
 router.patch(
 	'/:groupId',
-	validateScheme(groupSchema),
 	validateAuthToken,
+	// validateScheme(groupSchema),
 	verifyGroupModerator,
 	groupControllers.edit
 )
