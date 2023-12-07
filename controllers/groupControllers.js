@@ -27,10 +27,9 @@ exports.create = async (req, res, next) => {
 			{ $push: { moderatedGroups: group._id } }
 		)
 
-		res.send({
-			group,
-			message: 'Group successfully created'
-		})
+		res.locals.user = user
+
+		next()
 	} catch (error) {
 		next(error)
 	}

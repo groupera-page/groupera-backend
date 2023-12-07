@@ -13,7 +13,13 @@ exports.join = async (req, res, next) => {
 		let group = await Group.findOne({ _id: groupId })
 		if (!group) throw myCustomError('Die Gruppe existiert nicht', 400)
 
-		if (group.members.includes(currentUserId))
+		console.log(group.moderator)
+		console.log(currentUserId)
+
+		if (
+			group.members.includes(currentUserId) ||
+			group.moderator == currentUserId
+		)
 			throw myCustomError(`You're already in this group, sweetie`, 400)
 
 		const user = await User.findOneAndUpdate(
@@ -24,7 +30,7 @@ exports.join = async (req, res, next) => {
 
 		await Group.updateOne(
 			{ _id: groupId },
-			{ $push: { users: currentUserId } }
+			{ $push: { members: currentUserId } }
 		)
 
 		res.locals.user = user
@@ -48,9 +54,15 @@ exports.leave = async (req, res, next) => {
 
 		const user = await User.findOne({ _id: currentUserId })
 
+		if (user.id == group.moderator)
+			throw myCustomError(
+				'Sie können eine Gruppe, die Sie moderieren, nicht verlassen',
+				400
+			)
+
 		await Group.updateOne(
 			{ _id: groupId },
-			{ $pull: { users: currentUserId } }
+			{ $pull: { members: currentUserId } }
 		)
 
 		await User.updateOne(
