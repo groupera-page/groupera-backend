@@ -5,10 +5,10 @@ const meetingSchema = new Schema({
 	members: [
 		{
 			type: Schema.Types.ObjectId,
-			ref: 'Member',
+			ref: 'User',
 		},
 	],
-	groupId: {
+	group: {
 		type: Schema.Types.ObjectId,
 		ref: 'Group',
 	},

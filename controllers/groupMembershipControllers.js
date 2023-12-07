@@ -13,7 +13,7 @@ exports.join = async (req, res, next) => {
 		let group = await Group.findOne({ _id: groupId })
 		if (!group) throw myCustomError('Die Gruppe existiert nicht', 400)
 
-		if (group.users.includes(currentUserId))
+		if (group.members.includes(currentUserId))
 			throw myCustomError(`You're already in this group, sweetie`, 400)
 
 		const user = await User.findOneAndUpdate(

@@ -8,15 +8,17 @@ const {
 	// getEvents,
 	deleteEvent
 } = require('../utils/googleCalendar')
+const bcrypt = require('bcryptjs');
+const {hashSomething} = require('./authControllers');
 // const sendEmail = require('../utils/sendEmail')
 
 // const emailTemplates = require('../lib/emailTemplates')
 
-exports.findOne = async (req, res, next) => {
-	const { userId } = req.params
+exports.find = async (req, res, next) => {
+	const { userId } = req
 
 	try {
-		let user = await User.findOne(
+		const user = await User.findOne(
 			{ _id: userId },
 			'alias email dob questions emailVerified gender'
 		).populate({
@@ -44,55 +46,49 @@ exports.findOne = async (req, res, next) => {
 	}
 }
 
-// exports.edit = async (req, res, next) => {
-// 	const { userId } = req.params
-// 	const { alias, password, email } = req.body
-// 	const createExpirationDate = () =>
-// 		new Date(+new Date() + 24 * 60 * 60 * 1000)
-//
-// 	try {
-// 		const user = await User.findOne({ _id: userId })
-// 		if (!user) throw myCustomError('User could not be found', 400)
-//
-// 		const hashPassword = await hashSomething(password)
-//
-// 		const newUser = await User.findOneAndUpdate(
-// 			{ _id: userId },
-// 			{
-// 				...req.body,
-// 				email: email.toLowerCase(),
-// 				passwordHash: hashPassword,
-// 			},
-// 			{ returnOriginal: false }
-// 		)
-//
-// 		if (newUser.email !== user.email) {
-// 			const randomCode = Math.floor(
-// 				1000 + Math.random() * 9000
-// 			).toString()
-// 			const hashCode = await hashSomething(randomCode)
-//
-// 			await User.updateOne(
-// 				{ _id: userId },
-// 				{
-// 					emailVerified: false,
-// 					authCode: hashCode,
-// 					emailVerificationExpires: createExpirationDate(),
-// 					refreshToken: '',
-// 				}
-// 			)
-//
-// 			res.locals.user = { alias, email }
-// 			res.locals.authCode = randomCode
-// 			console.log(res.locals)
-// 			next()
-// 		} else {
-// 			res.send({ message: 'Benutzer erfolgreich aktualisiert' })
-// 		}
-// 	} catch (error) {
-// 		next(error)
-// 	}
-// }
+exports.editPassword = async (req, res, next) => {
+	const { userId } = req.params
+	const { currentPassword, newPassword } = req.body
+
+	try {
+		const user = await User.findOne({ _id: userId }, '+passwordHash')
+		if (!user) throw myCustomError('User could not be found', 400)
+
+		const validPassword = await bcrypt.compare(currentPassword, user.passwordHash)
+		if (!validPassword)
+			throw myCustomError('Ungültiges Passwort', 401)
+
+		user.passwordHash = await hashSomething(newPassword)
+
+		await user.save()
+
+		res.send({ message: 'Passwort erfolgreich aktualisiert' })
+	} catch (error) {
+		next(error)
+	}
+}
+
+exports.editEmail = async (req, res, next) => {
+	const { userId } = req.params
+	const { password, email: newEmail } = req.body
+
+	try {
+		const user = await User.findOne({ _id: userId }, '+passwordHash')
+		if (!user) throw myCustomError('User could not be found', 400)
+
+		const validPassword = await bcrypt.compare(password, user.passwordHash)
+		if (!validPassword)
+			throw myCustomError('Ungültige E-Mail oder Passwort', 401)
+
+		user.email = newEmail
+
+		await user.save()
+
+		res.send({ message: 'Email erfolgreich aktualisiert' })
+	} catch (error) {
+		next(error)
+	}
+}
 
 exports.edit = async (req, res, next) => {
 	const { userId } = req.params
@@ -130,17 +126,6 @@ exports.delete = async (req, res, next) => {
 				},
 			}
 		)
-
-		await Meeting.updateMany({
-			members: {
-				$in: [userId],
-			},
-		},
-		{
-			$pull: {
-				members: userId,
-			},
-		})
 
 		user.moderatedGroups.map(async (groupId) => {
 			const specGroup = await Group.findOne({ _id: groupId })
@@ -180,11 +165,9 @@ exports.delete = async (req, res, next) => {
 			await specGroup.delete()
 		})
 
-		res.locals.user = user
-
 		await user.delete()
 
-		next()
+		res.send({ message: 'Benutzer erfolgreich gelöscht' })
 	} catch (error) {
 		next(error)
 	}

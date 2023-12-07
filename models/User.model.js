@@ -12,6 +12,7 @@ const userSchema = new Schema({
 	},
 	passwordHash: {
 		type: String,
+		select: false
 	},
 	dob: {
 		type: Date,
@@ -67,6 +68,8 @@ const userSchema = new Schema({
 	refreshToken: {
 		type: String,
 	},
+}, {
+	timestamps: true
 })
 
 const User = model('User', userSchema)
@@ -97,7 +100,7 @@ const schema = {
 	dob: Joi.date().label('Age'),
 	authCode: Joi.string().label('Code'),
 	gender: Joi.string()
-		.valid('Männlich', 'Weiblich', 'Divers')
+		.valid('male', 'female', 'divers')
 		.label('Gender'),
 	questions: Joi.object().label('Questions'),
 	emailVerified: Joi.bool().label('emailVerified'),

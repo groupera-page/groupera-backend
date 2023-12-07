@@ -19,7 +19,9 @@ const loginBodySchema = {
 }
 
 const codeSchema = {
-	code: Joi.string().required().min(4).length(4).label('authCode'),
+	email: Joi.string().email().required().label('Email'),
+	authCode: Joi.string().required().min(4).length(4).label('authCode'),
+	joinedGroups: Joi.array().label('joinedGroups')
 }
 
 router.post(
@@ -31,7 +33,7 @@ router.post(
 )
 
 router.patch(
-	'/:email/verifyEmail',
+	'/verifyEmail',
 	validateScheme(codeSchema),
 	authControllers.verifyEmail,
 	sendEmail('Welcome email')

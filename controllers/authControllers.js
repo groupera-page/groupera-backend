@@ -12,12 +12,15 @@ const {
 	getAuthTokens,
 	cookieOptions,
 } = require('../utils/auth.helpers')
+const {Group} = require('../models/Group.model');
 
 const hashSomething = async (thingToHash) => {
 	const salt = await bcrypt.genSalt(Number(process.env.SALT))
 
 	return bcrypt.hash(thingToHash, salt)
 }
+
+exports.hashSomething = hashSomething
 
 exports.signup = async (req, res, next) => {
 	const { email, password } = req.body
@@ -45,19 +48,28 @@ exports.signup = async (req, res, next) => {
 
 exports.verifyEmail = async (req, res, next) => {
 	const {
-		body: { code },
-		params: { email },
+		body: { authCode, email, joinedGroups },
 	} = req
 	try {
 		let user = await User.findOne({ email: email })
 		if (!user) throw myCustomError('Ungültiger Email', 401)
 
-		const validAuthCode = await bcrypt.compare(code, user.authCode)
+		const validAuthCode = await bcrypt.compare(authCode, user.authCode)
 		if (!validAuthCode) throw myCustomError('Incorrect code!', 401)
 
 		user.emailVerified = true
 		user.emailVerificationExpires = null
 		user.authCode = ''
+
+		if (joinedGroups && joinedGroups[0]) {
+			const group = await Group.findById(joinedGroups[0])
+			if (group) {
+				group.members.push(user.id)
+				await group.save()
+
+				user.joinedGroups.push(joinedGroups[0])
+			}
+		}
 
 		const { userObject, authToken, refreshToken } = getAuthTokens(user)
 
@@ -101,7 +113,7 @@ exports.login = async (req, res, next) => {
 	try {
 		const { email, password } = req.body
 
-		const user = await User.findOne({ email: email.toLowerCase() })
+		const user = await User.findOne({ email: email.toLowerCase() }, '+passwordHash')
 		if (!user) throw myCustomError('Ungültige E-Mail oder Passwort', 401)
 
 		const validPassword = await bcrypt.compare(password, user.passwordHash)

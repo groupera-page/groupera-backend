@@ -20,58 +20,45 @@ const groupSchema = new Schema({
 	},
 	meetings: [
 		{
-			type: String,
+			type: Schema.Types.ObjectId,
+			ref: 'Meeting',
 		},
 	],
-	moderatorId: {
+	moderator: {
 		type: Schema.Types.ObjectId,
-		ref: 'Moderator',
+		ref: 'User',
 	},
-	users: [
+	members: [
 		{
 			type: Schema.Types.ObjectId,
 			ref: 'User',
 		},
 	],
-	moderationType: {
-		type: String,
+	selfModerated: {
+		type: Boolean,
+		default: false
 	},
+}, {
+	toJSON: {
+		virtuals: true,
+		transform: function(doc, ret) {
+			ret.id = ret._id;
+			delete ret._id;
+		}
+	},
+	toObject: {
+		virtuals: true,
+		transform: function(doc, ret) {
+			ret.id = ret._id;
+			delete ret._id;
+		}
+	},
+	timestamps: true
 })
 
-// groupSchema.pre('remove', async function () {
-// 	await this.model('User').updateOne(
-// 		{ _id: this.moderatorId },
-// 		{
-// 			$pull: {
-// 				moderatedGroups: this._id,
-// 			},
-// 		}
-// 	)
-// 	await this.model('User').updateMany(
-// 		{
-// 			joinedGroups: {
-// 				$in: [this._id],
-// 			},
-// 			// moderatedGroups: {
-// 			// 	$in: [this._id]
-// 			// }
-// 		},
-// 		{
-// 			$pull: {
-// 				joinedGroups: this._id,
-// 				// moderatedGroups: this._id
-// 			},
-// 		}
-// 	)
-// 	for (let i = 0; i < this.meetings.length; i++) {
-// 		const testProject = await this.model('Meeting').findOne({
-// 			groupId: this._id,
-// 		})
-// 		await deleteEvent(testProject.calendarId)
-// 		await testProject.deleteOne()
-// 	}
-// 	console.log('Group deleted')
-// })
+groupSchema.virtual('membersCount').get(function() {
+	return this.members ? this.members.length : 0
+});
 
 const Group = model('Group', groupSchema)
 
@@ -93,11 +80,7 @@ const schema = {
 			'string.empty': 'Bitte Description eingeben',
 		}),
 	topic: Joi.string().required().label('Topic'),
-	time: Joi.string().required().label('Time'),
-	date: Joi.date().required().label('Date'),
-	frequency: Joi.number().required().label('Frequency'),
-	length: Joi.number().required().label('Length'),
-	moderationType: Joi.string().label('Moderation-type'),
+	selfModerated: Joi.string().label('Self-moderated'),
 }
 
 module.exports = { Group, groupSchema: schema }

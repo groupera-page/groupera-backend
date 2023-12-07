@@ -22,7 +22,7 @@ exports.createMeeting = async (req, res, next) => {
 		const group = await Group.findOne({ _id: groupId })
 		if (!group) throw myCustomError('Group could not be found', 400)
 
-		const user = await User.findOne({ _id: group.moderatorId })
+		const user = await User.findOne({ _id: group.moderator })
 
 		let meeting = await new Meeting().save()
 

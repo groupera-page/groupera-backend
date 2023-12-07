@@ -19,13 +19,13 @@ exports.verifyGroupMember = async (req, res, next) => {
 
 	const group = await Group.findOne({ _id: params.groupId })
 
-	if (currentUserId === 1) next()
-	else if (
-		currentUserId != group.moderatorId &&
-		!group.users.includes(currentUserId)
-	)
+	if ( // if either member of the group or moderator
+		!group.moderator.equals(currentUserId) &&
+		// group.moderator !== currentUserId &&
+		!group.members.includes(currentUserId)
+	){
 		next(myCustomError('Unauthorized', 401))
-	else next()
+	} else next()
 }
 
 exports.verifyGroupModerator = async (req, res, next) => {
@@ -35,7 +35,7 @@ exports.verifyGroupModerator = async (req, res, next) => {
 	const group = await Group.findOne({ _id: params.groupId })
 	if (!group) next(myCustomError('Group not found', 400))
 
-	if (currentUserId != group.moderatorId)
+	if (!group.moderator.equals(currentUserId))
 		next(myCustomError('Unauthorized', 401))
 
 	next()
