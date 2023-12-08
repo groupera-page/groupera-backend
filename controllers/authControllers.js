@@ -29,20 +29,23 @@ exports.signup = async (req, res, next) => {
 
 	try {
 		const randomCode = Math.floor(1000 + Math.random() * 9000).toString()
-		console.log(randomCode)
 		const hashPassword = await hashSomething(password)
 		const hashCode = await hashSomething(randomCode)
 
-		const user = await new User({
+		res.locals.user = await User.create({
 			...req.body,
 			email: email.toLowerCase(),
 			passwordHash: hashPassword,
 			authCode: hashCode,
-		}).save()
-
-		res.locals.user = user
+		})
 		res.locals.authCode = randomCode
-		next()
+		
+		if (process.env.NODE_ENV === 'development') {
+			console.log('Email Auth Code', randomCode)
+			res.sendStatus(204)
+		} else{
+			next()
+		}
 	} catch (error) {
 		next(error)
 	}
@@ -98,14 +101,18 @@ exports.resendEmailVerification = async (req, res, next) => {
 
 		const randomCode = Math.floor(1000 + Math.random() * 9000).toString()
 		console.log(randomCode)
-		const hashCode = await hashSomething(randomCode)
-
-		user.authCode = hashCode
+		user.authCode = await hashSomething(randomCode)
 		await user.save()
 
 		res.locals.user = user
 		res.locals.authCode = randomCode
-		next()
+
+		if (process.env.NODE_ENV === 'development') {
+			console.log('Email Auth Code', randomCode)
+			res.sendStatus(204)
+		} else{
+			next()
+		}
 	} catch (error) {
 		next(error)
 	}
@@ -164,7 +171,12 @@ exports.setResetPasswordToken = async (req, res, next) => {
 		res.locals.resetPasswordTokenExp = user.resetPasswordTokenExp
 		res.locals.url = url
 
-		next()
+		if (process.env.NODE_ENV === 'development') {
+			console.log('Email Auth Code', user.resetPasswordToken)
+			res.sendStatus(204)
+		} else{
+			next()
+		}
 	} catch (error) {
 		next(error)
 	}
