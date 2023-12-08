@@ -22,14 +22,14 @@ const createStripeSession = async (planId) => {
 }
 
 exports.checkout = async (req, res, next) => {
-	const { id } = req.params
+	const { userId } = req
 	const planId = 'price_1O2wEdLSfyDnhMxYbBjqiOXF'
 
 	try {
 		const session = await createStripeSession(planId)
-		const user = await User.findOne({ _id: id })
+		const user = await User.findOne({ _id: userId })
 
-		user.subscription = {
+		user.paymentSubscription = {
 			sessionId: session.id,
 		}
 
@@ -44,7 +44,7 @@ exports.checkout = async (req, res, next) => {
 exports.successfulCheckout = async (req, res, next) => {
 	const {
 		body: { sessionId },
-		params: { id },
+		userId,
 	} = req
 
 	try {
@@ -56,7 +56,7 @@ exports.successfulCheckout = async (req, res, next) => {
 		const subscription = await stripe.subscriptions.retrieve(subscriptionId)
 
 		await User.updateOne(
-			{ _id: id },
+			{ _id: userId },
 			{
 				subscription: {
 					sessionId: null,
