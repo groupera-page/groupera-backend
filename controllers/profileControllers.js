@@ -9,7 +9,7 @@ const {
 	deleteEvent
 } = require('../utils/googleCalendar')
 const bcrypt = require('bcryptjs');
-const {hashSomething} = require('./authControllers');
+const { hashSomething } = require('./authControllers');
 
 
 exports.find = async (req, res, next) => {
