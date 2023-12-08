@@ -63,10 +63,9 @@ Here’s a sneak peek of our main endpoints:
 | POST   | /auth/resetPassword/:resetPasswordToken | Reset password based on generated uuid token         |
 | POST   | /auth/logout                            | Log out current user or rather clear all cookies     |
 | POST   | /auth/refresh                           | Refresh auth & refresh tokens                        |
-| GET    | /group                                  | Fetch all groups                                     |
 | POST   | /group                                  | Create a new group                                   |
-| PATCH  | /group/:groupId                         | Update group with :groupId                           |
-| ...    | ...                                     | ...                                                  |
+| GET    | /group/findAll                          | Find all groups                                      |
+| GET    | /group/:groupId                         | Find a group by ID                                   |
 
 (This list is still a working progress)
 
