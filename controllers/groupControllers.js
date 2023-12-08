@@ -73,14 +73,16 @@ exports.findOne = async (req, res, next) => {
 	const { params: { groupId }, userId } = req
 
 	try {
-		const group = await Group
+		let group = await Group
 			.findOne({ _id: groupId }, 'name description verified img topic selfModerated membersCount')
-			.populate('moderator', '_id alias email')
-			.populate('members', '_id alias email')
+			.populate('moderator', 'alias email')
+			.populate('members', 'alias email')
 
 		if (!group) throw myCustomError('Group could not be found', 400)
 
-		if(!group.members || !group.members.some(m => m.id === userId)) await group.depopulate('members')
+		group = group.toJSON()
+		if(!group.moderator.id.equals(userId) && (!group.members || !group.members.some(m => m.id === userId))) delete group.members
+
 
 		res.status(200).send(group)
 	} catch (error) {
