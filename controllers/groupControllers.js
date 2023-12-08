@@ -36,14 +36,34 @@ exports.create = async (req, res, next) => {
 	}
 }
 
+// Just attach `?page=2&limit=10&name=someName&topic=someTopic` to your request URL to enable pagination or filtering.
 exports.findAll = async (req, res, next) => {
 	try {
+		// Set up pagination variables
+		const page = parseInt(req.query.page) || 1;
+		const limit = parseInt(req.query.limit) || 10;
+		const skip = (page - 1) * limit;
+
+		// Set up filters for group name or topic
+		const filter = {};
+		if (req.query.name) {
+			filter.name = new RegExp(req.query.name, 'i'); // Case-insensitive match
+		}
+		if (req.query.topic) {
+			filter.topic = new RegExp(req.query.topic, 'i'); // Case-insensitive match
+		}
+
 		const groups = await Group
-			.find({}, 'name description verified img topic selfModerated membersCount')
+			.find(filter, 'name description verified img topic selfModerated membersCount')
 			.populate('moderator', '_id alias email')
 			.populate('meetings')
+			.skip(skip)
+			.limit(limit)
 
-		res.status(200).send(groups)
+		// get the total count for pagination info
+		const totalCount = await Group.countDocuments(filter);
+
+		res.status(200).send({groups, totalCount})
 	} catch (error) {
 		next(error)
 	}
