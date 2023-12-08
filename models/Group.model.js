@@ -80,7 +80,7 @@ const schema = {
 			'string.empty': 'Bitte Description eingeben',
 		}),
 	topic: Joi.string().required().label('Topic'),
-	selfModerated: Joi.string().label('Self-moderated'),
+	selfModerated: Joi.bool().label('Self Moderated'),
 }
 
 module.exports = { Group, groupSchema: schema }
