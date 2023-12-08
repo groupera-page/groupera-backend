@@ -5,15 +5,14 @@ const { v4: uuidv4 } = require('uuid')
 const { User } = require('../models/User.model')
 
 const myCustomError = require('../utils/myCustomError')
-// const sendEmail = require('../utils/sendEmail')
+
 const {
 	calcExpirationDate,
 	tokenExpired,
 	getAuthTokens,
 	cookieOptions,
 } = require('../utils/auth.helpers')
-
-// const emailTemplates = require('../lib/emailTemplates')
+const {Group} = require('../models/Group.model');
 
 const hashSomething = async (thingToHash) => {
 	const salt = await bcrypt.genSalt(Number(process.env.SALT))
@@ -21,12 +20,13 @@ const hashSomething = async (thingToHash) => {
 	return bcrypt.hash(thingToHash, salt)
 }
 
+exports.hashSomething = hashSomething
+
 exports.signup = async (req, res, next) => {
 	const { email, password } = req.body
 
 	try {
 		const randomCode = Math.floor(1000 + Math.random() * 9000).toString()
-		console.log(randomCode)
 		const hashPassword = await hashSomething(password)
 		const hashCode = await hashSomething(randomCode)
 
@@ -39,6 +39,7 @@ exports.signup = async (req, res, next) => {
 
 		res.locals.user = user
 		res.locals.authCode = randomCode
+		console.log(res.locals)
 		next()
 	} catch (error) {
 		next(error)
@@ -47,32 +48,40 @@ exports.signup = async (req, res, next) => {
 
 exports.verifyEmail = async (req, res, next) => {
 	const {
-		body: { code },
-		params: { email },
+		body: { authCode, email, joinedGroups },
 	} = req
 	try {
 		let user = await User.findOne({ email: email })
 		if (!user) throw myCustomError('Ungültiger Email', 401)
 
-		const validAuthCode = await bcrypt.compare(code, user.authCode)
+		const validAuthCode = await bcrypt.compare(authCode, user.authCode)
 		if (!validAuthCode) throw myCustomError('Incorrect code!', 401)
 
 		user.emailVerified = true
 		user.emailVerificationExpires = null
 		user.authCode = ''
 
+		if (joinedGroups && joinedGroups[0]) {
+			const group = await Group.findById(joinedGroups[0])
+			if (group) {
+				group.members.push(user.id)
+				await group.save()
+
+				user.joinedGroups.push(joinedGroups[0])
+			}
+		}
+
 		const { userObject, authToken, refreshToken } = getAuthTokens(user)
 
 		await user.save()
 
-		// should I send the Mongo formatted ID as the user ID or just the string?!
+		res.locals.user = user
+		res.locals.userObject = userObject
+		res.locals.authToken = authToken
+		res.locals.refreshToken = refreshToken
+		res.locals.cookieOptions = cookieOptions
 
-		// I had the same question, actually. Is mongo formatted better practice?
-		res.cookie('refreshToken', refreshToken, cookieOptions).send({
-			authToken,
-			user: userObject,
-			message: 'Bentzer erfolgreich verfiziert',
-		})
+		next()
 	} catch (error) {
 		next(error)
 	}
@@ -85,7 +94,6 @@ exports.resendEmailVerification = async (req, res, next) => {
 		if (!user) throw myCustomError('Ungültiger Email', 401)
 
 		const randomCode = Math.floor(1000 + Math.random() * 9000).toString()
-		console.log(randomCode)
 		const hashCode = await hashSomething(randomCode)
 
 		user.authCode = hashCode
@@ -93,6 +101,8 @@ exports.resendEmailVerification = async (req, res, next) => {
 
 		res.locals.user = user
 		res.locals.authCode = randomCode
+		console.log(res.locals)
+
 		next()
 	} catch (error) {
 		next(error)
@@ -103,7 +113,7 @@ exports.login = async (req, res, next) => {
 	try {
 		const { email, password } = req.body
 
-		const user = await User.findOne({ email: email.toLowerCase() })
+		const user = await User.findOne({ email: email.toLowerCase() }, '+passwordHash')
 		if (!user) throw myCustomError('Ungültige E-Mail oder Passwort', 401)
 
 		const validPassword = await bcrypt.compare(password, user.passwordHash)
@@ -179,15 +189,18 @@ exports.resetPassword = async (req, res, next) => {
 		user.resetPasswordTokenExp = undefined
 		user.resetPasswordToken = undefined
 		user.password = hashPassword
+
 		await user.save()
 
 		const { userObject, authToken, refreshToken } = getAuthTokens(user)
-		// should I send the Mongo formatted ID as the user ID or just the string?!
-		res.cookie('refreshToken', refreshToken, cookieOptions).send({
-			authToken,
-			user: userObject,
-			message: 'Passwort erfolgreich zurückgesetzt.',
-		})
+
+		res.locals.user = user
+		res.locals.userObject = userObject
+		res.locals.authToken = authToken
+		res.locals.refreshToken = refreshToken
+		res.locals.cookieOptions = cookieOptions
+
+		next()
 	} catch (error) {
 		next(error)
 	}

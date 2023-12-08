@@ -20,23 +20,45 @@ const groupSchema = new Schema({
 	},
 	meetings: [
 		{
-			type: String,
+			type: Schema.Types.ObjectId,
+			ref: 'Meeting',
 		},
 	],
-	moderatorId: {
+	moderator: {
 		type: Schema.Types.ObjectId,
-		ref: 'Moderator',
+		ref: 'User',
 	},
-	users: [
+	members: [
 		{
 			type: Schema.Types.ObjectId,
 			ref: 'User',
 		},
 	],
-	moderationType: {
-		type: String,
+	selfModerated: {
+		type: Boolean,
+		default: false
 	},
+}, {
+	toJSON: {
+		virtuals: true,
+		transform: function(doc, ret) {
+			ret.id = ret._id;
+			delete ret._id;
+		}
+	},
+	toObject: {
+		virtuals: true,
+		transform: function(doc, ret) {
+			ret.id = ret._id;
+			delete ret._id;
+		}
+	},
+	timestamps: true
 })
+
+groupSchema.virtual('membersCount').get(function() {
+	return this.members ? this.members.length : 0
+});
 
 const Group = model('Group', groupSchema)
 
@@ -58,11 +80,7 @@ const schema = {
 			'string.empty': 'Bitte Description eingeben',
 		}),
 	topic: Joi.string().required().label('Topic'),
-	time: Joi.string().required().label('Time'),
-	date: Joi.date().required().label('Date'),
-	frequency: Joi.number().required().label('Frequency'),
-	length: Joi.number().required().label('Length'),
-	moderationType: Joi.string().label('Moderation-type'),
+	selfModerated: Joi.string().label('Self-moderated'),
 }
 
 module.exports = { Group, groupSchema: schema }

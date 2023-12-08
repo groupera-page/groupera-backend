@@ -1,160 +1,189 @@
-/* eslint-disable no-mixed-spaces-and-tabs */
-const { User } = require('../models/User.model')
-const { Group } = require('../models/Group.model')
+// /* eslint-disable no-mixed-spaces-and-tabs */
+// const { User } = require('../models/User.model')
+// const { Group } = require('../models/Group.model')
+// const { Meeting } = require('../models/Meeting.model')
 
-const bcrypt = require('bcryptjs')
+// const myCustomError = require('../utils/myCustomError')
+// const {
+// 	// getEvents,
+// 	deleteEvent
+// } = require('../utils/googleCalendar')
 
-const myCustomError = require('../utils/myCustomError')
-const { getEvents, deleteEvent } = require('../utils/googleCalendar')
-// const sendEmail = require('../utils/sendEmail')
 
-// const emailTemplates = require('../lib/emailTemplates')
+// exports.findOne = async (req, res, next) => {
+// 	const { userId } = req.params
 
-const hashSomething = async (thingToHash) => {
-	const salt = await bcrypt.genSalt(Number(process.env.SALT))
+// 	try {
+// 		let user = await User.findOne(
+// 			{ _id: userId },
+// 			'alias email dob questions emailVerified gender'
+// 		).populate({
+// 			path: 'joinedGroups',
+// 			select: 'name description topic img verified',
+// 			populate: [{
+// 				path: 'moderator',
+// 				select: 'alias email',
+// 			}, {
+// 				path: 'meetings',
+// 			}]
+// 		}).populate({
+// 			path: 'moderatedGroups',
+// 			select: 'name description topic img verified',
+// 			populate: {
+// 				path: 'meetings'
+// 			}
+// 		})
 
-	return bcrypt.hash(thingToHash, salt)
-}
+// 		if (!user) throw myCustomError('User could not be found', 400)
 
-exports.findOne = async (req, res, next) => {
-	const { userId } = req.params
-	const allGroupMeetings = await getEvents()
+// 		res.send(user)
+// 	} catch (error) {
+// 		next(error)
+// 	}
+// }
 
-	try {
-		let user = await User.findOne({ _id: userId })
-		if (!user) throw myCustomError('User could not be found', 400)
+// // exports.edit = async (req, res, next) => {
+// // 	const { userId } = req.params
+// // 	const { alias, password, email } = req.body
+// // 	const createExpirationDate = () =>
+// // 		new Date(+new Date() + 24 * 60 * 60 * 1000)
+// //
+// // 	try {
+// // 		const user = await User.findOne({ _id: userId })
+// // 		if (!user) throw myCustomError('User could not be found', 400)
+// //
+// // 		const hashPassword = await hashSomething(password)
+// //
+// // 		const newUser = await User.findOneAndUpdate(
+// // 			{ _id: userId },
+// // 			{
+// // 				...req.body,
+// // 				email: email.toLowerCase(),
+// // 				passwordHash: hashPassword,
+// // 			},
+// // 			{ returnOriginal: false }
+// // 		)
+// //
+// // 		if (newUser.email !== user.email) {
+// // 			const randomCode = Math.floor(
+// // 				1000 + Math.random() * 9000
+// // 			).toString()
+// // 			const hashCode = await hashSomething(randomCode)
+// //
+// // 			await User.updateOne(
+// // 				{ _id: userId },
+// // 				{
+// // 					emailVerified: false,
+// // 					authCode: hashCode,
+// // 					emailVerificationExpires: createExpirationDate(),
+// // 					refreshToken: '',
+// // 				}
+// // 			)
+// //
+// // 			res.locals.user = { alias, email }
+// // 			res.locals.authCode = randomCode
+// // 			console.log(res.locals)
+// // 			next()
+// // 		} else {
+// // 			res.send({ message: 'Benutzer erfolgreich aktualisiert' })
+// // 		}
+// // 	} catch (error) {
+// // 		next(error)
+// // 	}
+// // }
 
-		let groups = await Group.find()
-		groups = groups.filter(
-			(group) =>
-				group.users.includes(user.id) || group.moderatorId == user.id
-		)
+// exports.edit = async (req, res, next) => {
+// 	const { userId } = req.params
 
-		user = {
-			id: user.id,
-			alias: user.alias,
-			email: user.email,
-			dob: user.dob,
-			questions: user.questions,
-			emailVerified: user.emailVerified,
-			gender: user.gender,
-			groups: groups.map((group) => {
-				return (group = {
-					id: group.id,
-					verified: group.verified,
-					name: group.name,
-					description: group.description,
-					topic: group.topic,
-					moderator: group.moderatorId,
-					meeting: allGroupMeetings.filter((groupMeeting) =>
-						groupMeeting.id.includes(group.meeting)
-					),
-				})
-			}),
-		}
+// 	try {
+// 		const userUpdateInfo = await User.updateOne(
+// 			{ _id: userId },
+// 			req.body
+// 		)
 
-		res.send(user)
-	} catch (error) {
-		next(error)
-	}
-}
+// 		if (!userUpdateInfo) throw myCustomError('User could not be updated', 400)
 
-exports.edit = async (req, res, next) => {
-	const { userId } = req.params
-	const { alias, password, email } = req.body
-	const createExpirationDate = () =>
-		new Date(+new Date() + 24 * 60 * 60 * 1000)
+// 		res.send({ message: 'Benutzer erfolgreich aktualisiert' })
+// 	} catch (error) {
+// 		next(error)
+// 	}
+// }
 
-	try {
-		const user = await User.findOne({ _id: userId })
-		if (!user) throw myCustomError('User could not be found', 400)
+// exports.delete = async (req, res, next) => {
+// 	const { userId } = req.params
 
-		const hashPassword = await hashSomething(password)
+// 	try {
+// 		const user = await User.findOne({ _id: userId })
+// 		if (!user) throw myCustomError('User could not be found', 400)
 
-		const newUser = await User.findOneAndUpdate(
-			{ _id: userId },
-			{
-				...req.body,
-				email: email.toLowerCase(),
-				passwordHash: hashPassword,
-			},
-			{ returnOriginal: false }
-		)
+// 		await Group.updateMany(
+// 			{
+// 				users: {
+// 					$in: [userId],
+// 				},
+// 			},
+// 			{
+// 				$pull: {
+// 					users: userId,
+// 				},
+// 			}
+// 		)
 
-		if (newUser.email !== user.email) {
-			const randomCode = Math.floor(
-				1000 + Math.random() * 9000
-			).toString()
-			const hashCode = await hashSomething(randomCode)
+// 		await Meeting.updateMany({
+// 			members: {
+// 				$in: [userId],
+// 			},
+// 		},
+// 		{
+// 			$pull: {
+// 				members: userId,
+// 			},
+// 		})
 
-			await User.updateOne(
-				{ _id: userId },
-				{
-					emailVerified: false,
-					authCode: hashCode,
-					emailVerificationExpires: createExpirationDate(),
-					refreshToken: '',
-				}
-			)
+// 		user.moderatedGroups.map(async (groupId) => {
+// 			const specGroup = await Group.findOne({ _id: groupId })
 
-			res.locals.user = { alias, email }
-			res.locals.authCode = randomCode
-			console.log(res.locals)
-			next()
-		} else {
-			res.send({ message: 'Benutzer erfolgreich aktualisiert' })
-		}
-	} catch (error) {
-		next(error)
-	}
-}
+// 			for (let i = 0; i < specGroup.meetings.length; i++) {
+// 				const meeting = await Meeting.findOneAndDelete({
+// 					_id: specGroup.meetings[i],
+// 				})
+// 				await deleteEvent(meeting.calendarId)
+// 				await User.updateMany(
+// 					{
+// 						meetings: {
+// 							$in: [meeting.id],
+// 						},
+// 					},
+// 					{
+// 						$pull: {
+// 							meetings: meeting.id,
+// 						},
+// 					}
+// 				)
+// 			}
 
-exports.delete = async (req, res, next) => {
-	const { userId } = req.params
+// 			await User.updateMany(
+// 				{
+// 					joinedGroups: {
+// 						$in: [groupId],
+// 					},
+// 				},
+// 				{
+// 					$pull: {
+// 						joinedGroups: groupId,
+// 					},
+// 				}
+// 			)
 
-	try {
-		const user = await User.findOne({ _id: userId })
-		if (!user) throw myCustomError('User could not be found', 400)
+// 			await specGroup.delete()
+// 		})
 
-		await Group.updateMany(
-			{
-				users: {
-					$in: [userId],
-				},
-			},
-			{
-				$pull: {
-					users: userId,
-				},
-			}
-		)
+// 		res.locals.user = user
 
-		user.moderatedGroups.map(async (groupId) => {
-			const specGroup = await Group.findOne({ _id: groupId })
+// 		await user.delete()
 
-			await deleteEvent(specGroup.meeting)
-
-			await User.updateMany(
-				{
-					joinedGroups: {
-						$in: [groupId],
-					},
-				},
-				{
-					$pull: {
-						joinedGroups: groupId,
-						meetings: specGroup.meeting,
-					},
-				}
-			)
-
-			await specGroup.delete()
-		})
-
-		await user.delete()
-
-		res.send({ message: 'Benutzer erfolgreich gelöscht' })
-	} catch (error) {
-		next(error)
-	}
-}
+// 		next()
+// 	} catch (error) {
+// 		next(error)
+// 	}
+// }

@@ -4,7 +4,7 @@ const Joi = require('joi')
 const { userSchema } = require('../models/User.model')
 
 const authControllers = require('../controllers/authControllers')
-const emailControllers = require('../controllers/emailControllers')
+const { sendEmail } = require('../controllers/emailControllers')
 
 const {
 	validateRefreshToken,
@@ -19,7 +19,9 @@ const loginBodySchema = {
 }
 
 const codeSchema = {
-	code: Joi.string().required().min(4).length(4).label('authCode'),
+	email: Joi.string().email().required().label('Email'),
+	authCode: Joi.string().required().min(4).length(4).label('authCode'),
+	joinedGroups: Joi.array().label('joinedGroups')
 }
 
 router.post(
@@ -27,19 +29,20 @@ router.post(
 	validateScheme(userSchema),
 	validateNoEmailDuplicates,
 	authControllers.signup,
-	emailControllers.sendEmail('Verify email')
+	sendEmail('Verify email')
 )
 
 router.patch(
-	'/:email/verifyEmail',
+	'/verifyEmail',
 	validateScheme(codeSchema),
-	authControllers.verifyEmail
+	authControllers.verifyEmail,
+	sendEmail('Welcome email')
 )
 
 router.patch(
 	'/:email/resendEmailVerification',
 	authControllers.resendEmailVerification,
-	emailControllers.sendEmail('Verify email')
+	sendEmail('Verify email')
 )
 
 router.post('/login', validateScheme(loginBodySchema), authControllers.login)
@@ -47,13 +50,14 @@ router.post('/login', validateScheme(loginBodySchema), authControllers.login)
 router.post(
 	'/resetPasswordRequest',
 	authControllers.setResetPasswordToken,
-	emailControllers.sendEmail('Reset Password Instructions')
+	sendEmail('Reset password instructions')
 )
 
 router.patch(
 	'/resetPassword/:resetPasswordToken',
 	validateResetPassword,
-	authControllers.resetPassword
+	authControllers.resetPassword,
+	sendEmail('Reset password successful')
 )
 
 router.get('/logout', authControllers.logout)

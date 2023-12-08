@@ -2,114 +2,45 @@ const { Group } = require('../models/Group.model')
 const { User } = require('../models/User.model')
 const { Meeting } = require('../models/Meeting.model')
 
-// const cloudinary = require("../utils/cloudinary");
 const myCustomError = require('../utils/myCustomError')
 
-const {
-	dateTimeForCalender,
-	insertEvent,
-	getEvents,
-	getEvent,
-	deleteEvent,
-	editEvent,
-} = require('../utils/googleCalendar')
+// const {getEvents, getEvent, deleteEvent} = require('../utils/googleCalendar')
 
 exports.create = async (req, res, next) => {
 	const {
-		body: {
-			// img,
-			frequency,
-			date,
-			time,
-			length,
-			// token,
-			moderationType,
-		},
+		body: {name, description, topic, selfModerated},
 		userId: currentUserId,
 	} = req
 
 	try {
-		// if (img) {
-		//   const uploadRes = await cloudinary.uploader.upload(img, {
-		//     folder: "test",
-		//   });
-		//   if (!uploadRes) res.sendStatus(400)
-		let group = await new Group({
-			...req.body,
-			// img: uploadRes
-		}).save()
+		const group = await Group.create({
+			name,
+			description,
+			topic,
+			selfModerated: selfModerated || false,
+			moderator: currentUserId,
+			verified: selfModerated || false
+		})
 
-		let meeting = await new Meeting().save()
-
-		const dateTime = dateTimeForCalender(date, time, length)
-
-		let calendarEvent = {
-			summary: group.name,
-			description: `Join code: ${group._id}`,
-			start: {
-				dateTime: dateTime['start'],
-				timeZone: 'Europe/Berlin',
-			},
-			end: {
-				dateTime: dateTime['end'],
-				timeZone: 'Europe/Berlin',
-			},
-			recurrence: [`RRULE:FREQ=WEEKLY;COUNT=2;INTERVAL=${+frequency}`],
-		}
-
-		const calendarMeeting = await insertEvent(calendarEvent)
-
-		await Meeting.updateOne(
-			{ _id: meeting._id },
-			{
-				groupId: group._id,
-				calendarId: calendarMeeting.id,
-				$push: { members: currentUserId },
-			}
-		)
-
-		await User.updateOne(
+		const user = await User.findOneAndUpdate(
 			{ _id: currentUserId },
-			{ $push: { moderatedGroups: group._id, meetings: meeting._id } }
+			{ $push: { moderatedGroups: group._id } }
 		)
 
-		await Group.updateOne(
-			{ _id: group._id },
-			{ $push: { meetings: meeting._id }, moderatorId: currentUserId }
-		)
+		res.locals.user = user
 
-		// generateRoom(token, group._id, length);
-
-		if (moderationType == 'Selbstmoderiert') group.verified = true
-		group.save()
-
-		res.send({ message: 'all good here, boss' })
+		next()
 	} catch (error) {
 		next(error)
 	}
 }
 
 exports.findAll = async (req, res, next) => {
-	const allGroupMeetings = await getEvents()
-
 	try {
-		let groups = await Group.find()
-
-		groups = await groups.map((group) => {
-			return {
-				id: group.id,
-				name: group.name,
-				description: group.description,
-				img: group.img,
-				topic: group.topic,
-				users: group.users.length,
-				meetings: group.meetings.map((thisGroupMeeting) =>
-					allGroupMeetings.filter((groupMeeting) =>
-						groupMeeting.id.includes(thisGroupMeeting)
-					)
-				),
-			}
-		})
+		const groups = await Group
+			.find({}, 'name description verified img topic selfModerated membersCount')
+			.populate('moderator', '_id alias email')
+			.populate('meetings')
 
 		res.status(200).send(groups)
 	} catch (error) {
@@ -118,62 +49,64 @@ exports.findAll = async (req, res, next) => {
 }
 
 exports.findOne = async (req, res, next) => {
-	const { groupId } = req.params
-	const allGroupMeetings = await getEvents()
+	const { params: { groupId }, userId } = req
 
 	try {
-		let group = await Group.findOne({ _id: groupId })
+		const group = await Group
+			.findOne({ _id: groupId }, 'name description verified img topic selfModerated membersCount')
+			.populate('moderator', '_id alias email')
+			.populate('members', '_id alias email')
+
 		if (!group) throw myCustomError('Group could not be found', 400)
 
-		let moderator = await User.findOne({ _id: group.moderatorId })
+		if(!group.members || !group.members.some(m => m.id === userId)) await group.depopulate('members')
 
-		moderator = {
-			id: moderator.id,
-			alias: moderator.alias,
-		}
-
-		// add a conditional so that only group members see this (probably through a req.memberId or some shit)
-		let users = await Promise.all(
-			group.users.map(async (user) => {
-				let foundUser = await User.findOne({ _id: user })
-				return foundUser.alias
-			})
-		)
-
-		group = {
-			id: group.id,
-			verified: group.verified,
-			name: group.name,
-			description: group.description,
-			topic: group.topic,
-			moderator: moderator,
-			users: users,
-			meetings: await Promise.all(
-				group.meetings.map((thisGroupMeeting) =>
-					allGroupMeetings.filter((groupMeeting) =>
-						groupMeeting.id.includes(thisGroupMeeting)
-					)
-				)
-			),
-		}
 		res.status(200).send(group)
 	} catch (error) {
 		next(error)
 	}
 }
 
-exports.edit = async (req, res, next) => {
+exports.groupMeetings = async (req, res, next) => {
 	const { groupId } = req.params
+	const allGroupMeetings = await getEvents()
 
 	try {
-		let group = await Group.findOneAndUpdate(
-			{ _id: groupId },
-			{ ...req.body },
-			{ returnOriginal: false }
-		)
+		const group = await Group.findOne({ _id: groupId })
 		if (!group) throw myCustomError('Group could not be found', 400)
 
-		res.send(group)
+		const meetings = await Promise.all(group.meetings.map(async (event) => {
+			const meetingObject = await Meeting.findOne({ _id: event })
+
+			return allGroupMeetings.filter((groupMeeting) =>
+				groupMeeting.id.includes(meetingObject.calendarId)
+			)
+		}))
+
+		res.send(meetings)
+	} catch (error) {
+		next(error)
+	}
+}
+
+exports.edit = async (req, res, next) => {
+	const { body, params: {groupId} } = req
+
+	try {
+		const groupUpdateInfo = await Group.updateOne(
+			{ _id: groupId },
+			{
+				...body,
+				verified: body.selfModerated || false
+			},
+			{ returnOriginal: false }
+		)
+
+		if (!groupUpdateInfo || !groupUpdateInfo.acknowledged) throw myCustomError('Something went wrong updating the group', 400)
+
+		res.send({
+			message: 'Group successfully updated'
+		})
 	} catch (error) {
 		next(error)
 	}
@@ -181,57 +114,32 @@ exports.edit = async (req, res, next) => {
 
 exports.delete = async (req, res, next) => {
 	const { groupId } = req.params
+
 	try {
-		let group = await Group.findOne({ _id: groupId })
+		let group = await Group.findOne({ _id: groupId }).populate('meetings')
 		if (!group) throw myCustomError('Group could not be found', 400)
 
 		await User.updateMany(
 			{
-				joinedGroups: {
-					$in: [groupId],
-				},
+				joinedGroups: groupId,
 			},
 			{
 				$pull: {
 					joinedGroups: groupId,
+					meetings: group.meetings
 				},
 			}
 		)
 
-		await User.updateOne(
-			{ _id: group.moderatorId },
+		await User.updateOne({ _id: group.moderator }, { $pull: { moderatedGroups: groupId } })
+
+		await Meeting.deleteMany(
 			{
-				$pull: {
-					moderatedGroups: groupId,
-				},
+				group: groupId
 			}
 		)
 
-		const user = await User.findOne({ _id: group.moderatorId })
-
-		if (user.moderatedGroups.length === 0) {
-			user.moderator = false
-			await user.save()
-		}
-
-		for (let i = 0; i < group.meetings.length; i++) {
-			const meeting = await Meeting.findOneAndDelete({ _id: group.meetings[i] })
-			await deleteEvent(meeting.calendarId)
-			await User.updateMany(
-				{
-					meetings: {
-						$in: [meeting.id],
-					},
-				},
-				{
-					$pull: {
-						meetings: meeting.id,
-					},
-				}
-			)
-		}
-
-		await Group.deleteOne({ _id: groupId })
+		await group.delete()
 
 		res.send({ message: 'Gruppe erfolgreich gelöscht' })
 	} catch (error) {
