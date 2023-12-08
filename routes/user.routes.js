@@ -36,7 +36,7 @@
 // 	validateAuthToken,
 // 	verifyCurrentUser,
 // 	userControllers.delete,
-// 	sendEmail('Delete account')
+	// sendEmail('Delete account')
 // )
 
 // module.exports = router

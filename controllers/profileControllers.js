@@ -163,9 +163,11 @@ exports.delete = async (req, res, next) => {
 			await specGroup.delete()
 		})
 
+		res.locals.user = user
+
 		await user.delete()
 
-		res.send({ message: 'Benutzer erfolgreich gelöscht' })
+		next()
 	} catch (error) {
 		next(error)
 	}

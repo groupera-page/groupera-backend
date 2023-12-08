@@ -1,6 +1,7 @@
 const router = require('express').Router()
 
 const profileControllers = require('../controllers/profileControllers')
+const { sendEmail } = require('../controllers/emailControllers')
 
 const { validateAuthToken } = require('../middleware/auth.middleware.js')
 
@@ -31,7 +32,8 @@ router.patch(
 router.delete(
 	'',
 	validateAuthToken,
-	profileControllers.delete
+	profileControllers.delete,
+	sendEmail('Delete account')
 )
 
 module.exports = router

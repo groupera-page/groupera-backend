@@ -119,8 +119,6 @@ exports.delete = async (req, res, next) => {
 		let group = await Group.findOne({ _id: groupId }).populate('meetings')
 		if (!group) throw myCustomError('Group could not be found', 400)
 
-		// In the group creation logic, a new group is pushed into the user's moderatedGroups array and so this won't
-		// take into account the moderator (because the group isn't in their joinedGroups) 
 		await User.updateMany(
 			{
 				joinedGroups: groupId,
@@ -128,11 +126,12 @@ exports.delete = async (req, res, next) => {
 			{
 				$pull: {
 					joinedGroups: groupId,
-					meetings: group.meetings,
-					moderatedGroups: groupId
+					meetings: group.meetings
 				},
 			}
 		)
+
+		await User.updateOne({ _id: group.moderator }, { $pull: { moderatedGroups: groupId } })
 
 		await Meeting.deleteMany(
 			{
