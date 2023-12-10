@@ -91,17 +91,21 @@ exports.editEmail = async (req, res, next) => {
 }
 
 exports.edit = async (req, res, next) => {
-	const { userId } = req.params
+	const { userId, body } = req
 
 	try {
 		const user = await User.findOneAndUpdate(
 			{ _id: userId },
-			req.body
+			body,
+			{new: true}
 		)
 
 		if (!user) throw myCustomError('User could not be updated', 400)
 
-		res.send({ message: 'Benutzer erfolgreich aktualisiert' })
+		res.send({
+			user,
+			message: 'Benutzer erfolgreich aktualisiert'
+		})
 	} catch (error) {
 		next(error)
 	}

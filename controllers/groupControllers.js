@@ -100,12 +100,13 @@ exports.edit = async (req, res, next) => {
 				...body,
 				verified: body.selfModerated || false
 			},
-			{ returnOriginal: false }
+			{ new: true }
 		)
 
 		if (!group) throw myCustomError('Something went wrong updating the group', 400)
 
 		res.send({
+			group,
 			message: 'Group successfully updated'
 		})
 	} catch (error) {
