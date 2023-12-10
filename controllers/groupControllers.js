@@ -94,7 +94,7 @@ exports.edit = async (req, res, next) => {
 	const { body, params: {groupId} } = req
 
 	try {
-		const groupUpdateInfo = await Group.updateOne(
+		const group = await Group.findOneAndUpdate(
 			{ _id: groupId },
 			{
 				...body,
@@ -103,7 +103,7 @@ exports.edit = async (req, res, next) => {
 			{ returnOriginal: false }
 		)
 
-		if (!groupUpdateInfo || !groupUpdateInfo.acknowledged) throw myCustomError('Something went wrong updating the group', 400)
+		if (!group) throw myCustomError('Something went wrong updating the group', 400)
 
 		res.send({
 			message: 'Group successfully updated'

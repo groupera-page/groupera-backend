@@ -94,12 +94,12 @@ exports.edit = async (req, res, next) => {
 	const { userId } = req.params
 
 	try {
-		const userUpdateInfo = await User.updateOne(
+		const user = await User.findOneAndUpdate(
 			{ _id: userId },
 			req.body
 		)
 
-		if (!userUpdateInfo) throw myCustomError('User could not be updated', 400)
+		if (!user) throw myCustomError('User could not be updated', 400)
 
 		res.send({ message: 'Benutzer erfolgreich aktualisiert' })
 	} catch (error) {
