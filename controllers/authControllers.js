@@ -238,18 +238,21 @@ exports.refresh = async (req, res, next) => {
 		jwt.verify(
 			currentRefreshToken,
 			process.env.REFRESH_TOKEN_SECRET,
-			(err, decoded) => {
+			async (err, decoded) => {
 				if (err) throw myCustomError('Invalid Token', 400)
 
+				const user = await User.findById(decoded.user.id)
+
 				const {
+					userObject,
 					authToken: newAuthToken,
 					refreshToken: newRefreshToken,
-				} = getAuthTokens(decoded.user)
+				} = getAuthTokens(user)
 
 				res.cookie('refreshToken', newRefreshToken, cookieOptions).send(
 					{
 						authToken: newAuthToken,
-						user: decoded.user,
+						user: userObject,
 					}
 				)
 			}

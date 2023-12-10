@@ -12,7 +12,7 @@ exports.validateAuthToken = (req, res, next) => {
 	if (!authHeader?.startsWith('Bearer ')) return res.sendStatus(401)
 	const token = authHeader.split(' ')[1]
 	jwt.verify(token, process.env.AUTH_TOKEN_SECRET, (error, decoded) => {
-		if (error) next(myCustomError(error, 403))
+		if (error) next(myCustomError(error, 401))
 		req.userId = decoded.user.id
 		console.log(req.userId)
 		next()
