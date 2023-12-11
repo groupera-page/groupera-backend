@@ -85,8 +85,11 @@ exports.findOne = async (req, res, next) => {
 		if (!group) throw myCustomError('Group could not be found', 400)
 
 		group = group.toJSON()
-		if(!group.moderator.id.equals(userId) && (!group.members || !group.members.some(m => m.id === userId))) delete group.members
 
+		const isModerator = group.moderator.id.equals(userId)
+		const isMember = group.members.some(m => m.id.equals(userId))
+
+		if(!isModerator && !isMember) delete group.members
 
 		res.status(200).send(group)
 	} catch (error) {

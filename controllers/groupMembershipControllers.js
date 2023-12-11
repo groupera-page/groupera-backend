@@ -10,7 +10,7 @@ exports.join = async (req, res, next) => {
 		params: { groupId },
 	} = req
 	try {
-		const group = await Group.findById(groupId)
+		let group = await Group.findById(groupId)
 		if (!group) throw myCustomError('Die Gruppe existiert nicht', 400)
 
 		if (group.members.includes(currentUserId) || group.moderator.equals(currentUserId))
@@ -22,15 +22,20 @@ exports.join = async (req, res, next) => {
 			{ returnOriginal: false }
 		)
 
-		await Group.updateOne(
-			{ _id: groupId },
-			{ $push: { members: currentUserId } }
-		)
+		group = await Group
+			.findOneAndUpdate(
+				{ _id: groupId },
+				{ $push: { members: currentUserId } },
+				{ returnOriginal: false, fields: 'name description verified img topic selfModerated membersCount' }
+			)
+			.populate('moderator', 'alias email')
+			.populate('members', 'alias email')
 
 		if (process.env.NODE_ENV === 'development') {
 
-			res.send({ message: 'Gruppe erfolgreich beigetreten' })
+			res.send({ group, message: 'Gruppe erfolgreich beigetreten' })
 		} else{
+			res.locals.group = group
 			res.locals.user = user
 			res.locals.groupName = group.name
 			next()

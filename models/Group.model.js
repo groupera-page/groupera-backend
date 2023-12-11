@@ -54,15 +54,19 @@ const groupSchema = new Schema({
 	toJSON: {
 		virtuals: true,
 		transform: function(doc, ret) {
-			ret.id = ret._id;
-			delete ret._id;
+			if (!ret.id || ret._id){
+				ret.id = ret._id;
+				delete ret._id;
+			}
 		}
 	},
 	toObject: {
 		virtuals: true,
 		transform: function(doc, ret) {
-			ret.id = ret._id;
-			delete ret._id;
+			if (!ret.id || ret._id){
+				ret.id = ret._id;
+				delete ret._id;
+			}
 		}
 	},
 	timestamps: true
