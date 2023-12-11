@@ -13,12 +13,12 @@ const meetingSchema = new Schema({
 		type: Number,
 	},
 	recurrence: {
-		meetingType: {
+		type: {
 			type: String,
 		},
-		days: [String],
+		days: [Number],
 	},
-	recurrenceEndDate: {
+	until: {
 		type: Date,
 	},
 	groupId: {
