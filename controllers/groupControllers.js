@@ -81,6 +81,7 @@ exports.findOne = async (req, res, next) => {
 			.findOne({ _id: groupId }, 'name description verified img topic selfModerated membersCount')
 			.populate('moderator', 'alias email')
 			.populate('members', 'alias email')
+			.populate('meetings')
 
 		if (!group) throw myCustomError('Group could not be found', 400)
 
@@ -99,25 +100,38 @@ exports.findOne = async (req, res, next) => {
 
 exports.groupMeetings = async (req, res, next) => {
 	const { groupId } = req.params
-	const allGroupMeetings = await getEvents()
 
 	try {
-		const group = await Group.findOne({ _id: groupId })
+		const group = await Group.findOne({ _id: groupId }).populate('meetings')
 		if (!group) throw myCustomError('Group could not be found', 400)
 
-		const meetings = await Promise.all(group.meetings.map(async (event) => {
-			const meetingObject = await Meeting.findOne({ _id: event })
-
-			return allGroupMeetings.filter((groupMeeting) =>
-				groupMeeting.id.includes(meetingObject.calendarId)
-			)
-		}))
-
-		res.send(meetings)
+		res.send(group)
 	} catch (error) {
 		next(error)
 	}
 }
+
+// exports.groupMeetings = async (req, res, next) => {
+// 	const { groupId } = req.params
+// 	const allGroupMeetings = await getEvents()
+
+// 	try {
+// 		const group = await Group.findOne({ _id: groupId })
+// 		if (!group) throw myCustomError('Group could not be found', 400)
+
+// 		const meetings = await Promise.all(group.meetings.map(async (event) => {
+// 			const meetingObject = await Meeting.findOne({ _id: event })
+
+// 			return allGroupMeetings.filter((groupMeeting) =>
+// 				groupMeeting.id.includes(meetingObject.calendarId)
+// 			)
+// 		}))
+
+// 		res.send(meetings)
+// 	} catch (error) {
+// 		next(error)
+// 	}
+// }
 
 exports.edit = async (req, res, next) => {
 	const { body, params: {groupId} } = req
