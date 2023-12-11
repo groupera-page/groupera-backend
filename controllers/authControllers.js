@@ -5,7 +5,7 @@ const { v4: uuidv4 } = require('uuid')
 const { User } = require('../models/User.model')
 
 const myCustomError = require('../utils/myCustomError')
-// const sendEmail = require('../utils/sendEmail')
+
 const {
 	calcExpirationDate,
 	tokenExpired,
@@ -13,8 +13,6 @@ const {
 	cookieOptions,
 } = require('../utils/auth.helpers')
 const {Group} = require('../models/Group.model');
-
-// const emailTemplates = require('../lib/emailTemplates')
 
 const hashSomething = async (thingToHash) => {
 	const salt = await bcrypt.genSalt(Number(process.env.SALT))
@@ -32,18 +30,19 @@ exports.signup = async (req, res, next) => {
 		const hashPassword = await hashSomething(password)
 		const hashCode = await hashSomething(randomCode)
 
-		res.locals.user = await User.create({
+		const user = await User.create({
 			...req.body,
 			email: email.toLowerCase(),
 			passwordHash: hashPassword,
 			authCode: hashCode,
 		})
-		res.locals.authCode = randomCode
-		
+
 		if (process.env.NODE_ENV === 'development') {
 			console.log('Email Auth Code', randomCode)
 			res.sendStatus(204)
 		} else{
+			res.locals.user = user
+			res.locals.authCode = randomCode
 			next()
 		}
 	} catch (error) {
@@ -80,14 +79,22 @@ exports.verifyEmail = async (req, res, next) => {
 
 		await user.save()
 
-		// should I send the Mongo formatted ID as the user ID or just the string?!
 
-		// I had the same question, actually. Is mongo formatted better practice?
-		res.cookie('refreshToken', refreshToken, cookieOptions).send({
-			authToken,
-			user: userObject,
-			message: 'Bentzer erfolgreich verfiziert',
-		})
+
+		if (process.env.NODE_ENV === 'development') {
+			res.cookie('refreshToken', refreshToken, cookieOptions).send({
+				authToken,
+				user: userObject,
+				message: 'Bentzer erfolgreich verfiziert',
+			})
+		} else{
+			res.locals.user = user
+			res.locals.userObject = userObject
+			res.locals.authToken = authToken
+			res.locals.refreshToken = refreshToken
+			res.locals.cookieOptions = cookieOptions
+			next()
+		}
 	} catch (error) {
 		next(error)
 	}
@@ -100,17 +107,16 @@ exports.resendEmailVerification = async (req, res, next) => {
 		if (!user) throw myCustomError('Ungültiger Email', 401)
 
 		const randomCode = Math.floor(1000 + Math.random() * 9000).toString()
-		console.log(randomCode)
 		user.authCode = await hashSomething(randomCode)
-		await user.save()
 
-		res.locals.user = user
-		res.locals.authCode = randomCode
+		await user.save()
 
 		if (process.env.NODE_ENV === 'development') {
 			console.log('Email Auth Code', randomCode)
 			res.sendStatus(204)
 		} else{
+			res.locals.user = user
+			res.locals.authCode = randomCode
 			next()
 		}
 	} catch (error) {
@@ -164,17 +170,15 @@ exports.setResetPasswordToken = async (req, res, next) => {
 
 		await user.save()
 
-		const url = `${process.env.FRONTEND_BASE_URL}/auth/resetPassword/${user.resetPasswordToken}`
-
-		res.locals.user = user
-		res.locals.resetPasswordToken = user.resetPasswordToken
-		res.locals.resetPasswordTokenExp = user.resetPasswordTokenExp
-		res.locals.url = url
-
 		if (process.env.NODE_ENV === 'development') {
 			console.log('Email Auth Code', user.resetPasswordToken)
 			res.sendStatus(204)
 		} else{
+			const url = `${process.env.FRONTEND_BASE_URL}/auth/resetPassword/${user.resetPasswordToken}`
+			res.locals.user = user
+			res.locals.resetPasswordToken = user.resetPasswordToken
+			res.locals.resetPasswordTokenExp = user.resetPasswordTokenExp
+			res.locals.url = url
 			next()
 		}
 	} catch (error) {
@@ -203,15 +207,27 @@ exports.resetPassword = async (req, res, next) => {
 		user.resetPasswordTokenExp = undefined
 		user.resetPasswordToken = undefined
 		user.password = hashPassword
+
 		await user.save()
 
 		const { userObject, authToken, refreshToken } = getAuthTokens(user)
-		// should I send the Mongo formatted ID as the user ID or just the string?!
-		res.cookie('refreshToken', refreshToken, cookieOptions).send({
-			authToken,
-			user: userObject,
-			message: 'Passwort erfolgreich zurückgesetzt.',
-		})
+
+
+		if (process.env.NODE_ENV === 'development') {
+			console.log('Email Auth Code', user.resetPasswordToken)
+			res.cookie('refreshToken', refreshToken, cookieOptions).send({
+				authToken,
+				user: userObject,
+				message: 'Passwort erfolgreich zurückgesetzt.',
+			})
+		} else{
+			res.locals.user = user
+			res.locals.userObject = userObject
+			res.locals.authToken = authToken
+			res.locals.refreshToken = refreshToken
+			res.locals.cookieOptions = cookieOptions
+			next()
+		}
 	} catch (error) {
 		next(error)
 	}

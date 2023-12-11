@@ -4,7 +4,8 @@ const { Meeting } = require('../models/Meeting.model')
 
 const myCustomError = require('../utils/myCustomError')
 
-// const {getEvents, getEvent, deleteEvent} = require('../utils/googleCalendar')
+// eslint-disable-next-line no-unused-vars
+const {getEvents, getEvent, deleteEvent} = require('../utils/googleCalendar')
 
 exports.create = async (req, res, next) => {
 	const {
@@ -22,15 +23,18 @@ exports.create = async (req, res, next) => {
 			verified: selfModerated || false
 		})
 
-		await User.updateOne(
+		res.locals.user = await User.findOneAndUpdate(
 			{ _id: currentUserId },
 			{ $push: { moderatedGroups: group._id } }
 		)
 
-		res.send({
-			group,
-			message: 'Group successfully created'
-		})
+		res.locals.group = group
+
+		if (process.env.NODE_ENV === 'development') {
+			res.status(200).send({group, message: 'Group successfully created'})
+		} else{
+			next()
+		}
 	} catch (error) {
 		next(error)
 	}
@@ -90,6 +94,28 @@ exports.findOne = async (req, res, next) => {
 	}
 }
 
+exports.groupMeetings = async (req, res, next) => {
+	const { groupId } = req.params
+	const allGroupMeetings = await getEvents()
+
+	try {
+		const group = await Group.findOne({ _id: groupId })
+		if (!group) throw myCustomError('Group could not be found', 400)
+
+		const meetings = await Promise.all(group.meetings.map(async (event) => {
+			const meetingObject = await Meeting.findOne({ _id: event })
+
+			return allGroupMeetings.filter((groupMeeting) =>
+				groupMeeting.id.includes(meetingObject.calendarId)
+			)
+		}))
+
+		res.send(meetings)
+	} catch (error) {
+		next(error)
+	}
+}
+
 exports.edit = async (req, res, next) => {
 	const { body, params: {groupId} } = req
 
@@ -126,11 +152,12 @@ exports.delete = async (req, res, next) => {
 			{
 				$pull: {
 					joinedGroups: groupId,
-					meetings: group.meetings,
-					moderatedGroups: groupId
+					meetings: group.meetings
 				},
 			}
 		)
+
+		await User.updateOne({ _id: group.moderator }, { $pull: { moderatedGroups: groupId } })
 
 		await Meeting.deleteMany(
 			{

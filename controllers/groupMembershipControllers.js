@@ -13,12 +13,13 @@ exports.join = async (req, res, next) => {
 		const group = await Group.findById(groupId)
 		if (!group) throw myCustomError('Die Gruppe existiert nicht', 400)
 
-		if (group.members.includes(currentUserId))
+		if (group.members.includes(currentUserId) || group.moderator.equals(currentUserId))
 			throw myCustomError('You\'re already in this group, sweetie', 400)
 
-		await User.updateOne(
+		const user = await User.findOneAndUpdate(
 			{ _id: currentUserId },
-			{ $push: { joinedGroups: group.id } }
+			{ $push: { joinedGroups: group.id } },
+			{ returnOriginal: false }
 		)
 
 		await Group.updateOne(
@@ -26,7 +27,14 @@ exports.join = async (req, res, next) => {
 			{ $push: { members: currentUserId } }
 		)
 
-		res.send({ message: 'Gruppe erfolgreich beigetreten' })
+		if (process.env.NODE_ENV === 'development') {
+
+			res.send({ message: 'Gruppe erfolgreich beigetreten' })
+		} else{
+			res.locals.user = user
+			res.locals.groupName = group.name
+			next()
+		}
 	} catch (error) {
 		next(error)
 	}
@@ -44,9 +52,15 @@ exports.leave = async (req, res, next) => {
 		
 		const user = await User.findById(currentUserId)
 
+		if (group.moderator.equals(user.id))
+			throw myCustomError(
+				'Sie können eine Gruppe, die Sie moderieren, nicht verlassen',
+				400
+			)
+
 		await Group.updateOne(
 			{ _id: groupId },
-			{ $pull: { users: currentUserId } }
+			{ $pull: { members: currentUserId } }
 		)
 
 		await User.updateOne(

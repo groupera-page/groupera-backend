@@ -9,10 +9,8 @@ const {
 	deleteEvent
 } = require('../utils/googleCalendar')
 const bcrypt = require('bcryptjs');
-const {hashSomething} = require('./authControllers');
-// const sendEmail = require('../utils/sendEmail')
+const { hashSomething } = require('./authControllers');
 
-// const emailTemplates = require('../lib/emailTemplates')
 
 exports.find = async (req, res, next) => {
 	const { userId } = req
@@ -47,7 +45,7 @@ exports.find = async (req, res, next) => {
 }
 
 exports.editPassword = async (req, res, next) => {
-	const { userId } = req.params
+	const { userId } = req
 	const { currentPassword, newPassword } = req.body
 
 	try {
@@ -69,7 +67,7 @@ exports.editPassword = async (req, res, next) => {
 }
 
 exports.editEmail = async (req, res, next) => {
-	const { userId } = req.params
+	const { userId } = req
 	const { password, email: newEmail } = req.body
 
 	try {
@@ -101,17 +99,14 @@ exports.edit = async (req, res, next) => {
 
 		if (!acknowledged) throw myCustomError('User could not be updated', 400)
 
-		res.send({
-			// user,
-			message: 'Benutzer erfolgreich aktualisiert'
-		})
+		res.send({ message: 'Benutzer erfolgreich aktualisiert' })
 	} catch (error) {
 		next(error)
 	}
 }
 
 exports.delete = async (req, res, next) => {
-	const { userId } = req.params
+	const { userId } = req
 
 	try {
 		const user = await User.findOne({ _id: userId })
@@ -168,9 +163,15 @@ exports.delete = async (req, res, next) => {
 			await specGroup.delete()
 		})
 
+		res.locals.user = user
+
 		await user.delete()
 
-		res.send({ message: 'Benutzer erfolgreich gelöscht' })
+		if (process.env.NODE_ENV === 'development') {
+			res.send({ message: 'Benutzer erfolgreich gelöscht' })
+		} else{
+			next()
+		}
 	} catch (error) {
 		next(error)
 	}

@@ -1,40 +1,42 @@
-const router = require('express').Router()
+// const router = require('express').Router()
 
-const userControllers = require('../controllers/userControllers')
+// const userControllers = require('../controllers/userControllers')
 
-const {
-	verifyCurrentUser,
-} = require('../middleware/userAuthentication.middleware.js')
-const { validateAuthToken } = require('../middleware/auth.middleware.js')
+// const {
+// 	verifyCurrentUser,
+// } = require('../middleware/userAuthentication.middleware.js')
 
-router.get(
-	'/:userId',
-	validateAuthToken,
-	verifyCurrentUser,
-	userControllers.findOne
-)
+// const { validateAuthToken } = require('../middleware/auth.middleware.js')
 
-router.patch(
-	'/:userId',
-	validateAuthToken,
-	verifyCurrentUser,
-	userControllers.edit,
-)
+// router.get(
+// 	'/:userId',
+// 	validateAuthToken,
+// 	verifyCurrentUser,
+// 	userControllers.findOne
+// )
 
 // router.patch(
 // 	'/:userId',
 // 	validateAuthToken,
-// 	validateScheme(userSchema),
 // 	verifyCurrentUser,
-// 	userControllers.edit,
-// 	emailControllers.sendEmail('Verify email')
+// 	userControllers.edit
 // )
 
-router.delete(
-	'/:userId',
-	validateAuthToken,
-	verifyCurrentUser,
-	userControllers.delete
-)
+// // router.patch(
+// // 	'/:userId',
+// // 	validateAuthToken,
+// // 	validateScheme(userSchema),
+// // 	verifyCurrentUser,
+// // 	userControllers.edit,
+// // 	emailControllers.sendEmail('Verify email')
+// // )
 
-module.exports = router
+// router.delete(
+// 	'/:userId',
+// 	validateAuthToken,
+// 	verifyCurrentUser,
+// 	userControllers.delete,
+//  sendEmail('Delete account')
+// )
+
+// module.exports = router
