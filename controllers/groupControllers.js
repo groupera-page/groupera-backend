@@ -4,7 +4,8 @@ const { Meeting } = require('../models/Meeting.model')
 
 const myCustomError = require('../utils/myCustomError')
 
-// const {getEvents, getEvent, deleteEvent} = require('../utils/googleCalendar')
+// eslint-disable-next-line no-unused-vars
+const {getEvents, getEvent, deleteEvent} = require('../utils/googleCalendar')
 
 exports.create = async (req, res, next) => {
 	const {
@@ -22,27 +23,51 @@ exports.create = async (req, res, next) => {
 			verified: selfModerated || false
 		})
 
-		const user = await User.findOneAndUpdate(
+		res.locals.user = await User.findOneAndUpdate(
 			{ _id: currentUserId },
 			{ $push: { moderatedGroups: group._id } }
 		)
 
-		res.locals.user = user
+		res.locals.group = group
 
-		next()
+		if (process.env.NODE_ENV === 'development') {
+			res.status(200).send({group, message: 'Group successfully created'})
+		} else{
+			next()
+		}
 	} catch (error) {
 		next(error)
 	}
 }
 
+// Just attach `?page=2&limit=10&name=someName&topic=someTopic` to your request URL to enable pagination or filtering.
 exports.findAll = async (req, res, next) => {
 	try {
+		// Set up pagination variables
+		const page = parseInt(req.query.page) || 1;
+		const limit = parseInt(req.query.limit) || 10;
+		const skip = (page - 1) * limit;
+
+		// Set up filters for group name or topic
+		const filter = {};
+		if (req.query.name) {
+			filter.name = new RegExp(req.query.name, 'i'); // Case-insensitive match
+		}
+		if (req.query.topic) {
+			filter.topic = new RegExp(req.query.topic, 'i'); // Case-insensitive match
+		}
+
 		const groups = await Group
-			.find({}, 'name description verified img topic selfModerated membersCount')
+			.find(filter, 'name description verified img topic selfModerated membersCount')
 			.populate('moderator', '_id alias email')
 			.populate('meetings')
+			.skip(skip)
+			.limit(limit)
 
-		res.status(200).send(groups)
+		// get the total count for pagination info
+		const totalCount = await Group.countDocuments(filter);
+
+		res.status(200).send({groups, totalCount})
 	} catch (error) {
 		next(error)
 	}
@@ -52,14 +77,16 @@ exports.findOne = async (req, res, next) => {
 	const { params: { groupId }, userId } = req
 
 	try {
-		const group = await Group
+		let group = await Group
 			.findOne({ _id: groupId }, 'name description verified img topic selfModerated membersCount')
-			.populate('moderator', '_id alias email')
-			.populate('members', '_id alias email')
+			.populate('moderator', 'alias email')
+			.populate('members', 'alias email')
 
 		if (!group) throw myCustomError('Group could not be found', 400)
 
-		if(!group.members || !group.members.some(m => m.id === userId)) await group.depopulate('members')
+		group = group.toJSON()
+		if(!group.moderator.id.equals(userId) && (!group.members || !group.members.some(m => m.id === userId))) delete group.members
+
 
 		res.status(200).send(group)
 	} catch (error) {
@@ -93,16 +120,15 @@ exports.edit = async (req, res, next) => {
 	const { body, params: {groupId} } = req
 
 	try {
-		const groupUpdateInfo = await Group.updateOne(
+		const {acknowledged} = await Group.updateOne(
 			{ _id: groupId },
 			{
 				...body,
 				verified: body.selfModerated || false
-			},
-			{ returnOriginal: false }
+			}
 		)
 
-		if (!groupUpdateInfo || !groupUpdateInfo.acknowledged) throw myCustomError('Something went wrong updating the group', 400)
+		if (!acknowledged) throw myCustomError('Something went wrong updating the group', 400)
 
 		res.send({
 			message: 'Group successfully updated'

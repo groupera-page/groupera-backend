@@ -29,7 +29,7 @@ exports.jwtAlgorithm = jwtAlgorithm
 
 exports.getAuthTokens = (user) => {
 	const userObject = {
-		_id: user._id,
+		id: user.id,
 		alias: user.alias,
 		email: user.email,
 		dob: user.dob,

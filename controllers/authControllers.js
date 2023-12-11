@@ -30,17 +30,21 @@ exports.signup = async (req, res, next) => {
 		const hashPassword = await hashSomething(password)
 		const hashCode = await hashSomething(randomCode)
 
-		const user = await new User({
+		const user = await User.create({
 			...req.body,
 			email: email.toLowerCase(),
 			passwordHash: hashPassword,
 			authCode: hashCode,
-		}).save()
+		})
 
-		res.locals.user = user
-		res.locals.authCode = randomCode
-		console.log(res.locals)
-		next()
+		if (process.env.NODE_ENV === 'development') {
+			console.log('Email Auth Code', randomCode)
+			res.sendStatus(204)
+		} else{
+			res.locals.user = user
+			res.locals.authCode = randomCode
+			next()
+		}
 	} catch (error) {
 		next(error)
 	}
@@ -75,13 +79,22 @@ exports.verifyEmail = async (req, res, next) => {
 
 		await user.save()
 
-		res.locals.user = user
-		res.locals.userObject = userObject
-		res.locals.authToken = authToken
-		res.locals.refreshToken = refreshToken
-		res.locals.cookieOptions = cookieOptions
 
-		next()
+
+		if (process.env.NODE_ENV === 'development') {
+			res.cookie('refreshToken', refreshToken, cookieOptions).send({
+				authToken,
+				user: userObject,
+				message: 'Bentzer erfolgreich verfiziert',
+			})
+		} else{
+			res.locals.user = user
+			res.locals.userObject = userObject
+			res.locals.authToken = authToken
+			res.locals.refreshToken = refreshToken
+			res.locals.cookieOptions = cookieOptions
+			next()
+		}
 	} catch (error) {
 		next(error)
 	}
@@ -94,16 +107,18 @@ exports.resendEmailVerification = async (req, res, next) => {
 		if (!user) throw myCustomError('Ungültiger Email', 401)
 
 		const randomCode = Math.floor(1000 + Math.random() * 9000).toString()
-		const hashCode = await hashSomething(randomCode)
+		user.authCode = await hashSomething(randomCode)
 
-		user.authCode = hashCode
 		await user.save()
 
-		res.locals.user = user
-		res.locals.authCode = randomCode
-		console.log(res.locals)
-
-		next()
+		if (process.env.NODE_ENV === 'development') {
+			console.log('Email Auth Code', randomCode)
+			res.sendStatus(204)
+		} else{
+			res.locals.user = user
+			res.locals.authCode = randomCode
+			next()
+		}
 	} catch (error) {
 		next(error)
 	}
@@ -155,14 +170,17 @@ exports.setResetPasswordToken = async (req, res, next) => {
 
 		await user.save()
 
-		const url = `${process.env.FRONTEND_BASE_URL}/auth/resetPassword/${user.resetPasswordToken}`
-
-		res.locals.user = user
-		res.locals.resetPasswordToken = user.resetPasswordToken
-		res.locals.resetPasswordTokenExp = user.resetPasswordTokenExp
-		res.locals.url = url
-
-		next()
+		if (process.env.NODE_ENV === 'development') {
+			console.log('Email Auth Code', user.resetPasswordToken)
+			res.sendStatus(204)
+		} else{
+			const url = `${process.env.FRONTEND_BASE_URL}/auth/resetPassword/${user.resetPasswordToken}`
+			res.locals.user = user
+			res.locals.resetPasswordToken = user.resetPasswordToken
+			res.locals.resetPasswordTokenExp = user.resetPasswordTokenExp
+			res.locals.url = url
+			next()
+		}
 	} catch (error) {
 		next(error)
 	}
@@ -194,13 +212,22 @@ exports.resetPassword = async (req, res, next) => {
 
 		const { userObject, authToken, refreshToken } = getAuthTokens(user)
 
-		res.locals.user = user
-		res.locals.userObject = userObject
-		res.locals.authToken = authToken
-		res.locals.refreshToken = refreshToken
-		res.locals.cookieOptions = cookieOptions
 
-		next()
+		if (process.env.NODE_ENV === 'development') {
+			console.log('Email Auth Code', user.resetPasswordToken)
+			res.cookie('refreshToken', refreshToken, cookieOptions).send({
+				authToken,
+				user: userObject,
+				message: 'Passwort erfolgreich zurückgesetzt.',
+			})
+		} else{
+			res.locals.user = user
+			res.locals.userObject = userObject
+			res.locals.authToken = authToken
+			res.locals.refreshToken = refreshToken
+			res.locals.cookieOptions = cookieOptions
+			next()
+		}
 	} catch (error) {
 		next(error)
 	}
@@ -227,18 +254,21 @@ exports.refresh = async (req, res, next) => {
 		jwt.verify(
 			currentRefreshToken,
 			process.env.REFRESH_TOKEN_SECRET,
-			(err, decoded) => {
+			async (err, decoded) => {
 				if (err) throw myCustomError('Invalid Token', 400)
 
+				const user = await User.findById(decoded.user.id)
+
 				const {
+					userObject,
 					authToken: newAuthToken,
 					refreshToken: newRefreshToken,
-				} = getAuthTokens(decoded.user)
+				} = getAuthTokens(user)
 
 				res.cookie('refreshToken', newRefreshToken, cookieOptions).send(
 					{
 						authToken: newAuthToken,
-						user: decoded.user,
+						user: userObject,
 					}
 				)
 			}

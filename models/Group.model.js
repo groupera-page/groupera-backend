@@ -1,6 +1,13 @@
 const { Schema, model } = require('mongoose')
 const Joi = require('joi')
 
+const imgOptions = [
+	'Grouptitel%20pictures%20low_res/pexels-johannes-plenio-1690355_bj811s_e6dajb.jpg',
+	'Grouptitel%20pictures%20low_res/pexels-taylor-hunt-2902440_xvgnuq_nueptp.jpg',
+	'Grouptitel%20pictures%20low_res/pexels-nandhu-kumar-1661296_ttr2gf_ijeg4r.jpg',
+	'Grouptitel%20pictures%20low_res/pexels-johannes-plenio-1690355_bj811s_e6dajb.jpg',
+]
+
 const groupSchema = new Schema({
 	verified: {
 		type: Boolean,
@@ -14,6 +21,11 @@ const groupSchema = new Schema({
 	},
 	img: {
 		type: Object,
+		default: () => {
+			return {
+				public_id: imgOptions[Math.floor(Math.random() * imgOptions.length)]
+			}
+		}
 	},
 	topic: {
 		type: String,
@@ -80,7 +92,7 @@ const schema = {
 			'string.empty': 'Bitte Description eingeben',
 		}),
 	topic: Joi.string().required().label('Topic'),
-	selfModerated: Joi.string().label('Self-moderated'),
+	selfModerated: Joi.bool().label('Self Moderated'),
 }
 
 module.exports = { Group, groupSchema: schema }
