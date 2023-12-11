@@ -31,7 +31,7 @@ router.get('/:groupId',
 	groupControllers.findOne
 )
 
-router.get('/:groupId/meetings', groupControllers.groupMeetings)
+// router.get('/:groupId/meetings', groupControllers.groupMeetings)
 
 router.patch(
 	'/:groupId',

@@ -98,18 +98,18 @@ exports.findOne = async (req, res, next) => {
 	}
 }
 
-exports.groupMeetings = async (req, res, next) => {
-	const { groupId } = req.params
+// exports.groupMeetings = async (req, res, next) => {
+// 	const { groupId } = req.params
 
-	try {
-		const group = await Group.findOne({ _id: groupId }).populate('meetings')
-		if (!group) throw myCustomError('Group could not be found', 400)
+// 	try {
+// 		const group = await Group.findOne({ _id: groupId }).populate('meetings')
+// 		if (!group) throw myCustomError('Group could not be found', 400)
 
-		res.send(group)
-	} catch (error) {
-		next(error)
-	}
-}
+// 		res.send(group)
+// 	} catch (error) {
+// 		next(error)
+// 	}
+// }
 
 // exports.groupMeetings = async (req, res, next) => {
 // 	const { groupId } = req.params
