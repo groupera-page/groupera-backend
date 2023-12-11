@@ -69,7 +69,7 @@ const seed = async () => {
 	let selfModerated
 
 	for (let i = 0; i < 10; i++) {
-		selfModerated = Math.random() > 0.3
+		selfModerated = Math.random() > 0.4
 		groups.push(new Group({
 			_id: faker.database.mongodbObjectId(),
 			name: faker.lorem.word(),

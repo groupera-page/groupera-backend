@@ -1,5 +1,5 @@
 const { Group } = require('../models/Group.model')
-const { Meeting } = require('../models/Meeting.model')
+// const { Meeting } = require('../models/Meeting.model')
 const { User } = require('../models/User.model')
 
 const myCustomError = require('../utils/myCustomError')
@@ -10,20 +10,20 @@ exports.join = async (req, res, next) => {
 		params: { groupId },
 	} = req
 	try {
-		let group = await Group.findOne({ _id: groupId })
+		const group = await Group.findById(groupId)
 		if (!group) throw myCustomError('Die Gruppe existiert nicht', 400)
 
 		if (group.members.includes(currentUserId))
-			throw myCustomError(`You're already in this group, sweetie`, 400)
+			throw myCustomError('You\'re already in this group, sweetie', 400)
 
 		await User.updateOne(
 			{ _id: currentUserId },
-			{ $push: { joinedGroups: group._id } }
+			{ $push: { joinedGroups: group.id } }
 		)
 
 		await Group.updateOne(
 			{ _id: groupId },
-			{ $push: { users: currentUserId } }
+			{ $push: { members: currentUserId } }
 		)
 
 		res.send({ message: 'Gruppe erfolgreich beigetreten' })
@@ -39,10 +39,10 @@ exports.leave = async (req, res, next) => {
 	} = req
 
 	try {
-		const group = await Group.findOne({ _id: groupId })
+		const group = await Group.findById(groupId)
 		if (!group) throw myCustomError('Die Gruppe existiert nicht', 400)
 		
-		const user = await User.findOne({ _id: currentUserId })
+		const user = await User.findById(currentUserId)
 
 		await Group.updateOne(
 			{ _id: groupId },
@@ -54,21 +54,21 @@ exports.leave = async (req, res, next) => {
 			{ $pull: { joinedGroups: groupId } }
 		)
 
-		for (let i = 0; i < user.meetings.length; i++) {
-			const meeting = await Meeting.findOne({ _id: user.meetings[i] })
-
-			if (group.meetings.includes(meeting.id)) {
-				await User.updateOne(
-					{ _id: user._id },
-					{ $pull: { meetings: meeting.id } }
-				)
-
-				await Meeting.updateOne(
-					{ _id: meeting._id },
-					{ $pull: { members: user._id } }
-				)
-			}
-		}
+		// for (let i = 0; i < user.meetings.length; i++) {
+		// 	const meeting = await Meeting.findOne({ _id: user.meetings[i] })
+		//
+		// 	if (group.meetings.includes(meeting.id)) {
+		// 		await User.updateOne(
+		// 			{ _id: user._id },
+		// 			{ $pull: { meetings: meeting.id } }
+		// 		)
+		//
+		// 		await Meeting.updateOne(
+		// 			{ _id: meeting._id },
+		// 			{ $pull: { members: user._id } }
+		// 		)
+		// 	}
+		// }
 
 		res.send({ message: 'Gruppe erfolgreich verlassen' })
 	} catch (error) {

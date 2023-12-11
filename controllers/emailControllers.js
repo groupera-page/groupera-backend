@@ -6,12 +6,13 @@ const myCustomError = require('../utils/myCustomError')
 exports.sendEmail = (emailType) => async (req, res, next) => {
 	if (!res.locals)
 		next(myCustomError('Something went wrong with setting locals', 500))
+
 	const {
 		user: { email, alias },
 		authCode,
 		url,
 	} = res.locals
-	console.log(res.locals)
+
 	let subject // case emailType === "Verify email"
 	let template
 	switch (emailType) {
