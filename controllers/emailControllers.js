@@ -14,6 +14,7 @@ const myCustomError = require('../utils/myCustomError')
 exports.sendEmail = (emailType) => async (req, res, next) => {
 	if (!res.locals)
 		next(myCustomError('Something went wrong with setting locals', 500))
+
 	const {
 		user: { email, alias },
 		authCode,
@@ -23,7 +24,9 @@ exports.sendEmail = (emailType) => async (req, res, next) => {
 		authToken,
 		userObject,
 		cookieOptions,
+		group
 	} = res.locals
+
 	let subject // case emailType === "Verify email"
 	let template
 	let send
@@ -73,6 +76,7 @@ exports.sendEmail = (emailType) => async (req, res, next) => {
 			subject = 'Deine neue Gruppe bei Groupera'
 			template = groupCreate(alias, email)
 			send = res.send({
+				group: group,
 				message: `Email gesendet an: ${email}`,
 			})
 			break

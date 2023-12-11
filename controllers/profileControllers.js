@@ -89,15 +89,15 @@ exports.editEmail = async (req, res, next) => {
 }
 
 exports.edit = async (req, res, next) => {
-	const { userId } = req
+	const { userId, body } = req
 
 	try {
-		const userUpdateInfo = await User.updateOne(
+		const {acknowledged} = await User.updateOne(
 			{ _id: userId },
-			req.body
+			body,
 		)
 
-		if (!userUpdateInfo) throw myCustomError('User could not be updated', 400)
+		if (!acknowledged) throw myCustomError('User could not be updated', 400)
 
 		res.send({ message: 'Benutzer erfolgreich aktualisiert' })
 	} catch (error) {
@@ -167,7 +167,11 @@ exports.delete = async (req, res, next) => {
 
 		await user.delete()
 
-		next()
+		if (process.env.NODE_ENV === 'development') {
+			res.send({ message: 'Benutzer erfolgreich gelöscht' })
+		} else{
+			next()
+		}
 	} catch (error) {
 		next(error)
 	}
