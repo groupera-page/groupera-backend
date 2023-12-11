@@ -10,13 +10,14 @@ const {
 } = require('../utils/googleCalendar')
 const bcrypt = require('bcryptjs');
 const { hashSomething } = require('./authControllers');
+const {getNextDatesForMeetings, findNextUpcomingMeeting} = require('../utils/meetingRecurrence.helpers');
 
 
 exports.find = async (req, res, next) => {
 	const { userId } = req
 
 	try {
-		const user = await User.findOne(
+		let user = await User.findOne(
 			{ _id: userId },
 			'alias email dob questions emailVerified gender'
 		).populate({
@@ -37,6 +38,13 @@ exports.find = async (req, res, next) => {
 		})
 
 		if (!user) throw myCustomError('User could not be found', 400)
+
+		user = user.toJSON()
+
+		user.joinedGroups = user.joinedGroups.map(group => ({...group, meetings: getNextDatesForMeetings(group.meetings)}))
+		user.moderatedGroups = user.moderatedGroups.map(group => ({...group, meetings: getNextDatesForMeetings(group.meetings)}))
+
+		user.nextMeeting = findNextUpcomingMeeting([...user.moderatedGroups.map(g => g.meetings).flat(), ...user.joinedGroups.map(g => g.meetings).flat()])
 
 		res.send(user)
 	} catch (error) {

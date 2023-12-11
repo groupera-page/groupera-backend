@@ -3,9 +3,7 @@ const { User } = require('../models/User.model')
 const { Meeting } = require('../models/Meeting.model')
 
 const myCustomError = require('../utils/myCustomError')
-
-// eslint-disable-next-line no-unused-vars
-const {getEvents, getEvent, deleteEvent} = require('../utils/googleCalendar')
+const {getNextDatesForMeetings, findNextUpcomingMeeting} = require('../utils/meetingRecurrence.helpers');
 
 exports.create = async (req, res, next) => {
 	const {
@@ -89,6 +87,9 @@ exports.findOne = async (req, res, next) => {
 
 		const isModerator = group.moderator.id.equals(userId)
 		const isMember = group.members.some(m => m.id.equals(userId))
+
+		group.meetings = getNextDatesForMeetings(group.meetings)
+		group.nextMeeting = findNextUpcomingMeeting(group.meetings)
 
 		if(!isModerator && !isMember) delete group.members
 
