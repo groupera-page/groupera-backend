@@ -50,7 +50,7 @@ const schema = {
 	title: Joi.string().required().label('Title'),
 	startDate: Joi.date().required().label('Start date'),
 	duration: Joi.number().valid(60, 90).required().label('Duration'),
-	recurrence: Joi.object({ meetingType: Joi.string().valid('Weekly', 'Semiweekly', 'Monthly'), days: Joi.array().items(Joi.string().valid('Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'))}).required().label('Recurrence'),
+	recurrence: Joi.object({ meetingType: Joi.string().valid('Weekly', 'Semiweekly', 'Monthly'), days: Joi.array().items(Joi.number())}).required().label('Recurrence'),
 }
 
 module.exports = { Meeting, meetingSchema: schema }
