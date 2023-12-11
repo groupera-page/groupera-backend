@@ -11,8 +11,4 @@ const {
 
 router.post('/createMeeting/:groupId', validateAuthToken, verifyGroupModerator, validateScheme(meetingSchema), meetingControllers.createMeeting)
 
-router.patch('/:meetingId/editMeeting/:groupId', validateAuthToken, verifyGroupModerator, meetingControllers.editMeeting)
-
-router.delete('/:meetingId/deleteMeeting/:groupId', validateAuthToken, verifyGroupModerator, meetingControllers.deleteMeeting)
-
 module.exports = router

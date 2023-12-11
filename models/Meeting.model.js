@@ -1,59 +1,39 @@
 const { Schema, model } = require('mongoose')
 const Joi = require('joi')
 
+
 const meetingSchema = new Schema({
-	members: [
-		{
-			type: Schema.Types.ObjectId,
-			ref: 'User',
+	title: {
+		type: String,
+	},
+	startDate: {
+		type: Date,
+	},
+	duration: {
+		type: Number,
+	},
+	recurrence: {
+		meetingType: {
+			type: String,
 		},
-	],
-	group: {
+		days: [String],
+	},
+	recurrenceEndDate: {
+		type: Date,
+	},
+	groupId: {
 		type: Schema.Types.ObjectId,
 		ref: 'Group',
 	},
-	calendarId: {
-		type: String,
-	},
 })
-
-// meetingSchema.pre('deleteOne', { document: true, query: false }, async function () {
-// 	console.log(this._id)
-// 	await this.model('User').updateMany(
-// 		{
-// 			meetings: {
-// 				$in: [this._id],
-// 			},
-// 		},
-// 		{
-// 			$pull: {
-// 				meetings: this._id,
-// 			},
-// 		}
-// 	)
-// 	await this.model('Group').updateMany(
-// 		{
-// 			meetings: {
-// 				$in: [this._id],
-// 			},
-// 		},
-// 		{
-// 			$pull: {
-// 				meetings: this._id,
-// 			},
-// 		}
-// 	)
-// 	console.log('Meeting + event deleted')
-// })
 
 const Meeting = model('Meeting', meetingSchema)
 
 const schema = {
-	members: Joi.array().max(15),
-	time: Joi.string().required().label('Time'),
-	date: Joi.date().required().label('Date'),
-	frequency: Joi.number().required().label('Frequency'),
-	length: Joi.number().required().label('Length'),
+	title: Joi.string().required().label('Title'),
+	startDate: Joi.date().required().label('Start date'),
+	duration: Joi.number().required().label('Duration'),
+	recurrence: Joi.object().required().label('Recurrence'),
 }
 
 module.exports = { Meeting, meetingSchema: schema }
