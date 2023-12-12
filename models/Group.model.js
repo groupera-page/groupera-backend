@@ -8,77 +8,84 @@ const imgOptions = [
 	'Grouptitel%20pictures%20low_res/pexels-johannes-plenio-1690355_bj811s_e6dajb.jpg',
 ]
 
-const groupSchema = new Schema({
-	verified: {
-		type: Boolean,
-		default: false,
-	},
-	name: {
-		type: String,
-	},
-	description: {
-		type: String,
-	},
-	img: {
-		type: Object,
-		default: () => {
-			return {
-				public_id: imgOptions[Math.floor(Math.random() * imgOptions.length)]
-			}
-		}
-	},
-	topic: {
-		type: String,
-	},
-	meetings: [
-		{
-			type: Schema.Types.ObjectId,
-			ref: 'Meeting',
+const groupSchema = new Schema(
+	{
+		verified: {
+			type: Boolean,
+			default: false,
 		},
-	],
-	moderator: {
-		type: Schema.Types.ObjectId,
-		ref: 'User',
-	},
-	members: [
-		{
+		name: {
+			type: String,
+		},
+		description: {
+			type: String,
+		},
+		img: {
+			type: Object,
+			default: () => {
+				return {
+					public_id:
+						imgOptions[
+							Math.floor(Math.random() * imgOptions.length)
+						],
+				}
+			},
+		},
+		topic: {
+			type: String,
+		},
+		meetings: [
+			{
+				type: Schema.Types.ObjectId,
+				ref: 'Meeting',
+			},
+		],
+		moderator: {
 			type: Schema.Types.ObjectId,
 			ref: 'User',
 		},
-	],
-	selfModerated: {
-		type: Boolean,
-		default: false
+		members: [
+			{
+				type: Schema.Types.ObjectId,
+				ref: 'User',
+			},
+		],
+		selfModerated: {
+			type: Boolean,
+			default: false,
+		},
 	},
-}, {
-	toJSON: {
-		virtuals: true,
-		transform: function(doc, ret) {
-			if (!ret.id || ret._id){
-				ret.id = ret._id;
-				delete ret._id;
-			}
-		}
-	},
-	toObject: {
-		virtuals: true,
-		transform: function(doc, ret) {
-			if (!ret.id || ret._id){
-				ret.id = ret._id;
-				delete ret._id;
-			}
-		}
-	},
-	timestamps: true
-})
+	{
+		toJSON: {
+			virtuals: true,
+			transform: function (doc, ret) {
+				if (!ret.id || ret._id) {
+					ret.id = ret._id
+					delete ret._id
+				}
+			},
+		},
+		toObject: {
+			virtuals: true,
+			transform: function (doc, ret) {
+				if (!ret.id || ret._id) {
+					ret.id = ret._id
+					delete ret._id
+				}
+			},
+		},
+		timestamps: true,
+	}
+)
 
-groupSchema.virtual('membersCount').get(function() {
+groupSchema.virtual('membersCount').get(function () {
 	return this.members ? this.members.length : 0
-});
+})
 
 const Group = model('Group', groupSchema)
 
 const schema = {
+	verified: Joi.bool().label('Verified'),
 	name: Joi.string().min(1).max(70).required().label('Name').messages({
 		'string.max': 'Bitte halten Sie den Namen auf weniger als 70 Zeichen',
 		'string.empty': 'Bitte Name eingeben',
@@ -95,7 +102,11 @@ const schema = {
 				'Bitte halten Sie den Description auf weniger als 500 Zeichen',
 			'string.empty': 'Bitte Description eingeben',
 		}),
+	img: Joi.object().label('Image'),
 	topic: Joi.string().required().label('Topic'),
+	meetings: Joi.array().items(Joi.object()).label('meetings'),
+	moderator: Joi.object().label('Moderator'),
+	members: Joi.array().items(Joi.object()).label('Members'),
 	selfModerated: Joi.bool().label('Self Moderated'),
 }
 

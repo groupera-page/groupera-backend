@@ -18,7 +18,12 @@ const userSchema = new Schema({
 		type: Date,
 	},
 	questions: {
-		type: Object,
+		theme: {
+			type: String,
+		},
+		experience: {
+			type: String,
+		}
 	},
 	emailVerificationExpires: {
 		type: Date,
@@ -57,11 +62,11 @@ const userSchema = new Schema({
 		},
 	],
 	// change below to ObjectId?
-	meetings: [
-		{
-			type: String,
-		},
-	],
+	// meetings: [
+	// 	{
+	// 		type: String,
+	// 	},
+	// ],
 	paymentSubscription: {
 		type: Object,
 	},
@@ -112,15 +117,23 @@ const schema = {
 		.label('Password')
 		.messages({ 'any.required': 'Erforderliches Feld' }),
 	dob: Joi.date().label('Age'),
-	authCode: Joi.string().label('Code'),
+	questions: Joi.object({ theme: Joi.string(), experience: Joi.string() }).label('Questions'),
+	emailVerificationExpires: Joi.date().label('Email Verification Expiration'),
+	emailVerified: Joi.bool().label('Email Verified'),
+	authCode: Joi.string().label('Auth Code'),
+	resetPasswordToken: Joi.string().label('Reset Password Token'),
+	resetPasswordTokenExp: Joi.date().label('Reset Password Token Expiration'),
 	gender: Joi.string()
 		.valid('male', 'female', 'divers')
 		.label('Gender'),
-	questions: Joi.object().label('Questions'),
-	emailVerified: Joi.bool().label('emailVerified'),
+	paid: Joi.bool().label('Paid'),
+	// Not sure how to validate terms - is it an object with type and date inside? I'm not sure if I wrote it either :')
+	// terms: Joi.bool().label('Terms & Conditions'),
+	moderatedGroups: Joi.array().items(Joi.object()).label('Moderated Groups'),
+	joinedGroups: Joi.array().items(Joi.object()).label('Joined Groups'),
 	emailVerificationTokenExp: Joi.date().label('emailVerificationTokenExp'),
-	resetPasswordToken: Joi.string().label('resetPasswordToken'),
-	resetPasswordTokenExp: Joi.date().label('resetPasswordTokenExp'),
+	paymentSubscription: Joi.object().label('Payment Subscription'),
+	refreshToken: Joi.string().label('Refresh Token')
 }
 
 module.exports = { User, userSchema: schema }
