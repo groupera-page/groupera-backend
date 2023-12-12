@@ -21,7 +21,7 @@ const meetingSchema = new Schema({
 	until: {
 		type: Date,
 	},
-	groupId: {
+	group: {
 		type: Schema.Types.ObjectId,
 		ref: 'Group',
 	},
@@ -47,10 +47,10 @@ const meetingSchema = new Schema({
 const Meeting = model('Meeting', meetingSchema)
 
 const schema = {
-	title: Joi.string().required().label('Title'),
-	startDate: Joi.date().required().label('Start date'),
-	duration: Joi.number().valid(60, 90).required().label('Duration'),
-	recurrence: Joi.object({ meetingType: Joi.string().valid('weekly', 'bi-weekly', 'monthly'), days: Joi.array().items(Joi.number())}).required().label('Recurrence'),
+	title: Joi.string().required(),
+	startDate: Joi.date().required(),
+	duration: Joi.number().valid(60, 90).required(),
+	recurrence: Joi.object({ type: Joi.string().valid('weekly', 'bi-weekly', 'monthly'), days: Joi.array().items(Joi.number())}).required(),
 }
 
 module.exports = { Meeting, meetingSchema: schema }

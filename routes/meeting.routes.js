@@ -5,15 +5,11 @@ const meetingControllers = require('../controllers/meetingControllers')
 const { meetingSchema } = require('../models/Meeting.model')
 
 const { validateAuthToken, validateScheme } = require('../middleware/auth.middleware')
-const {
-	verifyGroupModerator,
-} = require('../middleware/userAuthentication.middleware.js')
+const {verifyMeetingAdmin} = require('../middleware/userAuthentication.middleware');
 
-router.post('/createMeeting/:groupId', validateAuthToken, verifyGroupModerator, validateScheme(meetingSchema), meetingControllers.create)
+router.patch('/:meetingId', validateAuthToken, verifyMeetingAdmin, validateScheme(meetingSchema), meetingControllers.edit)
 
-router.patch('/:meetingId/editMeeting/:groupId', validateAuthToken, verifyGroupModerator, validateScheme(meetingSchema), meetingControllers.edit)
-
-router.delete('/:meetingId/deleteMeeting/:groupId', validateAuthToken, verifyGroupModerator, meetingControllers.delete)
+router.delete('/:meetingId', validateAuthToken, verifyMeetingAdmin, meetingControllers.delete)
 
 
 module.exports = router

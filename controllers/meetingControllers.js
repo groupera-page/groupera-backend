@@ -15,7 +15,7 @@ exports.create = async (req, res, next) => {
 			groupId: groupId,
 		})
 
-		group = await Group.updateOne({ _id: groupId }, { $push : { meetings: meeting._id } })
+		await Group.updateOne({ _id: groupId }, { $push : { meetings: meeting._id } })
 
 		res.send(meeting)
 	} catch (error) {
@@ -24,11 +24,11 @@ exports.create = async (req, res, next) => {
 }
 
 exports.edit = async (req, res, next) => {
-	const { meetingId } = req.params
+	const { params: {meetingId}, body } = req
 	
 	try {
 		const meeting = await Meeting.findOneAndUpdate({ _id: meetingId },
-			{ ...req.body }, { returnOriginal: false })
+			body, { returnOriginal: false })
 
 		res.send(meeting)
 	} catch (error) {
@@ -42,11 +42,11 @@ exports.delete = async (req, res, next) => {
 	try {
 		const meeting = await Meeting.findOne({ _id: meetingId })
 
-		await Group.updateOne({ _id: meeting.groupId }, { $pull: { meetings: meetingId }})
+		await Group.updateOne({ _id: meeting.group }, { $pull: { meetings: meetingId }})
 
 		meeting.delete()
 
-		res.send('Besprechung gelöscht')
+		res.send({message: 'Besprechung gelöscht'})
 	} catch (error) {
 		next(error)
 	}

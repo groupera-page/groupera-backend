@@ -63,7 +63,7 @@ exports.findAll = async (req, res, next) => {
 			.limit(limit)
 
 		// get the total count for pagination info
-		const totalCount = await Group.countDocuments(filter);
+		const totalCount = groups.length;
 
 		res.status(200).send({groups, totalCount})
 	} catch (error) {
@@ -98,41 +98,6 @@ exports.findOne = async (req, res, next) => {
 		next(error)
 	}
 }
-
-// exports.groupMeetings = async (req, res, next) => {
-// 	const { groupId } = req.params
-
-// 	try {
-// 		const group = await Group.findOne({ _id: groupId }).populate('meetings')
-// 		if (!group) throw myCustomError('Group could not be found', 400)
-
-// 		res.send(group)
-// 	} catch (error) {
-// 		next(error)
-// 	}
-// }
-
-// exports.groupMeetings = async (req, res, next) => {
-// 	const { groupId } = req.params
-// 	const allGroupMeetings = await getEvents()
-
-// 	try {
-// 		const group = await Group.findOne({ _id: groupId })
-// 		if (!group) throw myCustomError('Group could not be found', 400)
-
-// 		const meetings = await Promise.all(group.meetings.map(async (event) => {
-// 			const meetingObject = await Meeting.findOne({ _id: event })
-
-// 			return allGroupMeetings.filter((groupMeeting) =>
-// 				groupMeeting.id.includes(meetingObject.calendarId)
-// 			)
-// 		}))
-
-// 		res.send(meetings)
-// 	} catch (error) {
-// 		next(error)
-// 	}
-// }
 
 exports.edit = async (req, res, next) => {
 	const { body, params: {groupId} } = req
