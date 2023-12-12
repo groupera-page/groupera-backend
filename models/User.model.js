@@ -41,8 +41,7 @@ const userSchema = new Schema({
 	},
 	terms: {
 		type: Boolean,
-		date_agreed: Date,
-		default: false,
+		required: true
 	},
 	moderatedGroups: [
 		{
@@ -117,6 +116,7 @@ const schema = {
 		.valid('male', 'female', 'divers')
 		.label('Gender'),
 	questions: Joi.object().label('Questions'),
+	terms: Joi.bool().valid(true),
 	emailVerified: Joi.bool().label('emailVerified'),
 	emailVerificationTokenExp: Joi.date().label('emailVerificationTokenExp'),
 	resetPasswordToken: Joi.string().label('resetPasswordToken'),

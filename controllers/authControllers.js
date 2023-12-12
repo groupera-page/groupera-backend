@@ -67,6 +67,7 @@ exports.verifyEmail = async (req, res, next) => {
 
 		if (joinedGroups && joinedGroups[0]) {
 			const group = await Group.findById(joinedGroups[0])
+
 			if (group) {
 				group.members.push(user.id)
 				await group.save()
