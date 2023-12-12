@@ -45,7 +45,7 @@ const userSchema = new Schema(
 		resetPasswordTokenExp: { type: Date },
 		gender: {
 			type: String,
-			enum: ['male', 'female', 'divers'],
+			enum: ['mann', 'frau', 'divers'],
 			required: true,
 		},
 		paid: {
@@ -133,7 +133,7 @@ const userCreateSchema = {
 	authCode: Joi.string(),
 	resetPasswordToken: Joi.string(),
 	resetPasswordTokenExp: Joi.date(),
-	gender: Joi.string().valid('male', 'female', 'divers').required(),
+	gender: Joi.string().valid('mann', 'frau', 'divers').required(),
 	paid: Joi.bool(),
 	// Not sure how to validate terms - is it an object with type and date inside? I'm not sure if I wrote it either :')
 	// terms: Joi.bool().label('Terms & Conditions'),
