@@ -30,6 +30,7 @@ const meetingSchema = new Schema({
 		virtuals: true,
 		transform: function(doc, ret) {
 			ret.id = ret._id;
+			ret.recurrence.days = ret.recurrence.days.sort((a, b) => a-b)
 			delete ret._id;
 			delete ret.__v;
 		}
@@ -38,6 +39,7 @@ const meetingSchema = new Schema({
 		virtuals: true,
 		transform: function(doc, ret) {
 			ret.id = ret._id;
+			ret.recurrence.days = ret.recurrence.days.sort((a, b) => a-b)
 			delete ret._id;
 			delete ret.__v;
 		}
