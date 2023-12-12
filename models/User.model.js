@@ -5,14 +5,17 @@ const passwordComplexity = require('joi-password-complexity')
 const userSchema = new Schema({
 	alias: {
 		type: String,
+		required: true,
 	},
 	email: {
 		type: String,
 		unique: [true, 'Die E-Mail Adresse ist ungültig'],
+		required: true,
 	},
 	passwordHash: {
 		type: String,
-		select: false
+		select: false,
+		required: true,
 	},
 	dob: {
 		type: Date,
@@ -38,6 +41,7 @@ const userSchema = new Schema({
 	resetPasswordTokenExp: { type: Date },
 	gender: {
 		type: String,
+		enum: ['male', 'female', 'divers'],
 	},
 	paid: {
 		type: Boolean,
@@ -104,36 +108,32 @@ userSchema.index(
 // https://github.com/hapijs/joi/blob/master/API.md#list-of-errors
 
 const schema = {
-	alias: Joi.string().min(1).max(70).required().label('Alias').messages({
+	alias: Joi.string().min(1).max(70).messages({
 		'string.max': 'Bitte halten Sie den Namen auf weniger als 70 Zeichen',
 		'string.empty': 'Bitte Name eingeben',
 	}),
-	email: Joi.string().email().required().label('Email').messages({
+	email: Joi.string().email().messages({
 		'string.email': 'Bitte geben Sie eine gültige E-Mail Adresse ein',
 		'string.empty': 'Bitte geben Sie eine E-Mail Adresse ein',
 	}),
 	password: passwordComplexity()
-		.required()
-		.label('Password')
 		.messages({ 'any.required': 'Erforderliches Feld' }),
-	dob: Joi.date().label('Age'),
-	questions: Joi.object({ theme: Joi.string(), experience: Joi.string() }).label('Questions'),
-	emailVerificationExpires: Joi.date().label('Email Verification Expiration'),
-	emailVerified: Joi.bool().label('Email Verified'),
-	authCode: Joi.string().label('Auth Code'),
-	resetPasswordToken: Joi.string().label('Reset Password Token'),
-	resetPasswordTokenExp: Joi.date().label('Reset Password Token Expiration'),
-	gender: Joi.string()
-		.valid('male', 'female', 'divers')
-		.label('Gender'),
-	paid: Joi.bool().label('Paid'),
+	dob: Joi.date(),
+	questions: Joi.object({ theme: Joi.string(), experience: Joi.string() }),
+	emailVerificationExpires: Joi.date(),
+	emailVerified: Joi.bool(),
+	authCode: Joi.string(),
+	resetPasswordToken: Joi.string(),
+	resetPasswordTokenExp: Joi.date(),
+	gender: Joi.string(),
+	paid: Joi.bool(),
 	// Not sure how to validate terms - is it an object with type and date inside? I'm not sure if I wrote it either :')
 	// terms: Joi.bool().label('Terms & Conditions'),
-	moderatedGroups: Joi.array().items(Joi.object()).label('Moderated Groups'),
-	joinedGroups: Joi.array().items(Joi.object()).label('Joined Groups'),
-	emailVerificationTokenExp: Joi.date().label('emailVerificationTokenExp'),
-	paymentSubscription: Joi.object().label('Payment Subscription'),
-	refreshToken: Joi.string().label('Refresh Token')
+	moderatedGroups: Joi.array().items(Joi.object()),
+	joinedGroups: Joi.array().items(Joi.object()),
+	emailVerificationTokenExp: Joi.date(),
+	paymentSubscription: Joi.object(),
+	refreshToken: Joi.string()
 }
 
 module.exports = { User, userSchema: schema }

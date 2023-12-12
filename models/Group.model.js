@@ -16,6 +16,7 @@ const groupSchema = new Schema(
 		},
 		name: {
 			type: String,
+			unique: [true, 'Die Name Adresse ist ungültig'],
 		},
 		description: {
 			type: String,
@@ -85,8 +86,8 @@ groupSchema.virtual('membersCount').get(function () {
 const Group = model('Group', groupSchema)
 
 const schema = {
-	verified: Joi.bool().label('Verified'),
-	name: Joi.string().min(1).max(70).required().label('Name').messages({
+	verified: Joi.bool(),
+	name: Joi.string().min(1).max(70).required().messages({
 		'string.max': 'Bitte halten Sie den Namen auf weniger als 70 Zeichen',
 		'string.empty': 'Bitte Name eingeben',
 	}),
@@ -94,7 +95,6 @@ const schema = {
 		.min(3)
 		.max(500)
 		.required()
-		.label('Description')
 		.messages({
 			'string.min':
 				'Bitte geben Sie eine Beschreibung mit mindestens 3 Zeichen ein',
@@ -102,12 +102,12 @@ const schema = {
 				'Bitte halten Sie den Description auf weniger als 500 Zeichen',
 			'string.empty': 'Bitte Description eingeben',
 		}),
-	img: Joi.object().label('Image'),
-	topic: Joi.string().required().label('Topic'),
-	meetings: Joi.array().items(Joi.object()).label('meetings'),
-	moderator: Joi.object().label('Moderator'),
-	members: Joi.array().items(Joi.object()).label('Members'),
-	selfModerated: Joi.bool().label('Self Moderated'),
+	img: Joi.object(),
+	topic: Joi.string().required(),
+	meetings: Joi.array().items(Joi.object()),
+	moderator: Joi.object(),
+	members: Joi.array().items(Joi.object()),
+	selfModerated: Joi.bool(),
 }
 
 module.exports = { Group, groupSchema: schema }

@@ -2,7 +2,7 @@ const Joi = require('joi')
 const passwordComplexity = require('joi-password-complexity')
 
 const { User } = require('../models/User.model')
-const { Group } = require('../models/Group.model')
+// const { Group } = require('../models/Group.model')
 
 const myCustomError = require('../utils/myCustomError')
 const jwt = require('jsonwebtoken')
@@ -55,16 +55,16 @@ exports.validateNoEmailDuplicates = async (req, res, next) => {
 	}
 }
 
-exports.validateNoGroupDuplicates = async (req, res, next) => {
-	try {
-		const user = await Group.findOne({ name: req.body.name })
-		if (user) throw myCustomError('Gruppe bereits in Gebrauch', 409)
+// exports.validateNoGroupDuplicates = async (req, res, next) => {
+// 	try {
+// 		const user = await Group.findOne({ name: req.body.name })
+// 		if (user) throw myCustomError('Gruppe bereits in Gebrauch', 409)
 
-		next()
-	} catch (error) {
-		next(error)
-	}
-}
+// 		next()
+// 	} catch (error) {
+// 		next(error)
+// 	}
+// }
 
 // exports.verifyUser = (req, res, next) => {
 // 	const authHeader = req.headers.authorization || req.headers.Authorization
