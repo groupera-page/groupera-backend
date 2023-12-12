@@ -17,9 +17,15 @@ const groupSchema = new Schema(
 		name: {
 			type: String,
 			unique: [true, 'Die Name Adresse ist ungültig'],
+			required: true,
+			min: 1,
+			max: 70,
 		},
 		description: {
 			type: String,
+			required: true,
+			min: 3,
+			max: 500,
 		},
 		img: {
 			type: Object,
@@ -34,6 +40,7 @@ const groupSchema = new Schema(
 		},
 		topic: {
 			type: String,
+			required: true,
 		},
 		meetings: [
 			{
@@ -87,14 +94,11 @@ const Group = model('Group', groupSchema)
 
 const schema = {
 	verified: Joi.bool(),
-	name: Joi.string().min(1).max(70).required().messages({
+	name: Joi.string().messages({
 		'string.max': 'Bitte halten Sie den Namen auf weniger als 70 Zeichen',
 		'string.empty': 'Bitte Name eingeben',
 	}),
 	description: Joi.string()
-		.min(3)
-		.max(500)
-		.required()
 		.messages({
 			'string.min':
 				'Bitte geben Sie eine Beschreibung mit mindestens 3 Zeichen ein',
@@ -103,7 +107,7 @@ const schema = {
 			'string.empty': 'Bitte Description eingeben',
 		}),
 	img: Joi.object(),
-	topic: Joi.string().required(),
+	topic: Joi.string(),
 	meetings: Joi.array().items(Joi.object()),
 	moderator: Joi.object(),
 	members: Joi.array().items(Joi.object()),

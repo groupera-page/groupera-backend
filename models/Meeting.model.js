@@ -5,23 +5,28 @@ const meetingSchema = new Schema(
 	{
 		title: {
 			type: String,
+			required: true,
 		},
 		startDate: {
 			type: Date,
+			required: true,
 		},
 		duration: {
 			type: Number,
 			enum: [60, 90],
+			required: true,
 		},
 		recurrence: {
 			type: {
 				type: String,
 				enum: ['weekly', 'bi-weekly', 'monthly'],
+				required: true,
 			},
-			days: { type: [Number], enum: [1, 2, 3, 4, 5, 6, 7] },
+			days: { type: [Number], enum: [1, 2, 3, 4, 5, 6, 7], required: true, },
 		},
 		until: {
 			type: Date,
+			required: true,
 		},
 		group: {
 			type: Schema.Types.ObjectId,

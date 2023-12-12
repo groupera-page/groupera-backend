@@ -6,6 +6,8 @@ const userSchema = new Schema({
 	alias: {
 		type: String,
 		required: true,
+		min: 1,
+		max: 70,
 	},
 	email: {
 		type: String,
@@ -108,7 +110,7 @@ userSchema.index(
 // https://github.com/hapijs/joi/blob/master/API.md#list-of-errors
 
 const schema = {
-	alias: Joi.string().min(1).max(70).messages({
+	alias: Joi.string().messages({
 		'string.max': 'Bitte halten Sie den Namen auf weniger als 70 Zeichen',
 		'string.empty': 'Bitte Name eingeben',
 	}),
