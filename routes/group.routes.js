@@ -1,13 +1,16 @@
 const router = require('express').Router()
 
 const { groupSchema } = require('../models/Group.model')
+const {meetingSchema} = require('../models/Meeting.model');
 
 const groupControllers = require('../controllers/groupControllers')
+const meetingControllers = require('../controllers/meetingControllers');
 const { sendEmail } = require('../controllers/emailControllers')
 
 const {
 	verifyGroupModerator,
 } = require('../middleware/userAuthentication.middleware.js')
+
 const {
 	validateScheme,
 	validateAuthToken,
@@ -31,8 +34,6 @@ router.get('/:groupId',
 	groupControllers.findOne
 )
 
-// router.get('/:groupId/meetings', groupControllers.groupMeetings)
-
 router.patch(
 	'/:groupId',
 	validateAuthToken,
@@ -47,5 +48,7 @@ router.delete(
 	verifyGroupModerator,
 	groupControllers.delete
 )
+
+router.post('/:groupId/meeting', validateAuthToken, verifyGroupModerator, validateScheme(meetingSchema), meetingControllers.create)
 
 module.exports = router
