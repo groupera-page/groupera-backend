@@ -179,7 +179,7 @@ exports.delete = async (req, res, next) => {
 
 		await Meeting.deleteMany(
 			{
-				group: groupId
+				groupId: groupId
 			}
 		)
 

@@ -11,14 +11,14 @@ const {
 const {
 	validateScheme,
 	validateAuthToken,
-	// validateNoGroupDuplicates,
+	validateNoGroupDuplicates,
 } = require('../middleware/auth.middleware')
 
 router.post(
 	'',
 	validateAuthToken,
 	validateScheme(groupSchema),
-	// validateNoGroupDuplicates,
+	validateNoGroupDuplicates,
 	groupControllers.create,
 	sendEmail('Create group')
 )

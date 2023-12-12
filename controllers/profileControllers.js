@@ -122,13 +122,13 @@ exports.delete = async (req, res, next) => {
 
 		await Group.updateMany(
 			{
-				users: {
+				members: {
 					$in: [userId],
 				},
 			},
 			{
 				$pull: {
-					users: userId,
+					members: userId,
 				},
 			}
 		)
@@ -136,24 +136,9 @@ exports.delete = async (req, res, next) => {
 		user.moderatedGroups.map(async (groupId) => {
 			const specGroup = await Group.findOne({ _id: groupId })
 
-			for (let i = 0; i < specGroup.meetings.length; i++) {
-				const meeting = await Meeting.findOneAndDelete({
-					_id: specGroup.meetings[i],
-				})
-				await deleteEvent(meeting.calendarId)
-				await User.updateMany(
-					{
-						meetings: {
-							$in: [meeting.id],
-						},
-					},
-					{
-						$pull: {
-							meetings: meeting.id,
-						},
-					}
-				)
-			}
+			await Meeting.deleteMany({
+				groupId: groupId
+			})
 
 			await User.updateMany(
 				{
