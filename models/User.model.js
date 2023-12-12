@@ -22,6 +22,7 @@ const userSchema = new Schema(
 		},
 		dob: {
 			type: Date,
+			required: true,
 		},
 		questions: {
 			theme: {
@@ -45,6 +46,7 @@ const userSchema = new Schema(
 		gender: {
 			type: String,
 			enum: ['male', 'female', 'divers'],
+			required: true,
 		},
 		paid: {
 			type: Boolean,
