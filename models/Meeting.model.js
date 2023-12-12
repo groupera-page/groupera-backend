@@ -63,6 +63,7 @@ const schema = {
 		type: Joi.string(),
 		days: Joi.array(),
 	}),
+	until: Joi.date()
 }
 
 module.exports = { Meeting, meetingSchema: schema }
