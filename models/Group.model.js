@@ -16,7 +16,6 @@ const groupSchema = new Schema(
 		},
 		name: {
 			type: String,
-			unique: [true, 'Die Name Adresse ist ungültig'],
 			required: true,
 			min: 1,
 			max: 70,
@@ -92,20 +91,40 @@ groupSchema.virtual('membersCount').get(function () {
 
 const Group = model('Group', groupSchema)
 
-const schema = {
+const groupCreateSchema = {
 	verified: Joi.bool(),
-	name: Joi.string().messages({
+	name: Joi.string().min(1).max(70).required().messages({
 		'string.max': 'Bitte halten Sie den Namen auf weniger als 70 Zeichen',
 		'string.empty': 'Bitte Name eingeben',
 	}),
-	description: Joi.string()
-		.messages({
-			'string.min':
-				'Bitte geben Sie eine Beschreibung mit mindestens 3 Zeichen ein',
-			'string.max':
-				'Bitte halten Sie den Description auf weniger als 500 Zeichen',
-			'string.empty': 'Bitte Description eingeben',
-		}),
+	description: Joi.string().min(3).max(500).required().messages({
+		'string.min':
+			'Bitte geben Sie eine Beschreibung mit mindestens 3 Zeichen ein',
+		'string.max':
+			'Bitte halten Sie den Description auf weniger als 500 Zeichen',
+		'string.empty': 'Bitte Description eingeben',
+	}),
+	img: Joi.object(),
+	topic: Joi.string().required(),
+	meetings: Joi.array().items(Joi.object()),
+	moderator: Joi.object(),
+	members: Joi.array().items(Joi.object()),
+	selfModerated: Joi.bool(),
+}
+
+const groupEditSchema = {
+	verified: Joi.bool(),
+	name: Joi.string().min(1).max(70).messages({
+		'string.max': 'Bitte halten Sie den Namen auf weniger als 70 Zeichen',
+		'string.empty': 'Bitte Name eingeben',
+	}),
+	description: Joi.string().min(3).max(500).messages({
+		'string.min':
+			'Bitte geben Sie eine Beschreibung mit mindestens 3 Zeichen ein',
+		'string.max':
+			'Bitte halten Sie den Description auf weniger als 500 Zeichen',
+		'string.empty': 'Bitte Description eingeben',
+	}),
 	img: Joi.object(),
 	topic: Joi.string(),
 	meetings: Joi.array().items(Joi.object()),
@@ -114,4 +133,4 @@ const schema = {
 	selfModerated: Joi.bool(),
 }
 
-module.exports = { Group, groupSchema: schema }
+module.exports = { Group, groupSchema, groupCreateSchema, groupEditSchema  }

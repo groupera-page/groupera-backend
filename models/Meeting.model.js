@@ -17,12 +17,16 @@ const meetingSchema = new Schema(
 			required: true,
 		},
 		recurrence: {
-			type: {
+			meetingType: {
 				type: String,
 				enum: ['weekly', 'bi-weekly', 'monthly'],
 				required: true,
 			},
-			days: { type: [Number], enum: [1, 2, 3, 4, 5, 6, 7], required: true, },
+			days: {
+				type: [Number],
+				enum: [1, 2, 3, 4, 5, 6, 7],
+				required: true,
+			},
 		},
 		until: {
 			type: Date,
@@ -55,15 +59,26 @@ const meetingSchema = new Schema(
 
 const Meeting = model('Meeting', meetingSchema)
 
-const schema = {
-	title: Joi.string(),
-	startDate: Joi.date(),
-	duration: Joi.number(),
+const meetingCreateSchema = {
+	title: Joi.string().required(),
+	startDate: Joi.date().required(),
+	duration: Joi.number().valid(60, 90).required(),
 	recurrence: Joi.object({
-		type: Joi.string(),
-		days: Joi.array(),
-	}),
-	until: Joi.date()
+		meetingType: Joi.string().valid('weekly', 'bi-weekly', 'monthly'),
+		days: Joi.array().items(Joi.number().valid(1, 2, 3, 4, 5, 6, 7)),
+	}).required(),
+	until: Joi.date(),
 }
 
-module.exports = { Meeting, meetingSchema: schema }
+const meetingEditSchema = {
+	title: Joi.string(),
+	startDate: Joi.date(),
+	duration: Joi.number().valid(60, 90),
+	recurrence: Joi.object({
+		meetingType: Joi.string().valid('weekly', 'bi-weekly', 'monthly'),
+		days: Joi.array().items(Joi.number().valid(1, 2, 3, 4, 5, 6, 7)),
+	}),
+	until: Joi.date(),
+}
+
+module.exports = { Meeting, meetingSchema, meetingCreateSchema, meetingEditSchema }
