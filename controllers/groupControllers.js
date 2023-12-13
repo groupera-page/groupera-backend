@@ -7,12 +7,12 @@ const {getNextDatesForMeetings, findNextUpcomingMeeting} = require('../utils/mee
 
 exports.create = async (req, res, next) => {
 	const {
-		body: {name, description, topic, selfModerated},
+		body: {name, description, topic, selfModerated, firstMeeting},
 		userId: currentUserId,
 	} = req
 
 	try {
-		const group = await Group.create({
+		const group = new Group({
 			name,
 			description,
 			topic,
@@ -20,6 +20,14 @@ exports.create = async (req, res, next) => {
 			moderator: currentUserId,
 			verified: selfModerated || false
 		})
+
+		if (firstMeeting) {
+			const meeting = await Meeting.create({...firstMeeting, group: group.id})
+
+			group.meetings.push(meeting)
+		}
+
+		await group.save()
 
 		res.locals.user = await User.findOneAndUpdate(
 			{ _id: currentUserId },

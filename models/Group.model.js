@@ -97,6 +97,7 @@ const schema = {
 		}),
 	topic: Joi.string().required().label('Topic'),
 	selfModerated: Joi.bool().label('Self Moderated'),
+	firstMeeting: Joi.object()
 }
 
 module.exports = { Group, groupSchema: schema }
