@@ -69,6 +69,7 @@ exports.sendEmail = (emailType) => async (req, res, next) => {
 			subject = 'Dein Beitritt in einer Gruppe'
 			template = groupJoin(alias, groupName, email)
 			send = res.send({
+				group: group,
 				message: `Email gesendet an: ${email}`,
 			})
 			break
