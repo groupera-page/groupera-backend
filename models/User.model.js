@@ -2,6 +2,16 @@ const { Schema, model } = require('mongoose')
 const Joi = require('joi')
 const passwordComplexity = require('joi-password-complexity')
 
+const complexityOptions = {
+	min: 8,
+	max: 50,
+	lowerCase: 1,
+	upperCase: 1,
+	numeric: 1,
+	symbol: 0,
+	requirementCount: 2,
+};
+
 const userSchema = new Schema({
 	alias: {
 		type: String,
@@ -106,7 +116,7 @@ const schema = {
 		'string.email': 'Bitte geben Sie eine gültige E-Mail Adresse ein',
 		'string.empty': 'Bitte geben Sie eine E-Mail Adresse ein',
 	}),
-	password: passwordComplexity()
+	password: passwordComplexity(complexityOptions)
 		.required()
 		.label('Password')
 		.messages({ 'any.required': 'Erforderliches Feld' }),
