@@ -44,7 +44,13 @@ exports.find = async (req, res, next) => {
 		user.joinedGroups = user.joinedGroups.map(group => ({...group, meetings: getNextDatesForMeetings(group.meetings)}))
 		user.moderatedGroups = user.moderatedGroups.map(group => ({...group, meetings: getNextDatesForMeetings(group.meetings)}))
 
-		user.nextMeeting = findNextUpcomingMeeting([...user.moderatedGroups.map(g => g.meetings).flat(), ...user.joinedGroups.map(g => g.meetings).flat()])
+		const nextMeeting = findNextUpcomingMeeting([...user.moderatedGroups.map(g => g.meetings).flat(), ...user.joinedGroups.map(g => g.meetings).flat()])
+		if (nextMeeting) {
+			user.nextMeeting = {
+				meeting: nextMeeting,
+				group: [...user.joinedGroups, ...user.moderatedGroups].find(g => g.meetings.some(m => m.id === nextMeeting.id))
+			}
+		}
 
 		res.send(user)
 	} catch (error) {
