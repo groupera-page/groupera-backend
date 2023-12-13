@@ -156,9 +156,9 @@ const userEditSchema = {
 		'string.empty': 'Bitte geben Sie eine E-Mail Adresse ein',
 	}),
 	dob: Joi.date(),
-	questions: Joi.object({ theme: Joi.string(), experience: Joi.string() }),
+	questions: Joi.object({ groupTheme: Joi.string(), experience: Joi.string(), chooseFunnel: Joi.string() }),
 	authCode: Joi.string(),
-	gender: Joi.string(),
+	gender: Joi.string().valid('male', 'female', 'divers').required(),
 	paid: Joi.bool(),
 	// Not sure how to validate terms - is it an object with type and date inside? I'm not sure if I wrote it either :')
 	// terms: Joi.bool().label('Terms & Conditions'),
