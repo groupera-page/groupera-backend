@@ -20,7 +20,7 @@ const fixedGroups = [
 	},
 	{
 		name: 'Alkohol und Sucht',
-		topic: 'Alkohol und Sucht',
+		topic: 'Sucht',
 		description: 'Wir sind alles AlkoholikerInnen oder Menschen mit einer Suchtproblematik. Wir freuen uns über jedes neue Mitglied und wir starten am 18.12.2023 und wir arbeiten mit dem Groupera Programm. Gerade über die Weihnachtszeit ist der Zusammenhalt besonders wichtig. Wir freuen uns darauf dich kennenzulernen.',
 		meetings: [
 			{ startDate: new Date('2023-12-18 18:00'), duration: 60, recurrence: { type: 'weekly', days: [1] } }
@@ -36,7 +36,7 @@ const fixedGroups = [
 	},
 	{
 		name: 'Parkinson',
-		topic: 'chronische Erkrankungen',
+		topic: 'Chronische Erkrankungen, körperliche Einschränkungen',
 		description: 'Wir sind alles Betroffene von der Erkrankung Parkinson. Wir wollen uns in schlechten und in guten Tagen der Erkrankung zur Seite stehen und unsere Erfahrungen teilen. Wir fühlen uns öfter allein mit der Erkrankung und genau das wollen wir ändern. Wir freuen uns auf neue Mitglieder und die Gruppe startet im neuen Jahr. Bitte meldet euch schon mal zu der Gruppe an. Der Tag und die Uhrzeit kann auch noch geändert werden, wenn es für die Mehrheit zu einer anderen Zeit besser passt. Wir freuen uns auf den Austausch.',
 		meetings: [
 			{ startDate: new Date('2024-01-03 17:30'), duration: 60, recurrence: { type: 'weekly', days: [3] } }
@@ -44,7 +44,7 @@ const fixedGroups = [
 	},
 	{
 		name: 'Angehörige von psychisch Erkrankten',
-		topic: 'Angehörige',
+		topic: 'Angehörige/r von Menschen mit Erkrankungen',
 		description: 'Herzlich Willkommen liebe Angehörige! Wir sind eine Gruppe von Angehörigen von psychisch Erkrankten. Dazu gehören zum Beispiel: Sucht, Depressionen, Essstörungen, Persönlichkeitsstörungen etc. Bei uns hat jeder einen Platz und freuen uns auf den Austausch und die Erfahrungen zu teilen.',
 		meetings: [
 			{ startDate: new Date('2024-01-04 18:00'), duration: 60, recurrence: { type: 'weekly', days: [4] } }
