@@ -1,5 +1,6 @@
 const { Schema, model } = require('mongoose')
 const Joi = require('joi')
+const groupTopics = require('../utils/groupTopics')
 
 const imgOptions = [
 	'Grouptitel%20pictures%20low_res/pexels-johannes-plenio-1690355_bj811s_e6dajb.jpg',
@@ -7,6 +8,8 @@ const imgOptions = [
 	'Grouptitel%20pictures%20low_res/pexels-nandhu-kumar-1661296_ttr2gf_ijeg4r.jpg',
 	'Grouptitel%20pictures%20low_res/pexels-johannes-plenio-1690355_bj811s_e6dajb.jpg',
 ]
+
+const topicsArray = groupTopics.map(t => t.value)
 
 const groupSchema = new Schema({
 	verified: {
@@ -29,6 +32,7 @@ const groupSchema = new Schema({
 	},
 	topic: {
 		type: String,
+		enum: topicsArray
 	},
 	meetings: [
 		{
@@ -95,7 +99,7 @@ const schema = {
 				'Bitte halten Sie den Description auf weniger als 500 Zeichen',
 			'string.empty': 'Bitte Description eingeben',
 		}),
-	topic: Joi.string().required().label('Topic'),
+	topic: Joi.string().required().valid(topicsArray.join(', ')).label('Topic'),
 	selfModerated: Joi.bool().label('Self Moderated'),
 	firstMeeting: Joi.object()
 }
