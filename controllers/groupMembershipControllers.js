@@ -30,6 +30,7 @@ exports.join = async (req, res, next) => {
 			)
 			.populate('moderator', 'alias email')
 			.populate('members', 'alias email')
+			.populate('meetings')
 
 		if (process.env.NODE_ENV === 'development') {
 
@@ -37,7 +38,6 @@ exports.join = async (req, res, next) => {
 		} else{
 			res.locals.group = group
 			res.locals.user = user
-			res.locals.groupName = group.name
 			next()
 		}
 	} catch (error) {
