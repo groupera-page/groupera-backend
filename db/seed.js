@@ -35,7 +35,7 @@ const seed = async () => {
 	const users = [];
 	const groups = [];
 
-	let password = await hashSomething('testTest1')
+	let password = await hashSomething('test-Test1')
 
 	// Create fixed Test Account
 	users.push(new User({
@@ -46,6 +46,7 @@ const seed = async () => {
 		emailVerified: true,
 		emailVerificationExpires: null,
 		gender: 'male',
+		terms: true
 	}))
 		
 
@@ -62,7 +63,8 @@ const seed = async () => {
 			emailVerificationExpires: null,
 			gender: genderOptions[Math.floor(Math.random() * genderOptions.length)],
 			joinedGroups: [],
-			moderatedGroups: []
+			moderatedGroups: [],
+			terms: true
 		}));
 	}
 

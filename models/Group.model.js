@@ -118,19 +118,21 @@ const groupEditSchema = {
 		'string.max': 'Bitte halten Sie den Namen auf weniger als 70 Zeichen',
 		'string.empty': 'Bitte Name eingeben',
 	}),
-	description: Joi.string().min(3).max(500).messages({
-		'string.min':
-			'Bitte geben Sie eine Beschreibung mit mindestens 3 Zeichen ein',
-		'string.max':
-			'Bitte halten Sie den Description auf weniger als 500 Zeichen',
-		'string.empty': 'Bitte Description eingeben',
-	}),
-	img: Joi.object(),
-	topic: Joi.string(),
-	meetings: Joi.array().items(Joi.object()),
-	moderator: Joi.object(),
-	members: Joi.array().items(Joi.object()),
-	selfModerated: Joi.bool(),
+	description: Joi.string()
+		.min(3)
+		.max(500)
+		.required()
+		.label('Description')
+		.messages({
+			'string.min':
+				'Bitte geben Sie eine Beschreibung mit mindestens 3 Zeichen ein',
+			'string.max':
+				'Bitte halten Sie den Description auf weniger als 500 Zeichen',
+			'string.empty': 'Bitte Description eingeben',
+		}),
+	topic: Joi.string().required().label('Topic'),
+	selfModerated: Joi.bool().label('Self Moderated'),
+	firstMeeting: Joi.object()
 }
 
 module.exports = { Group, groupSchema, groupCreateSchema, groupEditSchema  }
