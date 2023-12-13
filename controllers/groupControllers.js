@@ -55,7 +55,9 @@ exports.findAll = async (req, res, next) => {
 		const skip = (page - 1) * limit;
 
 		// Set up filters for group name or topic
-		const filter = {};
+		const filter = {
+			verified: true,
+		};
 		if (req.query.name) {
 			filter.name = new RegExp(req.query.name, 'i'); // Case-insensitive match
 		}
@@ -69,11 +71,13 @@ exports.findAll = async (req, res, next) => {
 			.populate('meetings')
 			.skip(skip)
 			.limit(limit)
+		
+		const verifiedGroups = groups.filter(group => group.verified == true);
 
 		// get the total count for pagination info
-		const totalCount = groups.length;
+		const totalCount = verifiedGroups.length;
 
-		res.status(200).send({groups, totalCount})
+		res.status(200).send({verifiedGroups, totalCount})
 	} catch (error) {
 		next(error)
 	}
@@ -89,7 +93,7 @@ exports.findOne = async (req, res, next) => {
 			.populate('members', 'alias email')
 			.populate('meetings')
 
-		if (!group) throw myCustomError('Group could not be found', 400)
+		if (!group || group.verified === false) throw myCustomError('Group could not be found', 400)
 
 		group = group.toJSON()
 
