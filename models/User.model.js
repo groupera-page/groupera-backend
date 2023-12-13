@@ -25,12 +25,15 @@ const userSchema = new Schema(
 			required: true,
 		},
 		questions: {
-			theme: {
+			groupTheme: {
 				type: String,
 			},
 			experience: {
 				type: String,
 			},
+			chooseFunnel: {
+				type: String,
+			}
 		},
 		emailVerificationExpires: {
 			type: Date,
@@ -45,7 +48,7 @@ const userSchema = new Schema(
 		resetPasswordTokenExp: { type: Date },
 		gender: {
 			type: String,
-			enum: ['mann', 'frau', 'divers'],
+			enum: ['male', 'female', 'divers'],
 			required: true,
 		},
 		paid: {
@@ -127,18 +130,18 @@ const userCreateSchema = {
 		.required()
 		.messages({ 'any.required': 'Erforderliches Feld' }),
 	dob: Joi.date().required(),
-	questions: Joi.object({ theme: Joi.string(), experience: Joi.string() }),
+	questions: Joi.object({ groupTheme: Joi.string(), experience: Joi.string(), chooseFunnel: Joi.string() }),
 	emailVerificationExpires: Joi.date(),
 	emailVerified: Joi.bool(),
 	authCode: Joi.string(),
 	resetPasswordToken: Joi.string(),
 	resetPasswordTokenExp: Joi.date(),
-	gender: Joi.string().valid('mann', 'frau', 'divers').required(),
+	gender: Joi.string().valid('male', 'female', 'divers').required(),
 	paid: Joi.bool(),
 	// Not sure how to validate terms - is it an object with type and date inside? I'm not sure if I wrote it either :')
 	// terms: Joi.bool().label('Terms & Conditions'),
 	moderatedGroups: Joi.array().items(Joi.object()),
-	joinedGroups: Joi.array().items(Joi.object()),
+	joinedGroups: Joi.array(),
 	emailVerificationTokenExp: Joi.date(),
 	paymentSubscription: Joi.object(),
 	refreshToken: Joi.string(),
