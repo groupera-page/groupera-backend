@@ -71,7 +71,7 @@ exports.findAll = async (req, res, next) => {
 			.skip(skip)
 			.limit(limit)
 		
-		const verifiedGroups = groups.filter(group => group.verified == true);
+		const verifiedGroups = groups.filter(group => group.verified === true);
 
 		// get the total count for pagination info
 		const totalCount = verifiedGroups.length;
