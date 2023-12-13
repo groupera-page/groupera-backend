@@ -87,12 +87,12 @@ exports.findOne = async (req, res, next) => {
 
 	try {
 		let group = await Group
-			.findOne({ _id: groupId }, 'name description verified img topic selfModerated membersCount')
+			.findOne({ _id: groupId, verified: true }, 'name description verified img topic selfModerated membersCount')
 			.populate('moderator', 'alias email')
 			.populate('members', 'alias email')
 			.populate('meetings')
 
-		if (!group || group.verified === false) throw myCustomError('Group could not be found', 400)
+		if (!group) throw myCustomError('Group could not be found', 400)
 
 		group = group.toJSON()
 
