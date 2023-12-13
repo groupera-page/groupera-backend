@@ -58,7 +58,6 @@ const userSchema = new Schema(
 		},
 		terms: {
 			type: Boolean,
-			date_agreed: Date,
 			default: false,
 		},
 		moderatedGroups: [
@@ -118,7 +117,7 @@ userSchema.index(
 // https://github.com/hapijs/joi/blob/master/API.md#list-of-errors
 
 const userCreateSchema = {
-	alias: Joi.string().messages({
+	alias: Joi.string().required().messages({
 		'string.max': 'Bitte halten Sie den Namen auf weniger als 70 Zeichen',
 		'string.empty': 'Bitte Name eingeben',
 	}),
@@ -140,7 +139,7 @@ const userCreateSchema = {
 	paid: Joi.bool(),
 	// Not sure how to validate terms - is it an object with type and date inside? I'm not sure if I wrote it either :')
 	// terms: Joi.bool().label('Terms & Conditions'),
-	moderatedGroups: Joi.array().items(Joi.object()),
+	moderatedGroups: Joi.array(),
 	joinedGroups: Joi.array(),
 	emailVerificationTokenExp: Joi.date(),
 	paymentSubscription: Joi.object(),
@@ -163,8 +162,8 @@ const userEditSchema = {
 	paid: Joi.bool(),
 	// Not sure how to validate terms - is it an object with type and date inside? I'm not sure if I wrote it either :')
 	// terms: Joi.bool().label('Terms & Conditions'),
-	moderatedGroups: Joi.array().items(Joi.object()),
-	joinedGroups: Joi.array().items(Joi.object()),
+	moderatedGroups: Joi.array(),
+	joinedGroups: Joi.array(),
 	emailVerificationTokenExp: Joi.date(),
 	paymentSubscription: Joi.object(),
 	refreshToken: Joi.string(),

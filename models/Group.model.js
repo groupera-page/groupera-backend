@@ -126,7 +126,6 @@ const groupEditSchema = {
 		}),
 	topic: Joi.string().required().valid(topicsArray.join(', ')).label('Topic'),
 	selfModerated: Joi.bool(),
-	firstMeeting: Joi.object()
 }
 
 module.exports = { Group, groupSchema, groupCreateSchema, groupEditSchema }
