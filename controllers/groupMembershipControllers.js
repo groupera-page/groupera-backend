@@ -4,6 +4,8 @@ const { User } = require('../models/User.model')
 
 const myCustomError = require('../utils/myCustomError')
 
+const {getNextDatesForMeetings, findNextUpcomingMeeting} = require('../utils/meetingRecurrence.helpers');
+
 exports.join = async (req, res, next) => {
 	const {
 		userId: currentUserId,
@@ -30,11 +32,17 @@ exports.join = async (req, res, next) => {
 			)
 			.populate('moderator', 'alias email')
 			.populate('members', 'alias email')
+			.populate('meetings')
 
 		if (process.env.NODE_ENV === 'development') {
 
 			res.send({ group, message: 'Gruppe erfolgreich beigetreten' })
 		} else{
+			group = group.toJSON()
+			
+			group.meetings = getNextDatesForMeetings(group.meetings)
+			group.nextMeeting = findNextUpcomingMeeting(group.meetings)
+
 			res.locals.group = group
 			res.locals.user = user
 			res.locals.groupName = group.name

@@ -7,19 +7,12 @@ const {User} = require('../models/User.model');
 const {Group} = require('../models/Group.model');
 const {Meeting} = require('../models/Meeting.model');
 
+const groupTopics = require('../utils/groupTopics')
+
 // const mongoose = require('mongoose')
 const {hashSomething} = require('../controllers/authControllers');
 
-const topicOptions = [
-	'Depression',
-	'Sucht',
-	'Angststörung',
-	'Stress & Burnout',
-	'Trauer',
-	'chronische Erkrankungen',
-	'Essstörung',
-	'Angehörige'
-]
+const topicArray =  groupTopics.map(t => t.value)
 
 const genderOptions = ['male', 'female', 'divers']
 
@@ -76,7 +69,7 @@ const seed = async () => {
 			_id: faker.database.mongodbObjectId(),
 			name: faker.lorem.word(),
 			description: faker.lorem.words({ min: 1, max: 50 }),
-			topic: topicOptions[Math.floor(Math.random() * topicOptions.length)],
+			topic: topicArray[Math.floor(Math.random() * topicArray.length)],
 			moderator: users[Math.floor(Math.random() * users.length)]._id,
 			verified: selfModerated,
 			selfModerated: selfModerated,

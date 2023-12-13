@@ -8,6 +8,7 @@
 		"start": "node app.js",
 		"dev": "nodemon app.js",
 		"seed": "node db/seed.js",
+		"fixture": "node db/fixtures.js",
 		"lint": "eslint .",
 		"format": "prettier . --write"
 	},
