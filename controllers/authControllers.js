@@ -252,29 +252,24 @@ exports.logout = async (req, res, next) => {
 exports.refresh = async (req, res, next) => {
 	try {
 		const { refreshToken: currentRefreshToken } = req.cookies
-		jwt.verify(
-			currentRefreshToken,
-			process.env.REFRESH_TOKEN_SECRET,
-			async (err, decoded) => {
-				if (err) throw myCustomError('Invalid Token', 400)
 
-				const user = await User.findById(decoded.user.id)
+		const {user: decodedUser} = jwt.verify(currentRefreshToken, process.env.REFRESH_TOKEN_SECRET)
 
-				const {
-					userObject,
-					authToken: newAuthToken,
-					refreshToken: newRefreshToken,
-				} = getAuthTokens(user)
+		const user = await User.findById(decodedUser.id)
 
-				res.cookie('refreshToken', newRefreshToken, cookieOptions).send(
-					{
-						authToken: newAuthToken,
-						user: userObject,
-					}
-				)
+		const {
+			userObject,
+			authToken: newAuthToken,
+			refreshToken: newRefreshToken,
+		} = getAuthTokens(user)
+
+		res.cookie('refreshToken', newRefreshToken, cookieOptions).send(
+			{
+				authToken: newAuthToken,
+				user: userObject,
 			}
 		)
 	} catch (error) {
-		next(error)
+		next(myCustomError('Invalid Token', 400))
 	}
 }
