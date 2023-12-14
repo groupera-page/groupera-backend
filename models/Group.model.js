@@ -102,7 +102,7 @@ const groupCreateSchema = {
 				'Bitte halten Sie den Description auf weniger als 500 Zeichen',
 			'string.empty': 'Bitte Description eingeben',
 		}),
-	topic: Joi.string().required().valid(topicsArray.join(', ')).label('Topic'),
+	topic: Joi.string().required().valid(...topicsArray),
 	selfModerated: Joi.bool(),
 	firstMeeting: Joi.object()
 }
