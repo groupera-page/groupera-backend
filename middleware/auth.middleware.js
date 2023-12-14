@@ -8,39 +8,55 @@ const myCustomError = require('../utils/myCustomError')
 const jwt = require('jsonwebtoken')
 
 exports.validateAuthToken = (req, res, next) => {
-	const authHeader = req.headers.authorization || req.headers.Authorization
-	if (!authHeader?.startsWith('Bearer ')) return res.sendStatus(401)
-	const token = authHeader.split(' ')[1]
+	try {
+		const authHeader = req.headers.authorization || req.headers.Authorization
+		if (!authHeader?.startsWith('Bearer ')) return res.sendStatus(401)
+		const token = authHeader.split(' ')[1]
 
-	jwt.verify(token, process.env.AUTH_TOKEN_SECRET, (error, decoded) => {
-		if (error) next(myCustomError(error, 401))
-		req.userId = decoded.user.id
-		next()
-	})
+		jwt.verify(token, process.env.AUTH_TOKEN_SECRET, (error, decoded) => {
+			if (error) throw myCustomError(error, 401)
+			req.userId = decoded.user.id
+			next()
+		})
+	} catch (error) {
+		next(error)
+	}
 }
 
 exports.validateRefreshToken = (req, res, next) => {
-	const cookies = req.cookies
-	if (!cookies?.refreshToken) next(myCustomError('Token required', 400))
+	try {
+		const cookies = req.cookies
+		if (!cookies?.refreshToken) throw myCustomError('Token required', 400)
 
-	next()
+		next()
+	} catch (error) {
+		next(error)
+	}
 }
 
 exports.validateScheme = (schema, compareTo = undefined) => (req, res, next) => {
-	const { error } = Joi.object(schema).validate(compareTo || req.body)
-	if (error) next(myCustomError(error.details[0].message, 400))
-	next()
+	try {
+		const { error } = Joi.object(schema).validate(compareTo || req.body)
+		if (error) throw myCustomError(error.details[0].message, 400)
+		next()
+	} catch (error) {
+		next(error)
+	}
 }
 
 exports.validateResetPassword = (req, res, next) => {
-	const { error } = Joi.object({
-		password: passwordComplexity().required().label('Password'),
-	}).validate({
-		password: req.body.password,
-	})
-	if (error) next(myCustomError(error.details[0].message, 400))
+	try {
+		const { error } = Joi.object({
+			password: passwordComplexity().required().label('Password'),
+		}).validate({
+			password: req.body.password,
+		})
+		if (error) throw myCustomError(error.details[0].message, 400)
 
-	next()
+		next()
+	} catch (error) {
+		next(error)
+	}
 }
 
 exports.validateNoEmailDuplicates = async (req, res, next) => {
