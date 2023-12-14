@@ -95,7 +95,6 @@ const groupCreateSchema = {
 		.min(3)
 		.max(500)
 		.required()
-		.required()
 		.messages({
 			'string.min':
 				'Bitte geben Sie eine Beschreibung mit mindestens 3 Zeichen ein',
