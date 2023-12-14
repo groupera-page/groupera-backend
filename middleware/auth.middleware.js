@@ -13,11 +13,10 @@ exports.validateAuthToken = (req, res, next) => {
 		if (!authHeader?.startsWith('Bearer ')) return res.sendStatus(401)
 		const token = authHeader.split(' ')[1]
 
-		jwt.verify(token, process.env.AUTH_TOKEN_SECRET, (error, decoded) => {
-			if (error) throw myCustomError(error, 401)
-			req.userId = decoded.user.id
-			next()
-		})
+
+		const {user: decodedUser} = jwt.verify(token, process.env.AUTH_TOKEN_SECRET)
+		req.userId = decodedUser.id
+		next()
 	} catch (error) {
 		next(error)
 	}
