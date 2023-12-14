@@ -56,6 +56,7 @@ exports.findAll = async (req, res, next) => {
 
 		// Set up filters for group name or topic
 		const filter = {
+			verified: true
 		};
 		if (req.query.name) {
 			filter.name = new RegExp(req.query.name, 'i'); // Case-insensitive match
@@ -71,12 +72,10 @@ exports.findAll = async (req, res, next) => {
 			.skip(skip)
 			.limit(limit)
 		
-		const verifiedGroups = groups.filter(group => group.verified === true);
-
 		// get the total count for pagination info
-		const totalCount = verifiedGroups.length;
+		const totalCount = groups.length;
 
-		res.status(200).send({verifiedGroups, totalCount})
+		res.status(200).send({groups, totalCount})
 	} catch (error) {
 		next(error)
 	}
