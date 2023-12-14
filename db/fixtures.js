@@ -102,7 +102,8 @@ const fixtures = async () => {
 		emailVerified: true,
 		emailVerificationExpires: null,
 		gender: 'male',
-		terms: true
+		terms: true,
+		dob: faker.date.birthdate({ min: 18, max: 65, mode: 'age' })
 	}))
 
 	users.push(new User({
@@ -113,7 +114,8 @@ const fixtures = async () => {
 		emailVerified: true,
 		emailVerificationExpires: null,
 		gender: 'female',
-		terms: true
+		terms: true,
+		dob: faker.date.birthdate({ min: 18, max: 65, mode: 'age' })
 	}))
 		
 
@@ -131,7 +133,8 @@ const fixtures = async () => {
 			gender: genderOptions[Math.floor(Math.random() * genderOptions.length)],
 			joinedGroups: [],
 			moderatedGroups: [],
-			terms: true
+			terms: true,
+			dob: faker.date.birthdate({ min: 18, max: 65, mode: 'age' })
 		}));
 	}
 
