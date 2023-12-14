@@ -6,8 +6,43 @@ const getNextRecurrenceDate = (event, currentDate) => {
 	let nextDate = new Date(event.startDate);
 	const addDays = (date, days) => new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
 
+	// Calculate how many intervals have already passed since the start date
+	if (['weekly', 'bi-weekly', 'monthly', 'yearly'].includes(event.recurrence.type)) {
+		let intervalDays = 0;
+		switch (event.recurrence.type) {
+			case 'weekly':
+				intervalDays = 7;
+				break;
+			case 'bi-weekly':
+				intervalDays = 14;
+				break;
+			case 'monthly':
+				intervalDays = 30; // Approximation, actual days will vary
+				break;
+			case 'yearly':
+				intervalDays = 365; // Not accounting for leap years
+				break;
+		}
+
+		const intervalsPassed = Math.floor((currentDate - nextDate) / (intervalDays * 24 * 60 * 60 * 1000));
+
+		// Setting next Date to the last recurrence
+		switch (event.recurrence.type) {
+			case 'weekly':
+			case 'biweekly':
+				nextDate = addDays(nextDate, intervalsPassed * intervalDays)
+				break;
+			case 'monthly':
+				nextDate.setMonth(nextDate.getMonth() + intervalsPassed);
+				break;
+			case 'yearly':
+				nextDate.setFullYear(nextDate.getFullYear() + intervalsPassed);
+				break;
+		}
+	}
+
 	// Check for weekly and bi-weekly events
-	if (event.recurrence.type === 'weekly' || event.recurrence.type === 'bi-weekly') {
+	if (['weekly', 'bi-weekly'].includes(event.recurrence.type)) {
 		const weekDays = event.recurrence.days.sort();
 		const interval = event.recurrence.type === 'bi-weekly' ? 14 : 7;
 
