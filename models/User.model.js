@@ -34,15 +34,7 @@ const userSchema = new Schema({
 		required: true,
 	},
 	questions: {
-		groupTheme: {
-			type: String,
-		},
-		experience: {
-			type: String,
-		},
-		chooseFunnel: {
-			type: String,
-		}
+		type: Object
 	},
 	emailVerificationExpires: {
 		type: Date,
@@ -129,11 +121,7 @@ const userCreateSchema = {
 		.required()
 		.messages({ 'any.required': 'Erforderliches Feld' }),
 	dob: Joi.date().required(),
-	questions: Joi.object({
-		groupTheme: Joi.string(),
-		experience: Joi.string(),
-		chooseFunnel: Joi.string(),
-	}),
+	questions: Joi.object(),
 	emailVerificationExpires: Joi.date(),
 	emailVerified: Joi.bool(),
 	authCode: Joi.string(),
@@ -158,11 +146,7 @@ const userEditSchema = {
 		'string.email': 'Bitte geben Sie eine gültige E-Mail Adresse ein',
 		'string.empty': 'Bitte geben Sie eine E-Mail Adresse ein',
 	}),
-	questions: Joi.object({
-		groupTheme: Joi.string(),
-		experience: Joi.string(),
-		chooseFunnel: Joi.string(),
-	}),
+	questions: Joi.object(),
 	gender: Joi.string().valid('male', 'female', 'divers'),
 	paid: Joi.bool(),
 	// I don't think any of the ones below need to be on here, right?
