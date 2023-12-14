@@ -56,10 +56,10 @@ exports.verifyEmail = async (req, res, next) => {
 	} = req
 	try {
 		let user = await User.findOne({ email: email })
-		if (!user) throw myCustomError('Ungültiger Email', 401)
+		if (!user) throw myCustomError('Ungültiger Email', 403)
 
 		const validAuthCode = await bcrypt.compare(authCode, user.authCode)
-		if (!validAuthCode) throw myCustomError('Incorrect code!', 401)
+		if (!validAuthCode) throw myCustomError('Incorrect code!', 403)
 
 		user.emailVerified = true
 		user.emailVerificationExpires = null
@@ -105,7 +105,7 @@ exports.resendEmailVerification = async (req, res, next) => {
 	const { email } = req.params
 	try {
 		let user = await User.findOne({ email: email.toLowerCase() })
-		if (!user) throw myCustomError('Ungültiger Email', 401)
+		if (!user) throw myCustomError('Ungültiger Email', 403)
 
 		const randomCode = Math.floor(1000 + Math.random() * 9000).toString()
 		user.authCode = await hashSomething(randomCode)
@@ -130,11 +130,11 @@ exports.login = async (req, res, next) => {
 		const { email, password } = req.body
 
 		const user = await User.findOne({ email: email.toLowerCase() }, '+passwordHash')
-		if (!user) throw myCustomError('Ungültige E-Mail oder Passwort', 401)
+		if (!user) throw myCustomError('Ungültige E-Mail oder Passwort', 403)
 
 		const validPassword = await bcrypt.compare(password, user.passwordHash)
 		if (!validPassword)
-			throw myCustomError('Ungültige E-Mail oder Passwort', 401)
+			throw myCustomError('Ungültige E-Mail oder Passwort', 403)
 
 		if (!user.emailVerified)
 			throw myCustomError(

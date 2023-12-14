@@ -89,7 +89,7 @@ exports.editPassword = async (req, res, next) => {
 			currentPassword,
 			user.passwordHash
 		)
-		if (!validPassword) throw myCustomError('Ungültiges Passwort', 401)
+		if (!validPassword) throw myCustomError('Ungültiges Passwort', 403)
 
 		user.passwordHash = await hashSomething(newPassword)
 
@@ -111,7 +111,7 @@ exports.editEmail = async (req, res, next) => {
 
 		const validPassword = await bcrypt.compare(password, user.passwordHash)
 		if (!validPassword)
-			throw myCustomError('Ungültige E-Mail oder Passwort', 401)
+			throw myCustomError('Ungültige E-Mail oder Passwort', 403)
 
 		user.email = newEmail
 
