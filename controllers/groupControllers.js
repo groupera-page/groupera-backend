@@ -145,7 +145,6 @@ exports.delete = async (req, res, next) => {
 			{
 				$pull: {
 					joinedGroups: groupId,
-					meetings: group.meetings
 				},
 			}
 		)

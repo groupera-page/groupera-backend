@@ -59,7 +59,7 @@ exports.validateNoEmailDuplicates = async (req, res, next) => {
 // 	try {
 // 		const user = await Group.findOne({ name: req.body.name })
 // 		if (user) throw myCustomError('Gruppe bereits in Gebrauch', 409)
-//
+
 // 		next()
 // 	} catch (error) {
 // 		next(error)

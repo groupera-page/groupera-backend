@@ -4,14 +4,16 @@ const { Group } = require('../models/Group.model')
 const { Meeting } = require('../models/Meeting.model')
 
 const myCustomError = require('../utils/myCustomError')
+// const {
+// 	// getEvents,
+// 	// deleteEvent
+// } = require('../utils/googleCalendar')
+const bcrypt = require('bcryptjs')
+const { hashSomething } = require('./authControllers')
 const {
-	// getEvents,
-	deleteEvent
-} = require('../utils/googleCalendar')
-const bcrypt = require('bcryptjs');
-const { hashSomething } = require('./authControllers');
-const {getNextDatesForMeetings, findNextUpcomingMeeting} = require('../utils/meetingRecurrence.helpers');
-
+	getNextDatesForMeetings,
+	findNextUpcomingMeeting,
+} = require('../utils/meetingRecurrence.helpers')
 
 exports.find = async (req, res, next) => {
 	const { userId } = req
@@ -20,35 +22,51 @@ exports.find = async (req, res, next) => {
 		let user = await User.findOne(
 			{ _id: userId },
 			'alias email dob questions emailVerified gender'
-		).populate({
-			path: 'joinedGroups',
-			select: 'name description topic img verified',
-			populate: [{
-				path: 'moderator',
-				select: 'alias email',
-			}, {
-				path: 'meetings',
-			}]
-		}).populate({
-			path: 'moderatedGroups',
-			select: 'name description topic img verified',
-			populate: {
-				path: 'meetings'
-			}
-		})
+		)
+			.populate({
+				path: 'joinedGroups',
+				select: 'name description topic img verified',
+				populate: [
+					{
+						path: 'moderator',
+						select: 'alias email',
+					},
+					{
+						path: 'meetings',
+					},
+				],
+			})
+			.populate({
+				path: 'moderatedGroups',
+				select: 'name description topic img verified',
+				populate: {
+					path: 'meetings',
+				},
+			})
 
 		if (!user) throw myCustomError('User could not be found', 400)
 
 		user = user.toJSON()
 
-		user.joinedGroups = user.joinedGroups.map(group => ({...group, meetings: getNextDatesForMeetings(group.meetings)}))
-		user.moderatedGroups = user.moderatedGroups.map(group => ({...group, meetings: getNextDatesForMeetings(group.meetings)}))
+		user.joinedGroups = user.joinedGroups.map((group) => ({
+			...group,
+			meetings: getNextDatesForMeetings(group.meetings),
+		}))
+		user.moderatedGroups = user.moderatedGroups.map((group) => ({
+			...group,
+			meetings: getNextDatesForMeetings(group.meetings),
+		}))
 
-		const nextMeeting = findNextUpcomingMeeting([...user.moderatedGroups.map(g => g.meetings).flat(), ...user.joinedGroups.map(g => g.meetings).flat()])
+		const nextMeeting = findNextUpcomingMeeting([
+			...user.moderatedGroups.map((g) => g.meetings).flat(),
+			...user.joinedGroups.map((g) => g.meetings).flat(),
+		])
 		if (nextMeeting) {
 			user.nextMeeting = {
 				meeting: nextMeeting,
-				group: [...user.joinedGroups, ...user.moderatedGroups].find(g => g.meetings.some(m => m.id === nextMeeting.id))
+				group: [...user.joinedGroups, ...user.moderatedGroups].find(
+					(g) => g.meetings.some((m) => m.id === nextMeeting.id)
+				),
 			}
 		}
 
@@ -66,9 +84,11 @@ exports.editPassword = async (req, res, next) => {
 		const user = await User.findOne({ _id: userId }, '+passwordHash')
 		if (!user) throw myCustomError('User could not be found', 400)
 
-		const validPassword = await bcrypt.compare(currentPassword, user.passwordHash)
-		if (!validPassword)
-			throw myCustomError('Ungültiges Passwort', 401)
+		const validPassword = await bcrypt.compare(
+			currentPassword,
+			user.passwordHash
+		)
+		if (!validPassword) throw myCustomError('Ungültiges Passwort', 401)
 
 		user.passwordHash = await hashSomething(newPassword)
 
@@ -106,10 +126,7 @@ exports.edit = async (req, res, next) => {
 	const { userId, body } = req
 
 	try {
-		const {acknowledged} = await User.updateOne(
-			{ _id: userId },
-			body,
-		)
+		const { acknowledged } = await User.updateOne({ _id: userId }, body)
 
 		if (!acknowledged) throw myCustomError('User could not be updated', 400)
 
@@ -128,13 +145,13 @@ exports.delete = async (req, res, next) => {
 
 		await Group.updateMany(
 			{
-				users: {
+				members: {
 					$in: [userId],
 				},
 			},
 			{
 				$pull: {
-					users: userId,
+					members: userId,
 				},
 			}
 		)
@@ -142,24 +159,9 @@ exports.delete = async (req, res, next) => {
 		user.moderatedGroups.map(async (groupId) => {
 			const specGroup = await Group.findOne({ _id: groupId })
 
-			for (let i = 0; i < specGroup.meetings.length; i++) {
-				const meeting = await Meeting.findOneAndDelete({
-					_id: specGroup.meetings[i],
-				})
-				await deleteEvent(meeting.calendarId)
-				await User.updateMany(
-					{
-						meetings: {
-							$in: [meeting.id],
-						},
-					},
-					{
-						$pull: {
-							meetings: meeting.id,
-						},
-					}
-				)
-			}
+			await Meeting.deleteMany({
+				group: groupId,
+			})
 
 			await User.updateMany(
 				{
@@ -183,7 +185,7 @@ exports.delete = async (req, res, next) => {
 
 		if (process.env.NODE_ENV === 'development') {
 			res.send({ message: 'Benutzer erfolgreich gelöscht' })
-		} else{
+		} else {
 			next()
 		}
 	} catch (error) {

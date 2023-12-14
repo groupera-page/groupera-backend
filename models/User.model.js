@@ -15,20 +15,34 @@ const complexityOptions = {
 const userSchema = new Schema({
 	alias: {
 		type: String,
+		required: true,
+		min: 1,
+		max: 70,
 	},
 	email: {
 		type: String,
 		unique: [true, 'Die E-Mail Adresse ist ungültig'],
+		required: true,
 	},
 	passwordHash: {
 		type: String,
-		select: false
+		select: false,
+		required: true,
 	},
 	dob: {
 		type: Date,
+		required: true,
 	},
 	questions: {
-		type: Object,
+		groupTheme: {
+			type: String,
+		},
+		experience: {
+			type: String,
+		},
+		chooseFunnel: {
+			type: String,
+		}
 	},
 	emailVerificationExpires: {
 		type: Date,
@@ -38,15 +52,16 @@ const userSchema = new Schema({
 		type: Boolean,
 		default: false,
 	},
-	authCode: { type: String },
-	resetPasswordToken: { type: String },
-	resetPasswordTokenExp: { type: Date },
+	authCode: {type: String},
+	resetPasswordToken: {type: String},
+	resetPasswordTokenExp: {type: Date},
 	gender: {
 		type: String,
+		enum: ['male', 'female', 'divers'],
+		required: true,
 	},
 	paid: {
 		type: Boolean,
-		// date_paid: Date,
 		default: false,
 	},
 	terms: {
@@ -65,12 +80,6 @@ const userSchema = new Schema({
 			ref: 'Group',
 		},
 	],
-	// change below to ObjectId?
-	meetings: [
-		{
-			type: String,
-		},
-	],
 	paymentSubscription: {
 		type: Object,
 	},
@@ -80,19 +89,19 @@ const userSchema = new Schema({
 }, {
 	toJSON: {
 		virtuals: true,
-		transform: function(doc, ret) {
-			ret.id = ret._id;
-			delete ret._id;
-		}
+		transform: function (doc, ret) {
+			ret.id = ret._id
+			delete ret._id
+		},
 	},
 	toObject: {
 		virtuals: true,
-		transform: function(doc, ret) {
-			ret.id = ret._id;
-			delete ret._id;
-		}
+		transform: function (doc, ret) {
+			ret.id = ret._id
+			delete ret._id
+		},
 	},
-	timestamps: true
+	timestamps: true,
 })
 
 const User = model('User', userSchema)
@@ -107,30 +116,56 @@ userSchema.index(
 
 // https://github.com/hapijs/joi/blob/master/API.md#list-of-errors
 
-const schema = {
-	alias: Joi.string().min(1).max(70).required().label('Alias').messages({
+const userCreateSchema = {
+	alias: Joi.string().required().messages({
 		'string.max': 'Bitte halten Sie den Namen auf weniger als 70 Zeichen',
 		'string.empty': 'Bitte Name eingeben',
 	}),
-	email: Joi.string().email().required().label('Email').messages({
+	email: Joi.string().required().email().messages({
 		'string.email': 'Bitte geben Sie eine gültige E-Mail Adresse ein',
 		'string.empty': 'Bitte geben Sie eine E-Mail Adresse ein',
 	}),
 	password: passwordComplexity(complexityOptions)
 		.required()
-		.label('Password')
 		.messages({ 'any.required': 'Erforderliches Feld' }),
-	dob: Joi.date().label('Age'),
-	authCode: Joi.string().label('Code'),
-	gender: Joi.string()
-		.valid('male', 'female', 'divers')
-		.label('Gender'),
-	questions: Joi.object().label('Questions'),
-	terms: Joi.bool().valid(true),
-	emailVerified: Joi.bool().label('emailVerified'),
-	emailVerificationTokenExp: Joi.date().label('emailVerificationTokenExp'),
-	resetPasswordToken: Joi.string().label('resetPasswordToken'),
-	resetPasswordTokenExp: Joi.date().label('resetPasswordTokenExp'),
+	dob: Joi.date().required(),
+	questions: Joi.object({ groupTheme: Joi.string(), experience: Joi.string(), chooseFunnel: Joi.string() }),
+	emailVerificationExpires: Joi.date(),
+	emailVerified: Joi.bool(),
+	authCode: Joi.string(),
+	resetPasswordToken: Joi.string(),
+	resetPasswordTokenExp: Joi.date(),
+	gender: Joi.string().valid('male', 'female', 'divers').required(),
+	paid: Joi.bool(),
+	terms: Joi.bool(),
+	moderatedGroups: Joi.array(),
+	joinedGroups: Joi.array(),
+	emailVerificationTokenExp: Joi.date(),
+	paymentSubscription: Joi.object(),
+	refreshToken: Joi.string(),
 }
 
-module.exports = { User, userSchema: schema }
+const userEditSchema = {
+	alias: Joi.string().messages({
+		'string.max': 'Bitte halten Sie den Namen auf weniger als 70 Zeichen',
+		'string.empty': 'Bitte Name eingeben',
+	}),
+	email: Joi.string().email().messages({
+		'string.email': 'Bitte geben Sie eine gültige E-Mail Adresse ein',
+		'string.empty': 'Bitte geben Sie eine E-Mail Adresse ein',
+	}),
+	questions: Joi.object({ groupTheme: Joi.string(), experience: Joi.string(), chooseFunnel: Joi.string() }),
+	gender: Joi.string().valid('male', 'female', 'divers').required(),
+	paid: Joi.bool(),
+	// I don't think any of the ones below need to be on here, right?
+	terms: Joi.bool(),
+	dob: Joi.date(),
+	authCode: Joi.string(),
+	moderatedGroups: Joi.array(),
+	joinedGroups: Joi.array(),
+	emailVerificationTokenExp: Joi.date(),
+	paymentSubscription: Joi.object(),
+	refreshToken: Joi.string(),
+}
+
+module.exports = { User, userSchema, userCreateSchema, userEditSchema }

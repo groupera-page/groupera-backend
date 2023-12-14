@@ -86,8 +86,8 @@ groupSchema.virtual('membersCount').get(function() {
 
 const Group = model('Group', groupSchema)
 
-const schema = {
-	name: Joi.string().min(1).max(70).required().label('Name').messages({
+const groupCreateSchema = {
+	name: Joi.string().min(1).max(70).required().required().messages({
 		'string.max': 'Bitte halten Sie den Namen auf weniger als 70 Zeichen',
 		'string.empty': 'Bitte Name eingeben',
 	}),
@@ -95,7 +95,6 @@ const schema = {
 		.min(3)
 		.max(500)
 		.required()
-		.label('Description')
 		.messages({
 			'string.min':
 				'Bitte geben Sie eine Beschreibung mit mindestens 3 Zeichen ein',
@@ -104,8 +103,28 @@ const schema = {
 			'string.empty': 'Bitte Description eingeben',
 		}),
 	topic: Joi.string().required().valid(...topicsArray),
-	selfModerated: Joi.bool().label('Self Moderated'),
+	selfModerated: Joi.bool(),
 	firstMeeting: Joi.object()
 }
 
-module.exports = { Group, groupSchema: schema }
+const groupEditSchema = {
+	name: Joi.string().min(1).max(70).required().messages({
+		'string.max': 'Bitte halten Sie den Namen auf weniger als 70 Zeichen',
+		'string.empty': 'Bitte Name eingeben',
+	}),
+	description: Joi.string()
+		.min(3)
+		.max(500)
+		.required()
+		.messages({
+			'string.min':
+				'Bitte geben Sie eine Beschreibung mit mindestens 3 Zeichen ein',
+			'string.max':
+				'Bitte halten Sie den Description auf weniger als 500 Zeichen',
+			'string.empty': 'Bitte Description eingeben',
+		}),
+	topic: Joi.string().required().valid(topicsArray.join(', ')).label('Topic'),
+	selfModerated: Joi.bool(),
+}
+
+module.exports = { Group, groupSchema, groupCreateSchema, groupEditSchema }

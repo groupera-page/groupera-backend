@@ -48,11 +48,18 @@ const meetingSchema = new Schema({
 
 const Meeting = model('Meeting', meetingSchema)
 
-const schema = {
+const meetingCreateSchema = {
 	title: Joi.string().required(),
 	startDate: Joi.date().required(),
 	duration: Joi.number().valid(60, 90).required(),
 	recurrence: Joi.object({ type: Joi.string().valid('weekly', 'biweekly', 'monthly'), days: Joi.array().items(Joi.number())}).required(),
 }
 
-module.exports = { Meeting, meetingSchema: schema }
+const meetingEditSchema = {
+	title: Joi.string(),
+	startDate: Joi.date(),
+	duration: Joi.number().valid(60, 90),
+	recurrence: Joi.object({ type: Joi.string().valid('weekly', 'biweekly', 'monthly'), days: Joi.array().items(Joi.number())}),
+}
+
+module.exports = { Meeting, meetingSchema, meetingCreateSchema, meetingEditSchema }
