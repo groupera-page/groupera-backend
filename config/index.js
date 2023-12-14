@@ -17,29 +17,28 @@ const cors = require('cors')
 module.exports = (app) => {
 	// Because this will be hosted on a server that will accept requests from outside and it will be hosted ona server with a `proxy`, express needs to know that it should trust that setting.
 	// Services like Fly use something called a proxy and you need to add this to your server
-	app.set('trust proxy', 1)
+	if (['staging', 'production'].includes(process.env.NODE_ENV)) {
+		app.set('trust proxy', 1);
+	}
 
 	// controls a very specific header to pass headers from the frontend
-	// app.use(
-	//   cors({
-	//     origin: ["http://localhost:8080", process.env.FRONTEND_BASE_URL],
-	//   })
-	// );
-
 	const corsConfig = {
-		// origin: '*',
 		origin: ['http://localhost:8080', process.env.FRONTEND_BASE_URL],
 		credentials: true,
-		// allowedHeaders: [
-		// 	'set-cookie',
-		// 	'Content-Type',
-		// 	'Access-Control-Allow-Origin',
-		// 	'Access-Control-Allow-Credentials',
-		// ]
 	}
 
 	app.use(cors(corsConfig))
+
+
 	app.options('*', cors(corsConfig))
+
+	app.use((req, res, next) => {
+		res.header(
+			'Access-Control-Allow-Headers',
+			'x-access-token, Origin, Content-Type, Accept, Authorization'
+		);
+		next();
+	});
 
 	// In development environment the app logs
 	app.use(logger('dev'))
