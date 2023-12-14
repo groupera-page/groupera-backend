@@ -10,82 +10,84 @@ const complexityOptions = {
 	numeric: 1,
 	symbol: 0,
 	requirementCount: 2,
-};
+}
 
-const userSchema = new Schema({
-	alias: {
-		type: String,
-    required: true,
-    min: 1,
-    max: 70,
+const userSchema = new Schema(
+	{
+		alias: {
+			type: String,
+			required: true,
+			min: 1,
+			max: 70,
+		},
+		email: {
+			type: String,
+			unique: [true, 'Die E-Mail Adresse ist ungültig'],
+			required: true,
+		},
+		passwordHash: {
+			type: String,
+			select: false,
+			required: true,
+		},
+		dob: {
+			type: Date,
+			required: true,
+		},
+		questions: {
+			groupTheme: {
+				type: String,
+			},
+			experience: {
+				type: String,
+			},
+			chooseFunnel: {
+				type: String,
+			},
+		},
+		emailVerificationExpires: {
+			type: Date,
+			default: () => new Date(+new Date() + 24 * 60 * 60 * 1000), // 24 hours
+		},
+		emailVerified: {
+			type: Boolean,
+			default: false,
+		},
+		authCode: { type: String },
+		resetPasswordToken: { type: String },
+		resetPasswordTokenExp: { type: Date },
+		gender: {
+			type: String,
+			enum: ['male', 'female', 'divers'],
+			required: true,
+		},
+		paid: {
+			type: Boolean,
+			default: false,
+		},
+		terms: {
+			type: Boolean,
+			required: true,
+		},
+		moderatedGroups: [
+			{
+				type: Schema.Types.ObjectId,
+				ref: 'Group',
+			},
+		],
+		joinedGroups: [
+			{
+				type: Schema.Types.ObjectId,
+				ref: 'Group',
+			},
+		],
+		paymentSubscription: {
+			type: Object,
+		},
+		refreshToken: {
+			type: String,
+		},
 	},
-	email: {
-		type: String,
-		unique: [true, 'Die E-Mail Adresse ist ungültig'],
-    required: true,
-	},
-	passwordHash: {
-		type: String,
-		select: false,
-    required: true,
-	},
-	dob: {
-		type: Date,
-    required: true,
-	},
-	questions: {
-    groupTheme: {
-      type: String,
-    },
-    experience: {
-      type: String,
-    },
-    chooseFunnel: {
-      type: String,
-    }
-  },
-	emailVerificationExpires: {
-		type: Date,
-		default: () => new Date(+new Date() + 24 * 60 * 60 * 1000), // 24 hours
-	},
-	emailVerified: {
-		type: Boolean,
-		default: false,
-	},
-	authCode: { type: String },
-	resetPasswordToken: { type: String },
-	resetPasswordTokenExp: { type: Date },
-	gender: {
-    type: String,
-    enum: ['male', 'female', 'divers'],
-    required: true,
-  },
-	paid: {
-		type: Boolean,
-		default: false,
-	},
-	terms: {
-		type: Boolean,
-		required: true
-	},
-  moderatedGroups: [
-		{
-			type: Schema.Types.ObjectId,
-			ref: 'Group',
-    },
-  ],
-  joinedGroups: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'Group',
-    },
-  ],
-  paymentSubscription: {
-    type: Object,
-  },
-  refreshToken: {
-    type: String,
-  },
 	{
 		toJSON: {
 			virtuals: true,
@@ -103,7 +105,7 @@ const userSchema = new Schema({
 		},
 		timestamps: true,
 	}
-})
+)
 
 const User = model('User', userSchema)
 
@@ -130,7 +132,11 @@ const userCreateSchema = {
 		.required()
 		.messages({ 'any.required': 'Erforderliches Feld' }),
 	dob: Joi.date().required(),
-	questions: Joi.object({ groupTheme: Joi.string(), experience: Joi.string(), chooseFunnel: Joi.string() }),
+	questions: Joi.object({
+		groupTheme: Joi.string(),
+		experience: Joi.string(),
+		chooseFunnel: Joi.string(),
+	}),
 	emailVerificationExpires: Joi.date(),
 	emailVerified: Joi.bool(),
 	authCode: Joi.string(),
@@ -155,7 +161,11 @@ const userEditSchema = {
 		'string.email': 'Bitte geben Sie eine gültige E-Mail Adresse ein',
 		'string.empty': 'Bitte geben Sie eine E-Mail Adresse ein',
 	}),
-	questions: Joi.object({ groupTheme: Joi.string(), experience: Joi.string(), chooseFunnel: Joi.string() }),
+	questions: Joi.object({
+		groupTheme: Joi.string(),
+		experience: Joi.string(),
+		chooseFunnel: Joi.string(),
+	}),
 	gender: Joi.string().valid('male', 'female', 'divers'),
 	paid: Joi.bool(),
 	// I don't think any of the ones below need to be on here, right?

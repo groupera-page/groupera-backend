@@ -122,8 +122,9 @@ const groupEditSchema = {
 				'Bitte halten Sie den Description auf weniger als 500 Zeichen',
 			'string.empty': 'Bitte Description eingeben',
 		}),
-	topic: Joi.string().valid(topicsArray.join(', ')).label('Topic'),
 	selfModerated: Joi.bool(),
+	// Should topic be editable anyway?
+	topic: Joi.string().valid(topicsArray.join(', ')).label('Topic'),
 }
 
 module.exports = { Group, groupSchema, groupCreateSchema, groupEditSchema }
