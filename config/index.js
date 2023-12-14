@@ -32,13 +32,13 @@ module.exports = (app) => {
 
 	app.options('*', cors(corsConfig))
 
-	// app.use((req, res, next) => {
-	// 	res.header(
-	// 		'Access-Control-Allow-Headers',
-	// 		'x-access-token, Origin, Content-Type, Accept, Authorization'
-	// 	);
-	// 	next();
-	// });
+	app.use((req, res, next) => {
+		res.header(
+			'Access-Control-Allow-Headers',
+			'x-access-token, Origin, Content-Type, Accept, Authorization'
+		);
+		next();
+	});
 
 	// In development environment the app logs
 	app.use(logger('dev'))
