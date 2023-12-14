@@ -23,7 +23,7 @@ module.exports = (app) => {
 
 	app.use(
 		cors({
-			origin: ['http://localhost:8080', process.env.FRONTEND_BASE_URL],
+			origin: '*',
 			credentials: true,
 		})
 	);
