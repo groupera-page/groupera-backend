@@ -86,7 +86,7 @@ exports.findOne = async (req, res, next) => {
 
 	try {
 		let group = await Group
-			.findOne({ _id: groupId, verified: true }, 'name description verified img topic selfModerated membersCount')
+			.findOne({ _id: groupId }, 'name description verified img topic selfModerated membersCount')
 			.populate('moderator', 'alias email')
 			.populate('members', 'alias email')
 			.populate('meetings')
