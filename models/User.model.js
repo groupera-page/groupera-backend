@@ -10,7 +10,7 @@ const complexityOptions = {
 	numeric: 1,
 	symbol: 0,
 	requirementCount: 2,
-};
+}
 
 const userSchema = new Schema({
 	alias: {
@@ -129,7 +129,11 @@ const userCreateSchema = {
 		.required()
 		.messages({ 'any.required': 'Erforderliches Feld' }),
 	dob: Joi.date().required(),
-	questions: Joi.object({ groupTheme: Joi.string(), experience: Joi.string(), chooseFunnel: Joi.string() }),
+	questions: Joi.object({
+		groupTheme: Joi.string(),
+		experience: Joi.string(),
+		chooseFunnel: Joi.string(),
+	}),
 	emailVerificationExpires: Joi.date(),
 	emailVerified: Joi.bool(),
 	authCode: Joi.string(),
@@ -154,8 +158,12 @@ const userEditSchema = {
 		'string.email': 'Bitte geben Sie eine gültige E-Mail Adresse ein',
 		'string.empty': 'Bitte geben Sie eine E-Mail Adresse ein',
 	}),
-	questions: Joi.object({ groupTheme: Joi.string(), experience: Joi.string(), chooseFunnel: Joi.string() }),
-	gender: Joi.string().valid('male', 'female', 'divers').required(),
+	questions: Joi.object({
+		groupTheme: Joi.string(),
+		experience: Joi.string(),
+		chooseFunnel: Joi.string(),
+	}),
+	gender: Joi.string().valid('male', 'female', 'divers'),
 	paid: Joi.bool(),
 	// I don't think any of the ones below need to be on here, right?
 	terms: Joi.bool(),

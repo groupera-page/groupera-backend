@@ -11,78 +11,84 @@ const imgOptions = [
 	'Grouptitel%20pictures%20low_res/pexels-javier-gonzalez-108303_iwxfil_t8mk04.jpg',
 	'Grouptitel%20pictures%20low_res/pexels-pixabay-273886_dygqro_wt5ega.jpg',
 	'Grouptitel%20pictures%20low_res/pexels-nanoid-kumar-1661296_ttr2gf_ijeg4r.jpg',
-];
+]
 
-const topicsArray = groupTopics.map(t => t.value)
+const topicsArray = groupTopics.map((t) => t.value)
 
-const groupSchema = new Schema({
-	verified: {
-		type: Boolean,
-		default: false,
-	},
-	name: {
-		type: String,
-	},
-	description: {
-		type: String,
-	},
-	img: {
-		type: Object,
-		default: () => {
-			return {
-				public_id: imgOptions[Math.floor(Math.random() * imgOptions.length)]
-			}
-		}
-	},
-	topic: {
-		type: String,
-		enum: topicsArray
-	},
-	meetings: [
-		{
-			type: Schema.Types.ObjectId,
-			ref: 'Meeting',
+const groupSchema = new Schema(
+	{
+		verified: {
+			type: Boolean,
+			default: false,
 		},
-	],
-	moderator: {
-		type: Schema.Types.ObjectId,
-		ref: 'User',
-	},
-	members: [
-		{
+		name: {
+			type: String,
+		},
+		description: {
+			type: String,
+		},
+		img: {
+			type: Object,
+			default: () => {
+				return {
+					public_id:
+						imgOptions[
+							Math.floor(Math.random() * imgOptions.length)
+						],
+				}
+			},
+		},
+		topic: {
+			type: String,
+			enum: topicsArray,
+		},
+		meetings: [
+			{
+				type: Schema.Types.ObjectId,
+				ref: 'Meeting',
+			},
+		],
+		moderator: {
 			type: Schema.Types.ObjectId,
 			ref: 'User',
 		},
-	],
-	selfModerated: {
-		type: Boolean,
-		default: false
+		members: [
+			{
+				type: Schema.Types.ObjectId,
+				ref: 'User',
+			},
+		],
+		selfModerated: {
+			type: Boolean,
+			default: false,
+		},
 	},
-}, {
-	toJSON: {
-		virtuals: true,
-		transform: function(doc, ret) {
-			if (!ret.id || ret._id){
-				ret.id = ret._id;
-				delete ret._id;
-			}
-		}
-	},
-	toObject: {
-		virtuals: true,
-		transform: function(doc, ret) {
-			if (!ret.id || ret._id){
-				ret.id = ret._id;
-				delete ret._id;
-			}
-		}
-	},
-	timestamps: true
-})
+	{
+		toJSON: {
+			virtuals: true,
+			transform: function (doc, ret) {
+				if (!ret.id || ret._id) {
+					ret.id = ret._id
+					delete ret._id
+				}
+			},
+		},
+		toObject: {
+			virtuals: true,
+			transform: function (doc, ret) {
+				if (!ret.id || ret._id) {
+					ret.id = ret._id
+					delete ret._id
+				}
+			},
+		},
+		timestamps: true,
+	}
+)
 
-groupSchema.virtual('membersCount').get(function() {
+groupSchema.virtual('membersCount').get(function () {
 	return this.members ? this.members.length : 0
-});
+})
 
 const Group = model('Group', groupSchema)
 
@@ -91,40 +97,35 @@ const groupCreateSchema = {
 		'string.max': 'Bitte halten Sie den Namen auf weniger als 70 Zeichen',
 		'string.empty': 'Bitte Name eingeben',
 	}),
-	description: Joi.string()
-		.min(3)
-		.max(500)
+	description: Joi.string().min(3).max(500).required().messages({
+		'string.min':
+			'Bitte geben Sie eine Beschreibung mit mindestens 3 Zeichen ein',
+		'string.max':
+			'Bitte halten Sie den Description auf weniger als 500 Zeichen',
+		'string.empty': 'Bitte Description eingeben',
+	}),
+	topic: Joi.string()
 		.required()
-		.messages({
-			'string.min':
-				'Bitte geben Sie eine Beschreibung mit mindestens 3 Zeichen ein',
-			'string.max':
-				'Bitte halten Sie den Description auf weniger als 500 Zeichen',
-			'string.empty': 'Bitte Description eingeben',
-		}),
-	topic: Joi.string().required().valid(...topicsArray),
+		.valid(...topicsArray),
 	selfModerated: Joi.bool(),
-	firstMeeting: Joi.object()
+	firstMeeting: Joi.object(),
 }
 
 const groupEditSchema = {
-	name: Joi.string().min(1).max(70).required().messages({
+	name: Joi.string().min(1).max(70).messages({
 		'string.max': 'Bitte halten Sie den Namen auf weniger als 70 Zeichen',
 		'string.empty': 'Bitte Name eingeben',
 	}),
-	description: Joi.string()
-		.min(3)
-		.max(500)
-		.required()
-		.messages({
-			'string.min':
-				'Bitte geben Sie eine Beschreibung mit mindestens 3 Zeichen ein',
-			'string.max':
-				'Bitte halten Sie den Description auf weniger als 500 Zeichen',
-			'string.empty': 'Bitte Description eingeben',
-		}),
-	topic: Joi.string().required().valid(topicsArray.join(', ')).label('Topic'),
+	description: Joi.string().min(3).max(500).messages({
+		'string.min':
+			'Bitte geben Sie eine Beschreibung mit mindestens 3 Zeichen ein',
+		'string.max':
+			'Bitte halten Sie den Description auf weniger als 500 Zeichen',
+		'string.empty': 'Bitte Description eingeben',
+	}),
 	selfModerated: Joi.bool(),
+	// Should topic be editable anyway?
+	topic: Joi.string().valid(...topicsArray),
 }
 
 module.exports = { Group, groupSchema, groupCreateSchema, groupEditSchema }
