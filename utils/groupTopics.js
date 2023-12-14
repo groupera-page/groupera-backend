@@ -1,6 +1,6 @@
 module.exports = [
 	{
-		value: 'Depression',
+		value: 'Depressionen',
 		program:
 			'https://drive.google.com/uc?export=download&id=1Itf0fW1k5PDWePohGNLPhJtr-QLTv2KC',
 	},

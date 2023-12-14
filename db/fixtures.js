@@ -11,8 +11,8 @@ const {hashSomething} = require('../controllers/authControllers');
 
 const fixedGroups = [
 	{
-		name: 'Depression',
-		topic: 'Depression',
+		name: 'Depressionen',
+		topic: 'Depressionen',
 		description: 'Wir sind eine online Selbsthilfegruppe für Depression. Neue MitgliederInnen sind jederzeit Herzlich Willkommen. Wir starten am Dienstag den 19.12.2023 und wir arbeiten mit dem Goupera Programm für Depression. Wir freuen uns auf den Austausch.',
 		meetings: [
 			{ startDate: new Date('2023-12-19 18:00'), duration: 60, recurrence: { type: 'weekly', days: [2, 3] } },
