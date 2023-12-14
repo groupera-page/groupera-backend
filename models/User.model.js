@@ -155,7 +155,7 @@ const userEditSchema = {
 		'string.empty': 'Bitte geben Sie eine E-Mail Adresse ein',
 	}),
 	questions: Joi.object({ groupTheme: Joi.string(), experience: Joi.string(), chooseFunnel: Joi.string() }),
-	gender: Joi.string().valid('male', 'female', 'divers').required(),
+	gender: Joi.string().valid('male', 'female', 'divers'),
 	paid: Joi.bool(),
 	// I don't think any of the ones below need to be on here, right?
 	terms: Joi.bool(),

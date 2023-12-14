@@ -95,7 +95,6 @@ const groupCreateSchema = {
 		.min(3)
 		.max(500)
 		.required()
-		.required()
 		.messages({
 			'string.min':
 				'Bitte geben Sie eine Beschreibung mit mindestens 3 Zeichen ein',
@@ -109,14 +108,13 @@ const groupCreateSchema = {
 }
 
 const groupEditSchema = {
-	name: Joi.string().min(1).max(70).required().messages({
+	name: Joi.string().min(1).max(70).messages({
 		'string.max': 'Bitte halten Sie den Namen auf weniger als 70 Zeichen',
 		'string.empty': 'Bitte Name eingeben',
 	}),
 	description: Joi.string()
 		.min(3)
 		.max(500)
-		.required()
 		.messages({
 			'string.min':
 				'Bitte geben Sie eine Beschreibung mit mindestens 3 Zeichen ein',
@@ -124,7 +122,7 @@ const groupEditSchema = {
 				'Bitte halten Sie den Description auf weniger als 500 Zeichen',
 			'string.empty': 'Bitte Description eingeben',
 		}),
-	topic: Joi.string().required().valid(topicsArray.join(', ')).label('Topic'),
+	topic: Joi.string().valid(topicsArray.join(', ')).label('Topic'),
 	selfModerated: Joi.bool(),
 }
 
