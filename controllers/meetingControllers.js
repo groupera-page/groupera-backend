@@ -12,7 +12,7 @@ exports.create = async (req, res, next) => {
 
 		const meeting = await Meeting.create({
 			...req.body,
-			groupId: groupId,
+			group: groupId,
 		})
 
 		await Group.updateOne({ _id: groupId }, { $push : { meetings: meeting._id } })

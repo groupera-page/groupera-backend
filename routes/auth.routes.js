@@ -1,7 +1,7 @@
 const router = require('express').Router()
 const Joi = require('joi')
 
-const { userSchema } = require('../models/User.model')
+const { userCreateSchema } = require('../models/User.model')
 
 const authControllers = require('../controllers/authControllers')
 const { sendEmail } = require('../controllers/emailControllers')
@@ -26,7 +26,7 @@ const codeSchema = {
 
 router.post(
 	'/signup',
-	validateScheme(userSchema),
+	validateScheme(userCreateSchema),
 	validateNoEmailDuplicates,
 	authControllers.signup,
 	sendEmail('Verify email')

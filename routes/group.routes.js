@@ -1,7 +1,7 @@
 const router = require('express').Router()
 
-const { groupSchema } = require('../models/Group.model')
-const {meetingSchema} = require('../models/Meeting.model');
+const { groupCreateSchema, groupEditSchema } = require('../models/Group.model')
+const {meetingCreateSchema} = require('../models/Meeting.model');
 
 const groupControllers = require('../controllers/groupControllers')
 const meetingControllers = require('../controllers/meetingControllers');
@@ -20,7 +20,7 @@ const {
 router.post(
 	'',
 	validateAuthToken,
-	validateScheme(groupSchema),
+	validateScheme(groupCreateSchema),
 	// validateNoGroupDuplicates,
 	groupControllers.create,
 	sendEmail('Create group')
@@ -37,7 +37,7 @@ router.get('/:groupId',
 router.patch(
 	'/:groupId',
 	validateAuthToken,
-	// validateScheme(groupSchema),
+	validateScheme(groupEditSchema),
 	verifyGroupModerator,
 	groupControllers.edit
 )
@@ -49,6 +49,6 @@ router.delete(
 	groupControllers.delete
 )
 
-router.post('/:groupId/meeting', validateAuthToken, verifyGroupModerator, validateScheme(meetingSchema), meetingControllers.create)
+router.post('/:groupId/meeting', validateAuthToken, verifyGroupModerator, validateScheme(meetingCreateSchema), meetingControllers.create)
 
 module.exports = router

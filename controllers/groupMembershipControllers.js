@@ -15,7 +15,10 @@ exports.join = async (req, res, next) => {
 		let group = await Group.findById(groupId)
 		if (!group) throw myCustomError('Die Gruppe existiert nicht', 400)
 
-		if (group.members.includes(currentUserId) || group.moderator.equals(currentUserId))
+		if (
+			group.members.includes(currentUserId) ||
+			group.moderator.equals(currentUserId)
+		)
 			throw myCustomError('You\'re already in this group, sweetie', 400)
 
 		const user = await User.findOneAndUpdate(
@@ -24,28 +27,28 @@ exports.join = async (req, res, next) => {
 			{ returnOriginal: false }
 		)
 
-		group = await Group
-			.findOneAndUpdate(
-				{ _id: groupId },
-				{ $push: { members: currentUserId } },
-				{ returnOriginal: false, fields: 'name description verified img topic selfModerated membersCount' }
-			)
+		group = await Group.findOneAndUpdate(
+			{ _id: groupId },
+			{ $push: { members: currentUserId } },
+			{
+				returnOriginal: false,
+				fields: 'name description verified img topic selfModerated membersCount',
+			}
+		)
 			.populate('moderator', 'alias email')
 			.populate('members', 'alias email')
 			.populate('meetings')
 
 		if (process.env.NODE_ENV === 'development') {
-
 			res.send({ group, message: 'Gruppe erfolgreich beigetreten' })
-		} else{
+		} else {
 			group = group.toJSON()
-			
+
 			group.meetings = getNextDatesForMeetings(group.meetings)
 			group.nextMeeting = findNextUpcomingMeeting(group.meetings)
 
 			res.locals.group = group
 			res.locals.user = user
-			res.locals.groupName = group.name
 			next()
 		}
 	} catch (error) {
@@ -62,7 +65,7 @@ exports.leave = async (req, res, next) => {
 	try {
 		const group = await Group.findById(groupId)
 		if (!group) throw myCustomError('Die Gruppe existiert nicht', 400)
-		
+
 		const user = await User.findById(currentUserId)
 
 		if (group.moderator.equals(user.id))

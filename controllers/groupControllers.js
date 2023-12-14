@@ -55,7 +55,9 @@ exports.findAll = async (req, res, next) => {
 		const skip = (page - 1) * limit;
 
 		// Set up filters for group name or topic
-		const filter = {};
+		const filter = {
+			verified: true
+		};
 		if (req.query.name) {
 			filter.name = new RegExp(req.query.name, 'i'); // Case-insensitive match
 		}
@@ -69,7 +71,7 @@ exports.findAll = async (req, res, next) => {
 			.populate('meetings')
 			.skip(skip)
 			.limit(limit)
-
+		
 		// get the total count for pagination info
 		const totalCount = groups.length;
 
@@ -84,7 +86,7 @@ exports.findOne = async (req, res, next) => {
 
 	try {
 		let group = await Group
-			.findOne({ _id: groupId }, 'name description verified img topic selfModerated membersCount')
+			.findOne({ _id: groupId, verified: true }, 'name description verified img topic selfModerated membersCount')
 			.populate('moderator', 'alias email')
 			.populate('members', 'alias email')
 			.populate('meetings')
@@ -143,7 +145,6 @@ exports.delete = async (req, res, next) => {
 			{
 				$pull: {
 					joinedGroups: groupId,
-					meetings: group.meetings
 				},
 			}
 		)
