@@ -124,7 +124,7 @@ const groupEditSchema = {
 		}),
 	selfModerated: Joi.bool(),
 	// Should topic be editable anyway?
-	topic: Joi.string().valid(topicsArray.join(', ')).label('Topic'),
+	topic: Joi.string().valid(...topicsArray).label('Topic'),
 }
 
 module.exports = { Group, groupSchema, groupCreateSchema, groupEditSchema }
