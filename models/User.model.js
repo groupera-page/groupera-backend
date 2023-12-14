@@ -137,8 +137,7 @@ const userCreateSchema = {
 	resetPasswordTokenExp: Joi.date(),
 	gender: Joi.string().valid('male', 'female', 'divers').required(),
 	paid: Joi.bool(),
-	// Not sure how to validate terms - is it an object with type and date inside? I'm not sure if I wrote it either :')
-	// terms: Joi.bool().label('Terms & Conditions'),
+	terms: Joi.bool(),
 	moderatedGroups: Joi.array(),
 	joinedGroups: Joi.array(),
 	emailVerificationTokenExp: Joi.date(),
@@ -155,13 +154,13 @@ const userEditSchema = {
 		'string.email': 'Bitte geben Sie eine gültige E-Mail Adresse ein',
 		'string.empty': 'Bitte geben Sie eine E-Mail Adresse ein',
 	}),
-	dob: Joi.date(),
 	questions: Joi.object({ groupTheme: Joi.string(), experience: Joi.string(), chooseFunnel: Joi.string() }),
-	authCode: Joi.string(),
 	gender: Joi.string().valid('male', 'female', 'divers').required(),
 	paid: Joi.bool(),
-	// Not sure how to validate terms - is it an object with type and date inside? I'm not sure if I wrote it either :')
-	// terms: Joi.bool().label('Terms & Conditions'),
+	// I don't think any of the ones below need to be on here, right?
+	terms: Joi.bool(),
+	dob: Joi.date(),
+	authCode: Joi.string(),
 	moderatedGroups: Joi.array(),
 	joinedGroups: Joi.array(),
 	emailVerificationTokenExp: Joi.date(),
