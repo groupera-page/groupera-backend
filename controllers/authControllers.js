@@ -236,7 +236,13 @@ exports.resetPassword = async (req, res, next) => {
 
 exports.logout = async (req, res, next) => {
 	try {
-		res.clearCookie('refreshToken').sendStatus(204)
+		res.cookie('refreshToken', '')
+			.clearCookie('refreshToken', {
+				httpOnly: true,
+				sameSite: 'None',
+				secure: true,
+			})
+			.sendStatus(204)
 	} catch (error) {
 		next(error)
 	}
