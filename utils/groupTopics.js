@@ -32,7 +32,7 @@ module.exports = [
 	{
 		value: 'Angehörige/r von Menschen mit Erkrankungen',
 		program:
-			'https://drive.google.com/uc?export=download&id=1iacvuMd7zVMAdN0mucpwDEEutYnm5Ms',
+			'https://drive.google.com/uc?export=download&id=1iacvuMd7zVMAdN0mucpwDEEutYnm5Ms_',
 	},
 	{
 		value: 'Chronische Erkrankungen, körperliche Einschränkungen',

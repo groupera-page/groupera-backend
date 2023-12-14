@@ -23,7 +23,7 @@ exports.sendEmail = (emailType) => async (req, res, next) => {
 		authToken,
 		userObject,
 		cookieOptions,
-		group
+		group,
 	} = res.locals
 
 	let subject // case emailType === "Verify email"
@@ -67,7 +67,8 @@ exports.sendEmail = (emailType) => async (req, res, next) => {
 		case 'Join group':
 			subject = 'Dein Beitritt in einer Gruppe'
 			template = groupJoin(alias, group.name, email, group.topic)
-			send = res.send({group,
+			send = res.send({
+				group,
 				message: `Email gesendet an: ${email}`,
 			})
 			break
