@@ -84,7 +84,7 @@ const seed = async () => {
 		groups.forEach(group => {
 			if (group.moderator.equals(user._id)) {
 				user.moderatedGroups.push(group._id);
-			} else if(Math.random() > 0.5) {
+			} else if(Math.random() > 0.7) {
 				user.joinedGroups.push(group._id);
 				group.members.push(user._id);
 			}
