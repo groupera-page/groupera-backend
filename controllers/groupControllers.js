@@ -3,7 +3,7 @@ const { User } = require('../models/User.model')
 const { Meeting } = require('../models/Meeting.model')
 
 const myCustomError = require('../utils/myCustomError')
-const {getNextDatesForMeetings, findNextUpcomingMeeting} = require('../utils/meetingRecurrence.helpers');
+const {getNextDatesForMeetings} = require('../utils/meetingRecurrence.helpers');
 
 exports.create = async (req, res, next) => {
 	const {
@@ -99,7 +99,18 @@ exports.findOne = async (req, res, next) => {
 		const isMember = group.members.some(m => m.id.equals(userId))
 
 		group.meetings = getNextDatesForMeetings(group.meetings)
-		group.nextMeeting = findNextUpcomingMeeting(group.meetings)
+		group.futureMeetings = group.meetings
+			.map(m => {
+				return m.nextRecurrences.map(r => {
+					delete m.nextRecurrences
+					return {
+						...m,
+						startDate: r
+					}
+				})
+			})
+			.flat()
+			.sort((a,b) => new Date(a.startDate) - new Date(b.startDate))
 
 		if(!isModerator && !isMember) delete group.members
 

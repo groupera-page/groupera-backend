@@ -71,15 +71,38 @@ const getNextRecurrenceDate = (event, currentDate) => {
 	return (event.recurrence.until && nextDate > event.recurrence.until) ? null : nextDate;
 };
 
+const getMultipleNextRecurrences = (event, count=5) => {
+	let occurrences = [];
+	let currentDate = new Date();
+
+	for (let i = 0; i < count; i++) {
+		let nextDate = getNextRecurrenceDate(event, currentDate);
+
+		if (!nextDate || (event.recurrence.until && nextDate > event.recurrence.until)) {
+			break; // Stop if there's no next date or it's beyond the recurrence end date
+		}
+
+		occurrences.push(nextDate);
+
+		// Set the start date for the next iteration to be the day after the current next date
+		currentDate = new Date(nextDate);
+		currentDate.setDate(currentDate.getDate() + 1);
+	}
+
+	return occurrences;
+};
+
 exports.getNextDatesForMeetings = (events) => {
 	const currentDate = new Date();
 
 	return events.map(event => {
 		if (event.recurrence.type === 'none' || !event.recurrence.until || event.recurrence.until >= currentDate) {
-			const nextDate = getNextRecurrenceDate(event, currentDate);
+			// const nextDate = getNextRecurrenceDate(event, currentDate);
+			const nextFiveRecurrences = getMultipleNextRecurrences(event, 5)
 			return {
 				...event, // Spread the original event data
-				nextDate: nextDate // Add the nextDate property
+				// nextDate: nextDate,
+				nextRecurrences: nextFiveRecurrences,
 			};
 		}
 		return null; // Filter out events that are past their recurrence end date
