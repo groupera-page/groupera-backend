@@ -62,6 +62,7 @@ exports.find = async (req, res, next) => {
 			...user.moderatedGroups.map((g) => g.meetings).flat(),
 			...user.joinedGroups.map((g) => g.meetings).flat(),
 		])
+
 		if (nextMeeting) {
 			user.nextMeeting = {
 				meeting: nextMeeting,

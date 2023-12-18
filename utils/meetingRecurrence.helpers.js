@@ -79,7 +79,7 @@ const getMultipleNextRecurrences = (event, count=5) => {
 		let nextDate = getNextRecurrenceDate(event, currentDate);
 
 		if (!nextDate || (event.recurrence.until && nextDate > event.recurrence.until)) {
-			break; // Stop if there's no next date or it's beyond the recurrence end date
+			break; // Stop if there's no next date, or it's beyond the recurrence end date
 		}
 
 		occurrences.push(nextDate);
@@ -109,13 +109,24 @@ exports.getNextDatesForMeetings = (events) => {
 	}).filter(event => event !== null); // Remove null entries
 };
 
-exports.findNextUpcomingMeeting = (eventsWithNextDate) => {
-	if (!eventsWithNextDate || eventsWithNextDate.length === 0) {
+exports.findNextUpcomingMeeting = (eventsWithNextRecurrences) => {
+	if (!eventsWithNextRecurrences || eventsWithNextRecurrences.length === 0) {
 		return null; // Return null if the array is empty or not provided
 	}
 
 	// Sort the array by the nextDate in ascending order
-	const sortedEvents = eventsWithNextDate.sort((a, b) => new Date(a.nextDate) - new Date(b.nextDate));
+	const sortedEvents = eventsWithNextRecurrences
+		.map(m => {
+			return m.nextRecurrences.map(r => {
+				delete m.nextRecurrences
+				return {
+					...m,
+					startDate: r
+				}
+			})
+		})
+		.flat()
+		.sort((a,b) => new Date(a.startDate) - new Date(b.startDate))
 
 	// Return the first element in the sorted array
 	return sortedEvents[0];
