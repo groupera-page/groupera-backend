@@ -18,6 +18,7 @@ exports.validateAuthToken = (req, res, next) => {
 		req.userId = decodedUser.id
 		next()
 	} catch (error) {
+		error.status = 401
 		next(error)
 	}
 }
