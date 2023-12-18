@@ -40,7 +40,7 @@ router.patch(
 )
 
 router.patch(
-	'/:email/resendEmailVerification',
+	'/resendEmailVerification',
 	authControllers.resendEmailVerification,
 	sendEmail('Verify email')
 )

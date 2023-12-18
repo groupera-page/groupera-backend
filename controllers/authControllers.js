@@ -102,8 +102,9 @@ exports.verifyEmail = async (req, res, next) => {
 }
 
 exports.resendEmailVerification = async (req, res, next) => {
-	const { email } = req.params
+	const { email } = req.body
 	try {
+		if (!email) throw myCustomError('Ungültiger Email', 403)
 		let user = await User.findOne({ email: email.toLowerCase() })
 		if (!user) throw myCustomError('Ungültiger Email', 403)
 
