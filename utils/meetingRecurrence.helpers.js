@@ -29,7 +29,7 @@ const getNextRecurrenceDate = (event, currentDate) => {
 		// Setting next Date to the last recurrence
 		switch (event.recurrence.type) {
 			case 'weekly':
-			case 'biweekly':
+			case 'bi-weekly':
 				nextDate = addDays(nextDate, intervalsPassed * intervalDays)
 				break;
 			case 'monthly':

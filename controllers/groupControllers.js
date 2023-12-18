@@ -126,10 +126,7 @@ exports.edit = async (req, res, next) => {
 	try {
 		const {acknowledged} = await Group.updateOne(
 			{ _id: groupId },
-			{
-				...body,
-				verified: body.selfModerated || false
-			}
+			body
 		)
 
 		if (!acknowledged) throw myCustomError('Something went wrong updating the group', 400)
