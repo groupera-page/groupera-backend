@@ -210,7 +210,7 @@ exports.resetPassword = async (req, res, next) => {
 
 		user.resetPasswordTokenExp = undefined
 		user.resetPasswordToken = undefined
-		user.password = hashPassword
+		user.passwordHash = hashPassword
 
 		await user.save()
 
