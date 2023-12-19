@@ -159,7 +159,7 @@ exports.login = async (req, res, next) => {
 exports.setResetPasswordToken = async (req, res, next) => {
 	const { email } = req.body
 	try {
-		let user = await User.findOne({ email: email.toLowerCase() })
+		const user = await User.findOne({ email: email.toLowerCase() })
 		// As security measure we respond always with status code of 200 and the same message
 		if (!user)
 			throw myCustomError(
@@ -174,7 +174,9 @@ exports.setResetPasswordToken = async (req, res, next) => {
 
 		if (process.env.NODE_ENV === 'development') {
 			console.log('Email Auth Code', user.resetPasswordToken)
-			res.sendStatus(204)
+			res.send({
+				message: 'Der Link zum Zurücksetzen des Passworts wurde an Ihre E-Mail-Adresse gesendet'
+			})
 		} else{
 			const url = `${process.env.FRONTEND_BASE_URL}/auth/resetPassword/${user.resetPasswordToken}`
 			res.locals.user = user

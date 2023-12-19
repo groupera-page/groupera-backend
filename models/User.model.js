@@ -160,4 +160,4 @@ const userEditSchema = {
 	refreshToken: Joi.string(),
 }
 
-module.exports = { User, userSchema, userCreateSchema, userEditSchema }
+module.exports = { User, userSchema, userCreateSchema, userEditSchema, complexityOptions }

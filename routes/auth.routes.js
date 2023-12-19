@@ -47,7 +47,7 @@ router.patch(
 
 router.post('/login', validateScheme(loginBodySchema), authControllers.login)
 
-router.post(
+router.patch(
 	'/resetPasswordRequest',
 	authControllers.setResetPasswordToken,
 	sendEmail('Reset password instructions')

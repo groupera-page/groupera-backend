@@ -1,5 +1,6 @@
 const Joi = require('joi')
 const passwordComplexity = require('joi-password-complexity')
+const {complexityOptions} = require('../models/User.model')
 
 const { User } = require('../models/User.model')
 // const { Group } = require('../models/Group.model')
@@ -47,7 +48,7 @@ exports.validateScheme = (schema, compareTo = undefined) => (req, res, next) => 
 exports.validateResetPassword = (req, res, next) => {
 	try {
 		const { error } = Joi.object({
-			password: passwordComplexity().required().label('Password'),
+			password: passwordComplexity(complexityOptions).required().label('Password'),
 		}).validate({
 			password: req.body.password,
 		})

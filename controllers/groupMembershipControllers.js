@@ -4,7 +4,7 @@ const { User } = require('../models/User.model')
 
 const myCustomError = require('../utils/myCustomError')
 
-const {getNextDatesForMeetings, findNextUpcomingMeeting} = require('../utils/meetingRecurrence.helpers');
+const {getNextDatesForMeetings} = require('../utils/meetingRecurrence.helpers');
 
 exports.join = async (req, res, next) => {
 	const {
@@ -45,7 +45,18 @@ exports.join = async (req, res, next) => {
 			group = group.toJSON()
 
 			group.meetings = getNextDatesForMeetings(group.meetings)
-			group.nextMeeting = findNextUpcomingMeeting(group.meetings)
+			group.futureMeetings = group.meetings
+				.map(m => {
+					return m.nextRecurrences.map(r => {
+						delete m.nextRecurrences
+						return {
+							...m,
+							startDate: r
+						}
+					})
+				})
+				.flat()
+				.sort((a,b) => new Date(a.startDate) - new Date(b.startDate))
 
 			res.locals.group = group
 			res.locals.user = user
