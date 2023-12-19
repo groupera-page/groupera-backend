@@ -1,11 +1,12 @@
 const router = require('express').Router()
 
 const { groupCreateSchema, groupEditSchema } = require('../models/Group.model')
-const {meetingCreateSchema} = require('../models/Meeting.model');
+const { meetingCreateSchema } = require('../models/Meeting.model')
 
 const groupControllers = require('../controllers/groupControllers')
-const meetingControllers = require('../controllers/meetingControllers');
+const meetingControllers = require('../controllers/meetingControllers')
 const { sendEmail } = require('../controllers/emailControllers')
+const videoControllers = require('../controllers/videoControllers')
 
 const {
 	verifyGroupModerator,
@@ -22,13 +23,16 @@ router.post(
 	validateAuthToken,
 	validateScheme(groupCreateSchema),
 	// validateNoGroupDuplicates,
+	videoControllers.getToken,
+	videoControllers.createMeeting,
 	groupControllers.create,
 	sendEmail('Create group')
 )
 
 router.get('/', validateAuthToken, groupControllers.findAll)
 
-router.get('/:groupId',
+router.get(
+	'/:groupId',
 	validateAuthToken,
 	// verifyGroupMember,
 	groupControllers.findOne
@@ -49,6 +53,14 @@ router.delete(
 	groupControllers.delete
 )
 
-router.post('/:groupId/meeting', validateAuthToken, verifyGroupModerator, validateScheme(meetingCreateSchema), meetingControllers.create)
+router.post(
+	'/:groupId/meeting',
+	validateAuthToken,
+	verifyGroupModerator,
+	validateScheme(meetingCreateSchema),
+	videoControllers.getToken,
+	videoControllers.createMeeting,
+	meetingControllers.create
+)
 
 module.exports = router
