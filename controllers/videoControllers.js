@@ -10,36 +10,44 @@ exports.getTokenMeeting = async (req, res, next) => {
 	const API_KEY = process.env.VIDEO_KEY
 	const SECRET_KEY = process.env.VIDEO_SECRET
 
-	const options = { expiresIn: '120m', algorithm: 'HS256' }
+	try {
+		const options = { expiresIn: '120m', algorithm: 'HS256' }
 
-	const payload = {
-		apikey: API_KEY,
-		version: 2,
-		permissions: ['allow_join'],
+		const payload = {
+			apikey: API_KEY,
+			version: 2,
+			permissions: ['allow_join'],
+		}
+
+		const token = jwt.sign(payload, SECRET_KEY, options)
+
+		res.locals.token = token
+
+		next()
+	} catch (error) {
+		next(error)
 	}
-
-	const token = jwt.sign(payload, SECRET_KEY, options)
-
-	res.locals.token = token
-
-	next()
 }
 
 exports.getTokenUser = async (req, res, next) => {
 	const API_KEY = process.env.VIDEO_KEY
 	const SECRET_KEY = process.env.VIDEO_SECRET
 
-	const options = { expiresIn: '120m', algorithm: 'HS256' }
+	try {
+		const options = { expiresIn: '120m', algorithm: 'HS256' }
 
-	const payload = {
-		apikey: API_KEY,
-		version: 2,
-		permissions: ['allow_join'],
+		const payload = {
+			apikey: API_KEY,
+			version: 2,
+			permissions: ['allow_join'],
+		}
+
+		const token = jwt.sign(payload, SECRET_KEY, options)
+
+		res.send(token)
+	} catch (error) {
+		next(error)
 	}
-
-	const token = jwt.sign(payload, SECRET_KEY, options)
-
-	res.send(token)
 }
 
 //
@@ -50,23 +58,30 @@ exports.createMeeting = async (req, res, next) => {
 	const { firstMeeting } = req.body
 	const { token } = res.locals
 
-	const url = `${process.env.VIDEOSDK_API_ENDPOINT}/v2/rooms`
-	const options = {
-		method: 'POST',
-		headers: { Authorization: token, 'Content-Type': 'application/json' },
-		body: JSON.stringify({
-			autoCloseConfig: {
-				type: 'session-ends',
-				duration: +firstMeeting.duration,
+	try {
+		const url = `${process.env.VIDEOSDK_API_ENDPOINT}/v2/rooms`
+		const options = {
+			method: 'POST',
+			headers: {
+				Authorization: token,
+				'Content-Type': 'application/json',
 			},
-		}),
+			body: JSON.stringify({
+				autoCloseConfig: {
+					type: 'session-ends',
+					duration: +firstMeeting.duration,
+				},
+			}),
+		}
+
+		const roomInfo = await axios(url, options)
+
+		res.locals.roomInfo = roomInfo
+
+		next()
+	} catch (error) {
+		next(error)
 	}
-
-	const roomInfo = await axios(url, options)
-
-	res.locals.roomInfo = roomInfo
-
-	next()
 }
 
 // I don't think this is necessary, as meeting validation is (again, I think) only necessary
@@ -76,16 +91,20 @@ exports.validateMeetingId = async (req, res, next) => {
 	const token = res.locals.token
 	const roomId = res.locals.roomInfo.data.roomId
 
-	const url = `${process.env.VIDEOSDK_API_ENDPOINT}/v2/rooms/validate/${roomId}`
+	try {
+		const url = `${process.env.VIDEOSDK_API_ENDPOINT}/v2/rooms/validate/${roomId}`
 
-	const options = {
-		method: 'POST',
-		headers: { Authorization: token },
+		const options = {
+			method: 'POST',
+			headers: { Authorization: token },
+		}
+
+		const validationInfo = await axios(url, options)
+
+		res.locals.validationInfo = validationInfo
+
+		next()
+	} catch (error) {
+		next(error)
 	}
-
-	const validationInfo = await axios(url, options)
-
-	res.locals.validationInfo = validationInfo
-
-	next()
 }
