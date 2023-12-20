@@ -39,7 +39,7 @@ exports.getTokenUser = async (req, res, next) => {
 
 	const token = jwt.sign(payload, SECRET_KEY, options)
 
-	return token
+	res.send(token)
 }
 
 //
