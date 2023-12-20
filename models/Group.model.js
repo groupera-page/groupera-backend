@@ -42,9 +42,6 @@ const groupSchema = new Schema(
 			type: String,
 			enum: topicsArray,
 		},
-		roomId: {
-			type: String,
-		},
 		meetings: [
 			{
 				type: Schema.Types.ObjectId,

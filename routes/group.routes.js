@@ -23,7 +23,7 @@ router.post(
 	validateAuthToken,
 	validateScheme(groupCreateSchema),
 	// validateNoGroupDuplicates,
-	videoControllers.getToken,
+	videoControllers.getTokenMeeting,
 	videoControllers.createMeeting,
 	groupControllers.create,
 	sendEmail('Create group')
@@ -58,7 +58,7 @@ router.post(
 	validateAuthToken,
 	verifyGroupModerator,
 	validateScheme(meetingCreateSchema),
-	videoControllers.getToken,
+	videoControllers.getTokenMeeting,
 	videoControllers.createMeeting,
 	meetingControllers.create
 )

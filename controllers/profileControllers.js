@@ -25,7 +25,7 @@ exports.find = async (req, res, next) => {
 		)
 			.populate({
 				path: 'joinedGroups',
-				select: 'name description topic img meetingId verified',
+				select: 'name description topic img verified',
 				match: { verified: true },
 				populate: [
 					{
@@ -39,7 +39,7 @@ exports.find = async (req, res, next) => {
 			})
 			.populate({
 				path: 'moderatedGroups',
-				select: 'name description topic img meetingId verified',
+				select: 'name description topic img verified',
 				populate: {
 					path: 'meetings',
 				},

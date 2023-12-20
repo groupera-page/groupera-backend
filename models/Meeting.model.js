@@ -21,7 +21,7 @@ const meetingSchema = new Schema({
 	until: {
 		type: Date,
 	},
-	videoRoomId: {
+	roomId: {
 		type: String,
 	},
 	group: {

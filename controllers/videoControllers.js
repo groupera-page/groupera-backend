@@ -6,7 +6,7 @@ const axios = require('axios')
 // in the frontend when Users click join meeting (I believe that's what the documentation
 // reveals to be the simplest method). Please let me know if I'm just reading this wrong
 
-exports.getToken = async (req, res, next) => {
+exports.getTokenMeeting = async (req, res, next) => {
 	const API_KEY = process.env.VIDEO_KEY
 	const SECRET_KEY = process.env.VIDEO_SECRET
 
@@ -23,6 +23,23 @@ exports.getToken = async (req, res, next) => {
 	res.locals.token = token
 
 	next()
+}
+
+exports.getTokenUser = async (req, res, next) => {
+	const API_KEY = process.env.VIDEO_KEY
+	const SECRET_KEY = process.env.VIDEO_SECRET
+
+	const options = { expiresIn: '120m', algorithm: 'HS256' }
+
+	const payload = {
+		apikey: API_KEY,
+		version: 2,
+		permissions: ['allow_join'],
+	}
+
+	const token = jwt.sign(payload, SECRET_KEY, options)
+
+	return token
 }
 
 //
@@ -45,9 +62,9 @@ exports.createMeeting = async (req, res, next) => {
 		}),
 	}
 
-	const result = await axios(url, options)
+	const roomInfo = await axios(url, options)
 
-	res.locals.result = result
+	res.locals.roomInfo = roomInfo
 
 	next()
 }
@@ -57,7 +74,7 @@ exports.createMeeting = async (req, res, next) => {
 
 exports.validateMeetingId = async (req, res, next) => {
 	const token = res.locals.token
-	const roomId = res.locals.result.data.roomId
+	const roomId = res.locals.roomInfo.data.roomId
 
 	const url = `${process.env.VIDEOSDK_API_ENDPOINT}/v2/rooms/validate/${roomId}`
 
@@ -66,9 +83,9 @@ exports.validateMeetingId = async (req, res, next) => {
 		headers: { Authorization: token },
 	}
 
-	const result = await axios(url, options)
+	const validationInfo = await axios(url, options)
 
-	res.locals.result = result
+	res.locals.validationInfo = validationInfo
 
 	next()
 }

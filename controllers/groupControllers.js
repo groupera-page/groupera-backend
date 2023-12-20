@@ -12,23 +12,20 @@ exports.create = async (req, res, next) => {
 		body: {name, description, topic, selfModerated, firstMeeting},
 		userId: currentUserId,
 	} = req
-	const { result } = res.locals
-
-	console.log(result)
+	const { roomInfo } = res.locals
 
 	try {
 		const group = new Group({
 			name,
 			description,
 			topic,
-			roomId: result.data.roomId,
 			selfModerated: selfModerated || false,
 			moderator: currentUserId,
 			verified: selfModerated || false
 		})
 
 		if (firstMeeting) {
-			const meeting = await Meeting.create({...firstMeeting, group: group.id})
+			const meeting = await Meeting.create({...firstMeeting, roomId: roomInfo.data.roomId, group: group.id})
 
 			group.meetings.push(meeting)
 		}
@@ -92,7 +89,7 @@ exports.findOne = async (req, res, next) => {
 
 	try {
 		let group = await Group
-			.findOne({ _id: groupId }, 'name description verified img topic meetingId selfModerated membersCount')
+			.findOne({ _id: groupId }, 'name description verified img topic selfModerated membersCount')
 			.populate('moderator', 'alias email')
 			.populate('members', 'alias email')
 			.populate('meetings')
