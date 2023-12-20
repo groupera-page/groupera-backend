@@ -14,12 +14,14 @@ exports.create = async (req, res, next) => {
 	} = req
 	const { result } = res.locals
 
+	console.log(result)
+
 	try {
 		const group = new Group({
 			name,
 			description,
 			topic,
-			meetingId: result.data.meetingId,
+			roomId: result.data.roomId,
 			selfModerated: selfModerated || false,
 			moderator: currentUserId,
 			verified: selfModerated || false

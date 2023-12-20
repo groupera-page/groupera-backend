@@ -42,7 +42,7 @@ const groupSchema = new Schema(
 			type: String,
 			enum: topicsArray,
 		},
-		meetingId: {
+		roomId: {
 			type: String,
 		},
 		meetings: [

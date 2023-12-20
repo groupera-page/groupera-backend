@@ -33,7 +33,7 @@ exports.createMeeting = async (req, res, next) => {
 	const { firstMeeting } = req.body
 	const { token } = res.locals
 
-	const url = `${process.env.VIDEOSDK_API_ENDPOINT}/api/meetings`
+	const url = `${process.env.VIDEOSDK_API_ENDPOINT}/v2/rooms`
 	const options = {
 		method: 'POST',
 		headers: { Authorization: token, 'Content-Type': 'application/json' },
@@ -57,9 +57,9 @@ exports.createMeeting = async (req, res, next) => {
 
 exports.validateMeetingId = async (req, res, next) => {
 	const token = res.locals.token
-	const meetingId = res.locals.result.data.meetingId
+	const roomId = res.locals.result.data.roomId
 
-	const url = `${process.env.VIDEOSDK_API_ENDPOINT}/api/meetings/${meetingId}`
+	const url = `${process.env.VIDEOSDK_API_ENDPOINT}/v2/rooms/validate/${roomId}`
 
 	const options = {
 		method: 'POST',

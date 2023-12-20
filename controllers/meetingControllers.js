@@ -13,7 +13,7 @@ exports.create = async (req, res, next) => {
 
 		const meeting = await Meeting.create({
 			...req.body,
-			videoMeetingId: result.data.meetingId,
+			videoRoomId: result.data.roomId,
 			group: groupId,
 		})
 
