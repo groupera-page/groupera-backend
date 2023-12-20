@@ -55,32 +55,40 @@ The magic happens on `http://localhost:3000` by default!
 
 Here’s a sneak peek of our main endpoints:
 
-## API Endpoints (Continued)
-
-| Method | Endpoint                                    | Description                                          |
-|--------| ------------------------------------------- | ---------------------------------------------------- |
-| PATCH  | /auth/resendEmailVerification               | Resend email verification code                       |
-| GET    | /group/:groupId/members                     | Get members of a specific group                      |
-| PUT    | /group/:groupId/join                        | Join a specific group                                |
-| PUT    | /group/:groupId/leave                       | Leave a specific group                               |
-| PUT    | /group/:groupId/invite                      | Invite a user to join a specific group               |
-| PATCH  | /group/:groupId/acceptInvite                | Accept an invitation to join a specific group        |
-| DELETE | /group/:groupId/declineInvite               | Decline an invitation to join a specific group       |
-| PUT    | /group/:groupId/editMembers                 | Edit members of a specific group                     |
-| POST   | /group/:groupId/meeting                     | Create a new meeting for a specific group            |
-| GET    | /group/:groupId/meetings                    | Get all meetings for a specific group                |
-| GET    | /group/:groupId/meeting/:meetingId          | Get details of a specific meeting within a group     |
-| PATCH  | /group/:groupId/meeting/:meetingId          | Edit details of a specific meeting within a group    |
-| DELETE | /group/:groupId/meeting/:meetingId          | Delete a specific meeting within a group             |
-| PUT    | /meeting/:meetingId/join                    | Join a specific meeting within a group               |
-| PUT    | /meeting/:meetingId/leave                   | Leave a specific meeting within a group              |
-| GET    | /profile                                    | Get user profile details                             |
-| PATCH  | /profile                                    | Edit user profile details                            |
-| PATCH  | /profile/updateEmail                        | Update user email address                            |
-| PATCH  | /profile/updatePassword                     | Update user password                                 |
-| DELETE | /profile                                    | Delete user account                                  |
-| GET    | /video/getToken                             | Get video call token for the user                    |
-| POST   | /video/createMeeting                        | Create a new video meeting                           |
+| Method | Endpoint                                | Description                                          |
+|--------| --------------------------------------- | ---------------------------------------------------- |
+| POST   | /auth/sigup                             | Log in to an existing user                           |
+| PATCH  | /auth/verifyEmail                       | Verify email address based on generated 4 digit code |
+| POST   | /auth/login                             | Log in to an existing user                           |
+| POST   | /auth/resetPasswordRequest              | Request reset password instruction email             |
+| POST   | /auth/resetPassword/:resetPasswordToken | Reset password based on generated uuid token         |
+| POST   | /auth/logout                            | Log out current user or rather clear all cookies     |
+| POST   | /auth/refresh                           | Refresh auth & refresh tokens                        |
+| POST   | /group                                  | Create a new group                                   |
+| GET    | /group/findAll                          | Find all groups                                      |
+| GET    | /group/:groupId                         | Find a group by ID                                   |
+| PATCH  | /auth/resendEmailVerification           | Resend email verification code                       |
+| GET    | /group/:groupId/members                 | Get members of a specific group                      |
+| PUT    | /group/:groupId/join                    | Join a specific group                                |
+| PUT    | /group/:groupId/leave                   | Leave a specific group                               |
+| PUT    | /group/:groupId/invite                  | Invite a user to join a specific group               |
+| PATCH  | /group/:groupId/acceptInvite            | Accept an invitation to join a specific group        |
+| DELETE | /group/:groupId/declineInvite           | Decline an invitation to join a specific group       |
+| PUT    | /group/:groupId/editMembers             | Edit members of a specific group                     |
+| POST   | /group/:groupId/meeting                 | Create a new meeting for a specific group            |
+| GET    | /group/:groupId/meetings                | Get all meetings for a specific group                |
+| GET    | /group/:groupId/meeting/:meetingId      | Get details of a specific meeting within a group     |
+| PATCH  | /group/:groupId/meeting/:meetingId      | Edit details of a specific meeting within a group    |
+| DELETE | /group/:groupId/meeting/:meetingId      | Delete a specific meeting within a group             |
+| PUT    | /meeting/:meetingId/join                | Join a specific meeting within a group               |
+| PUT    | /meeting/:meetingId/leave               | Leave a specific meeting within a group              |
+| GET    | /profile                                | Get user profile details                             |
+| PATCH  | /profile                                | Edit user profile details                            |
+| PATCH  | /profile/updateEmail                    | Update user email address                            |
+| PATCH  | /profile/updatePassword                 | Update user password                                 |
+| DELETE | /profile                                | Delete user account                                  |
+| GET    | /video/getToken                         | Get video call token for the user                    |
+| POST   | /video/createMeeting                    | Create a new video meeting                           |
 
 (This list is still a working progress)
 
