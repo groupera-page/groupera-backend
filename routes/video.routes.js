@@ -1,8 +1,16 @@
 const router = require('express').Router()
 const videoControllers = require('../controllers/videoControllers')
 
-router.get('/get-token-mod', videoControllers.getTokenMod)
+// just in case routes are needed
 
-router.get('/get-token', videoControllers.getToken)
+// for users joining groups
+router.get('/getTokenUser', videoControllers.getTokenUser)
+
+
+// for groups creating meetings
+router.get('/getTokenMeeting', videoControllers.getTokenMeeting)
+
+
+router.post('/createMeeting', videoControllers.createMeeting)
 
 module.exports = router

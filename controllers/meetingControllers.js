@@ -5,6 +5,7 @@ const myCustomError = require('../utils/myCustomError')
 
 exports.create = async (req, res, next) => {
 	const { groupId } = req.params
+	const { roomInfo } = res.locals
 
 	try {
 		let group = await Group.findOne({ _id: groupId })
@@ -12,6 +13,7 @@ exports.create = async (req, res, next) => {
 
 		const meeting = await Meeting.create({
 			...req.body,
+			roomId: roomInfo.data.roomId,
 			group: groupId,
 		})
 

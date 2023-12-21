@@ -21,6 +21,9 @@ const meetingSchema = new Schema({
 	until: {
 		type: Date,
 	},
+	roomId: {
+		type: String,
+	},
 	group: {
 		type: Schema.Types.ObjectId,
 		ref: 'Group',
