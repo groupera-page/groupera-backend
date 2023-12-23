@@ -8,6 +8,8 @@ const {Group} = require('../models/Group.model');
 const {Meeting} = require('../models/Meeting.model');
 
 const {hashSomething} = require('../controllers/authControllers');
+const jwt = require('jsonwebtoken');
+const axios = require('axios');
 
 const fixedGroups = [
 	{
@@ -78,6 +80,38 @@ const fixedGroups = [
 
 
 const genderOptions = ['male', 'female', 'divers']
+
+const createVideoSDKRoom = async (meeting) => {
+	const API_KEY = process.env.VIDEO_KEY
+	const SECRET_KEY = process.env.VIDEO_SECRET
+	const tokenOptions = { expiresIn: '120m', algorithm: 'HS256' }
+
+	const payload = {
+		apikey: API_KEY,
+		version: 2,
+		permissions: ['allow_join'],
+	}
+
+	const token = jwt.sign(payload, SECRET_KEY, tokenOptions)
+
+	const url = `${process.env.VIDEOSDK_API_ENDPOINT}/v2/rooms`
+	const options = {
+		method: 'POST',
+		headers: {
+			Authorization: token,
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({
+			autoCloseConfig: {
+				type: 'session-ends',
+				duration: meeting.duration,
+			},
+		}),
+	}
+	const roomInfo = await axios(url, options)
+
+	return roomInfo.data.roomId
+}
 
 const fixtures = async () => {
 	// Clear the existing data
@@ -174,7 +208,11 @@ const fixtures = async () => {
 	// Save everything to the database
 	await Promise.all(users.map(user => user.save()));
 	await Promise.all(groups.map(group => group.save()));
-	await Promise.all(meetings.map(meeting => meeting.save()));
+
+	await Promise.all(meetings.map(async meeting => {
+		meeting.roomId = await createVideoSDKRoom(meeting)
+		meeting.save()
+	}));
 
 	console.log('Database fixtures created! 🌱');
 }
