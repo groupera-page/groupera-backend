@@ -2,6 +2,8 @@ const { Group } = require('../models/Group.model')
 const { User } = require('../models/User.model')
 const { Meeting } = require('../models/Meeting.model')
 
+// const { getToken, createMeeting } = require('../utils/videoSDK')
+
 const myCustomError = require('../utils/myCustomError')
 const {getNextDatesForMeetings} = require('../utils/meetingRecurrence.helpers');
 
@@ -10,6 +12,7 @@ exports.create = async (req, res, next) => {
 		body: {name, description, topic, selfModerated, firstMeeting},
 		userId: currentUserId,
 	} = req
+	const { roomInfo } = res.locals
 
 	try {
 		const group = new Group({
@@ -22,7 +25,7 @@ exports.create = async (req, res, next) => {
 		})
 
 		if (firstMeeting) {
-			const meeting = await Meeting.create({...firstMeeting, group: group.id})
+			const meeting = await Meeting.create({...firstMeeting, roomId: roomInfo.data.roomId, group: group.id})
 
 			group.meetings.push(meeting)
 		}
