@@ -44,7 +44,7 @@ exports.getTokenUser = async (req, res, next) => {
 
 		const token = jwt.sign(payload, SECRET_KEY, options)
 
-		res.send(token)
+		res.send({token})
 	} catch (error) {
 		next(error)
 	}
