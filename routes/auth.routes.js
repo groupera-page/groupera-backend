@@ -29,7 +29,7 @@ router.post(
 	validateScheme(userCreateSchema),
 	validateNoEmailDuplicates,
 	authControllers.signup,
-	sendEmail('Verify email')
+	// sendEmail('Verify email')
 )
 
 router.patch(
