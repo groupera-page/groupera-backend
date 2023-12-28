@@ -71,6 +71,25 @@ exports.validateNoEmailDuplicates = async (req, res, next) => {
 	}
 }
 
+exports.isAdmin = async (req, res, next) => {
+	const { userId } = req;
+
+	try {
+		let user = await User.findById(
+			userId,
+			'+role'
+		)
+		if (user.role !== 'admin') {
+			const error = new Error('Request requires admin role!');
+			error.status = 403;
+			throw error;
+		}
+		next();
+	} catch (err) {
+		next(err);
+	}
+};
+
 // exports.validateNoGroupDuplicates = async (req, res, next) => {
 // 	try {
 // 		const user = await Group.findOne({ name: req.body.name })

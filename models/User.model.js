@@ -78,6 +78,12 @@ const userSchema = new Schema({
 	refreshToken: {
 		type: String,
 	},
+	role: {
+		type: String,
+		enum: ['user', 'admin'],
+		required: true,
+		default: 'user',
+	}
 }, {
 	toJSON: {
 		virtuals: true,
