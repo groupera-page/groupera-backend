@@ -1,10 +1,18 @@
-// const router = require('express').Router()
+const router = require('express').Router()
 
-// const userControllers = require('../controllers/userControllers')
+const userControllers = require('../controllers/userControllers')
 
-// const {
-// 	verifyCurrentUser,
-// } = require('../middleware/userAuthentication.middleware.js')
+const {
+	validateAuthToken,
+	isAdmin,
+} = require('../middleware/auth.middleware.js')
+
+router.get(
+	'',
+	validateAuthToken,
+	isAdmin,
+	userControllers.findAll
+)
 
 // const { validateAuthToken } = require('../middleware/auth.middleware.js')
 
@@ -39,4 +47,4 @@
 //  sendEmail('Delete account')
 // )
 
-// module.exports = router
+module.exports = router
