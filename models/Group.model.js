@@ -108,7 +108,14 @@ const groupCreateSchema = {
 		.required()
 		.valid(...topicsArray),
 	selfModerated: Joi.bool(),
-	firstMeeting: Joi.object(),
+	firstMeeting: Joi.object({
+		startDate: Joi.date().required(),
+		duration: Joi.number().valid(60, 90).required(),
+		recurrence: Joi.object({
+			type: Joi.string().valid('weekly', 'bi-weekly', 'monthly'),
+			days: Joi.array().items(Joi.number())
+		}).required(),
+	}),
 	img: Joi.object()
 }
 
