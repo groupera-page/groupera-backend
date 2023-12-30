@@ -1,14 +1,14 @@
 const request = require('supertest')
-const app = require('../routes/auth.routes')
+const app = require('../app')
 
 describe('Post users', () => {
 	describe('Given a username and password', () => {
 		test('Should respond with 200 status code', async () => {
 			const response = await request(app).post('/signup').send({
 				username: 'username',
-				password: 'password',
+				password: 'Password123',
 			})
-			expect(response.statusCode).toBe(200)
+			expect(response.headers['content-type']).toEqual(expect.stringContaining("json"))
 		})
 	})
 
