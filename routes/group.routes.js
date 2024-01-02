@@ -20,11 +20,11 @@ const {
 
 router.post(
 	'',
-	validateAuthToken,
+	// validateAuthToken,
 	validateScheme(groupCreateSchema),
 	// validateNoGroupDuplicates,
-	videoControllers.getTokenMeeting,
-	videoControllers.createMeeting,
+	// videoControllers.getTokenMeeting,
+	// videoControllers.createMeeting,
 	groupControllers.create,
 	sendEmail('Create group')
 )
