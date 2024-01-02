@@ -76,6 +76,7 @@ const getNextRecurrenceDate = (event, currentDate) => {
 const getMultipleNextRecurrences = (event, count=5) => {
 	let occurrences = [];
 	let currentDate = new Date();
+	currentDate.setMinutes(currentDate.getMinutes() - event.duration)
 
 	for (let i = 0; i < count; i++) {
 		let nextDate = getNextRecurrenceDate(event, currentDate);

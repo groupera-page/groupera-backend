@@ -21,7 +21,7 @@ exports.find = async (req, res, next) => {
 	try {
 		let user = await User.findOne(
 			{ _id: userId },
-			'alias email dob questions emailVerified gender'
+			'alias email dob questions emailVerified gender role'
 		)
 			.populate({
 				path: 'joinedGroups',

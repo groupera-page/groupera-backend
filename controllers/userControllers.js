@@ -1,3 +1,60 @@
+const {User} = require('../models/User.model');
+
+exports.findAll = async (req, res, next) => {
+	try {
+		// Set up pagination variables
+		const page = parseInt(req.query.page) || 1;
+		const limit = parseInt(req.query.limit) || 10;
+		const skip = (page - 1) * limit;
+
+		// Set up filters for group name or topic
+		const filter = {
+			verified: true
+		};
+
+		if (req.query.name) {
+			filter.name = new RegExp(req.query.name, 'i'); // Case-insensitive match
+		}
+		if (req.query.topic) {
+			filter.topic = new RegExp(req.query.topic, 'i'); // Case-insensitive match
+		}
+
+		const users = await User
+			.find(filter, 'alias email dob questions gender')
+			.populate({
+				path: 'joinedGroups',
+				select: 'name description topic img verified',
+				populate: [
+					{
+						path: 'moderator',
+						select: 'alias email',
+					},
+					{
+						path: 'meetings',
+					},
+				],
+			})
+			.populate({
+				path: 'moderatedGroups',
+				select: 'name description topic img verified',
+				populate: {
+					path: 'meetings',
+				},
+			})
+			.sort([['createdAt', -1]])
+			.skip(skip)
+			.limit(limit)
+
+		// get the total count for pagination info
+		const totalCount = await User.countDocuments();
+
+		res.status(200).send({users, totalCount})
+	} catch (error) {
+		next(error)
+	}
+}
+
+
 // /* eslint-disable no-mixed-spaces-and-tabs */
 // const { User } = require('../models/User.model')
 // const { Group } = require('../models/Group.model')
@@ -187,3 +244,4 @@
 // 		next(error)
 // 	}
 // }
+

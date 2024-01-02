@@ -26,7 +26,7 @@ router.post(
 	// videoControllers.getTokenMeeting,
 	// videoControllers.createMeeting,
 	groupControllers.create,
-	sendEmail('Create group')
+	// sendEmail('Create group')
 )
 
 router.get('/', validateAuthToken, groupControllers.findAll)

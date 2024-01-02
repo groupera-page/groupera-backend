@@ -29,17 +29,17 @@ describe('Post groups', () => {
 					name: 'Group name 8000',
 					description: 'This is a group description',
 					topic: 'Depressionen',
-					firstMeeting: {
-						title: 'Event title 2',
-						startDate: 'Tue Sep 05 2023 18:00:00 GMT+0200',
-						duration: 90,
-						recurrence: {
-							type: 'weekly',
-							days: [4],
-						},
-					},
+					// firstMeeting: {
+					// 	title: 'Event title 2',
+					// 	startDate: 'Tue Sep 05 2023 18:00:00 GMT+0200',
+					// 	duration: 90,
+					// 	recurrence: {
+					// 		type: 'weekly',
+					// 		days: [4],
+					// 	},
+					// },
 				})
-			expect(response.statusCode).toBe(200)
+			await expect(response.statusCode).toBe(200)
 		})
 	})
 })

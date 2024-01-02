@@ -36,6 +36,7 @@ exports.getAuthTokens = (user) => {
 		questions: user.questions,
 		emailVerified: user.emailVerified,
 		gender: user.gender,
+		role: user.role,
 	}
 	const authToken = jwt.sign(
 		{ user: userObject },

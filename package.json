@@ -9,6 +9,7 @@
 		"dev": "nodemon app.js",
 		"seed": "node db/seed.js",
 		"fixture": "node db/fixtures.js",
+		"updateUsers": "node db/updateUsers.js",
 		"lint": "eslint .",
 		"format": "prettier . --write"
 	},
