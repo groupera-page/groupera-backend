@@ -9,6 +9,7 @@ const {
 	groupJoin,
 	groupCreate,
 } = require('../lib/emailTemplates')
+const { scheduleMeetingReminders } = require('../utils/email.reminder')
 const myCustomError = require('../utils/myCustomError')
 
 exports.sendEmail = (emailType) => async (req, res, next) => {
@@ -64,12 +65,30 @@ exports.sendEmail = (emailType) => async (req, res, next) => {
 				message: `Email gesendet an: ${email}`,
 			})
 			break
+		// case 'Join group':
+		// 	subject = 'Dein Beitritt in einer Gruppe'
+		// 	template = groupJoin(alias, group.name, email, group.topic)
+		// 	send = res.send({
+		// 		group,
+		// 		message: `Email gesendet an: ${email}`,
+		// 	})
+		// 	scheduleMeetingReminders(group.futureMeetings, email, group.name, alias)
+		// 	break
 		case 'Join group':
 			subject = 'Dein Beitritt in einer Gruppe'
 			template = groupJoin(alias, group.name, email, group.topic)
 			send = res.send({
 				group,
 				message: `Email gesendet an: ${email}`,
+			})
+			// Schedule reminders after sending the response
+			process.nextTick(() => {
+				scheduleMeetingReminders(
+					group.futureMeetings,
+					email,
+					group.name,
+					alias
+				)
 			})
 			break
 		case 'Create group':
