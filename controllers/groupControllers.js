@@ -5,11 +5,13 @@ const { Meeting } = require('../models/Meeting.model')
 // const { getToken, createMeeting } = require('../utils/videoSDK')
 
 const myCustomError = require('../utils/myCustomError')
-const {getNextDatesForMeetings} = require('../utils/meetingRecurrence.helpers');
+const {
+	getNextDatesForMeetings,
+} = require('../utils/meetingRecurrence.helpers')
 
 exports.create = async (req, res, next) => {
 	const {
-		body: {name, description, topic, selfModerated, firstMeeting},
+		body: { name, description, topic, selfModerated, firstMeeting },
 		userId: currentUserId,
 	} = req
 	const { roomInfo } = res.locals
@@ -21,11 +23,15 @@ exports.create = async (req, res, next) => {
 			topic,
 			selfModerated: selfModerated || false,
 			moderator: currentUserId,
-			verified: selfModerated || false
+			verified: selfModerated || false,
 		})
 
 		if (firstMeeting) {
-			const meeting = await Meeting.create({...firstMeeting, roomId: roomInfo.data.roomId, group: group.id})
+			const meeting = await Meeting.create({
+				...firstMeeting,
+				roomId: roomInfo.data.roomId,
+				group: group.id,
+			})
 
 			group.meetings.push(meeting)
 		}
@@ -40,8 +46,11 @@ exports.create = async (req, res, next) => {
 		res.locals.group = group
 
 		if (process.env.NODE_ENV === 'development') {
-			res.status(200).send({group, message: 'Group successfully created'})
-		} else{
+			res.status(200).send({
+				group,
+				message: 'Group successfully created',
+			})
+		} else {
 			next()
 		}
 	} catch (error) {
@@ -49,47 +58,71 @@ exports.create = async (req, res, next) => {
 	}
 }
 
+exports.findAllForEmails = async () => {
+	// eslint-disable-next-line no-useless-catch
+	try {
+		const groups = await Group.find(
+			// { verified: true },
+			// 'name description verified img topic selfModerated membersCount'
+		)
+			.populate('moderator', '_id alias email')
+			.populate('members', 'alias email')
+			.populate('meetings')
+
+		return groups
+	} catch (error) {
+		throw error
+	}
+}
+
 // Just attach `?page=2&limit=10&name=someName&topic=someTopic` to your request URL to enable pagination or filtering.
 exports.findAll = async (req, res, next) => {
 	try {
 		// Set up pagination variables
-		const page = parseInt(req.query.page) || 1;
-		const limit = parseInt(req.query.limit) || 10;
-		const skip = (page - 1) * limit;
+		const page = parseInt(req.query.page) || 1
+		const limit = parseInt(req.query.limit) || 10
+		const skip = (page - 1) * limit
 
 		// Set up filters for group name or topic
 		const filter = {
-			verified: true
-		};
+			verified: true,
+		}
 		if (req.query.name) {
-			filter.name = new RegExp(req.query.name, 'i'); // Case-insensitive match
+			filter.name = new RegExp(req.query.name, 'i') // Case-insensitive match
 		}
 		if (req.query.topic) {
-			filter.topic = new RegExp(req.query.topic, 'i'); // Case-insensitive match
+			filter.topic = new RegExp(req.query.topic, 'i') // Case-insensitive match
 		}
 
-		const groups = await Group
-			.find(filter, 'name description verified img topic selfModerated membersCount')
+		const groups = await Group.find(
+			filter,
+			'name description verified img topic selfModerated membersCount'
+		)
 			.populate('moderator', '_id alias email')
 			.populate('meetings')
 			.skip(skip)
 			.limit(limit)
-		
-		// get the total count for pagination info
-		const totalCount = groups.length;
 
-		res.status(200).send({groups, totalCount})
+		// get the total count for pagination info
+		const totalCount = groups.length
+
+		res.status(200).send({ groups, totalCount })
 	} catch (error) {
 		next(error)
 	}
 }
 
 exports.findOne = async (req, res, next) => {
-	const { params: { groupId }, userId } = req
+	const {
+		params: { groupId },
+		userId,
+	} = req
 
 	try {
-		let group = await Group
-			.findOne({ _id: groupId }, 'name description verified img topic selfModerated membersCount')
+		let group = await Group.findOne(
+			{ _id: groupId },
+			'name description verified img topic selfModerated membersCount'
+		)
 			.populate('moderator', 'alias email')
 			.populate('members', 'alias email')
 			.populate('meetings')
@@ -99,23 +132,23 @@ exports.findOne = async (req, res, next) => {
 		group = group.toJSON()
 
 		const isModerator = group.moderator.id.equals(userId)
-		const isMember = group.members.some(m => m.id.equals(userId))
+		const isMember = group.members.some((m) => m.id.equals(userId))
 
 		group.meetings = getNextDatesForMeetings(group.meetings)
 		group.futureMeetings = group.meetings
-			.map(m => {
-				return m.nextRecurrences.map(r => {
+			.map((m) => {
+				return m.nextRecurrences.map((r) => {
 					delete m.nextRecurrences
 					return {
 						...m,
-						startDate: r
+						startDate: r,
 					}
 				})
 			})
 			.flat()
-			.sort((a,b) => new Date(a.startDate) - new Date(b.startDate))
+			.sort((a, b) => new Date(a.startDate) - new Date(b.startDate))
 
-		if(!isModerator && !isMember) delete group.members
+		if (!isModerator && !isMember) delete group.members
 
 		res.status(200).send(group)
 	} catch (error) {
@@ -124,18 +157,19 @@ exports.findOne = async (req, res, next) => {
 }
 
 exports.edit = async (req, res, next) => {
-	const { body, params: {groupId} } = req
+	const {
+		body,
+		params: { groupId },
+	} = req
 
 	try {
-		const {acknowledged} = await Group.updateOne(
-			{ _id: groupId },
-			body
-		)
+		const { acknowledged } = await Group.updateOne({ _id: groupId }, body)
 
-		if (!acknowledged) throw myCustomError('Something went wrong updating the group', 400)
+		if (!acknowledged)
+			throw myCustomError('Something went wrong updating the group', 400)
 
 		res.send({
-			message: 'Group successfully updated'
+			message: 'Group successfully updated',
 		})
 	} catch (error) {
 		next(error)
@@ -160,13 +194,14 @@ exports.delete = async (req, res, next) => {
 			}
 		)
 
-		await User.updateOne({ _id: group.moderator }, { $pull: { moderatedGroups: groupId } })
-
-		await Meeting.deleteMany(
-			{
-				group: groupId
-			}
+		await User.updateOne(
+			{ _id: group.moderator },
+			{ $pull: { moderatedGroups: groupId } }
 		)
+
+		await Meeting.deleteMany({
+			group: groupId,
+		})
 
 		await group.delete()
 
