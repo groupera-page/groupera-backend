@@ -9,7 +9,7 @@ const {
 	groupJoin,
 	groupCreate,
 } = require('../lib/emailTemplates')
-const { scheduleMeetingReminders } = require('../utils/email.reminder')
+const { scheduleMeetingReminders } = require('../utils/meeting.email.helper')
 const myCustomError = require('../utils/myCustomError')
 
 exports.sendEmail = (emailType) => async (req, res, next) => {
