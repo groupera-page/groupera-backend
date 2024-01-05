@@ -73,23 +73,6 @@ exports.sendEmail = (emailType) => async (req, res, next) => {
 				message: `Email gesendet an: ${email}`,
 			})
 			break
-		// case 'Join group':
-		// 	subject = 'Dein Beitritt in einer Gruppe'
-		// 	template = groupJoin(alias, group.name, email, group.topic)
-		// 	send = res.send({
-		// 		group,
-		// 		message: `Email gesendet an: ${email}`,
-		// 	})
-		// 	// Schedule reminders after sending the response
-		// 	process.nextTick(() => {
-		// 		scheduleMeetingReminders(
-		// 			group.futureMeetings,
-		// 			email,
-		// 			group.name,
-		// 			alias
-		// 		)
-		// 	})
-		// 	break
 		case 'Create group':
 			subject = 'Deine neue Gruppe bei Groupera'
 			template = groupCreate(alias, email)
@@ -118,7 +101,7 @@ exports.sendEmail = (emailType) => async (req, res, next) => {
 		})
 
 		const info = await transporter.sendMail({
-			from: `${process.env.SEND_TRANSACTIONAL_EMAILS_FROM_NAME} <${process.env.SEND_TRANSACTIONAL_EMAILS_FROM_EMAIL}>`,
+			from: `${process.env.SEND_TRANSACTIONAL_EMAILS_FROM_NAME} <${process.env.SEND_TRANSACTIONAL_EMAILS_FROM_EMAIL_VERIFICATION}>`,
 			to: `${alias} <${email}>`,
 			subject: subject,
 			html: template,
