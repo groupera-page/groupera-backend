@@ -29,7 +29,7 @@ exports.sendMeetingReminder = async (email, name, groupName, subject, time) => {
 			from: `${process.env.SEND_TRANSACTIONAL_EMAILS_FROM_NAME} <${process.env.SEND_TRANSACTIONAL_EMAILS_FROM_EMAIL_PRODUCT}>`,
 			to: email,
 			subject: subject,
-			html: time === 24 ? nextMeeting24Hours(name, groupName, email) : nextMeeting1Hour(name, groupName, email),
+			html: time == 24 ? nextMeeting24Hours(name, groupName, email) : nextMeeting1Hour(name, groupName, email),
 			// html: nextMeeting1Hour(name, groupName, email)
 		})
 		console.log(`Email sent: ${info.response}`)

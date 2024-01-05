@@ -11,7 +11,7 @@ process.env.TZ = 'Europe/Berlin'
 let currentDate = new Date()
 currentDate.setHours(currentDate.getHours() + 1)
 
-const meetingScheduler = schedule.scheduleJob('58 16 * * *', async () => {
+const meetingScheduler = schedule.scheduleJob('0 0 * * *', async () => {
 	try {
 		const groups = await findAllForEmails()
 		const group = groups[26]
@@ -27,71 +27,34 @@ const meetingScheduler = schedule.scheduleJob('58 16 * * *', async () => {
 
 		console.log(currentDate)
 
-		// const reminder24Hours = new Date(
-		// 	nextMeeting.getTime() - 24 * 60 * 60 * 1000
-		// )
-
-		// const reminder1Hour = new Date(
-		// 	nextMeeting.getTime() - 1 * 60 * 60 * 1000
-		// )
-
-		// const reminder24Hours = new Date(nextMeeting)
-		// reminder24Hours.setHours(reminder24Hours.getHours() - 24)
+		const reminder24Hours = new Date(nextMeeting)
+		reminder24Hours.setHours(reminder24Hours.getHours() - 25)
 
 		const reminder1Hour = new Date(nextMeeting)
 		reminder1Hour.setHours(reminder1Hour.getHours() - 1)
 
-		// console.log(reminder24Hours)
+		console.log(reminder24Hours)
 		console.log(reminder1Hour)
 
-		// if (currentDate >= reminder24Hours && currentDate < nextMeeting) {
-		// 	schedule.scheduleJob(reminder24Hours, async () => {
-		// 		await sendMeetingReminder(
-		// 			group.moderator.email,
-		// 			group.moderator.alias,
-		// 			group.name,
-		// 			subject24Hours,
-		// 			24
-		// 		)
-		// 		if (group.members.length > 1)
-		// 			await sendMeetingReminder(
-		// 				group.members[0].email,
-		// 				group.members[0].alias,
-		// 				group.name,
-		// 				subject24Hours,
-		// 				24
-		// 			)
-		// 	})
-		// } else {
-		// 	console.log("meow")
-		// }
-		if (nextMeeting && currentDate < nextMeeting) {
-			const reminder24Hours = new Date(nextMeeting.getTime() - 24 * 60 * 60 * 1000);
-		
-			console.log(reminder24Hours)
+		schedule.scheduleJob(reminder24Hours, async () => {
+			console.log('sending 24')
+			await sendMeetingReminder(
+				group.moderator.email,
+				group.moderator.alias,
+				group.name,
+				subject24Hours,
+				24
+			)
+			if (group.members.length > 1)
+				await sendMeetingReminder(
+					group.members[0].email,
+					group.members[0].alias,
+					group.name,
+					subject24Hours,
+					24
+				)
+		})
 
-			if (currentDate >= reminder24Hours) {
-				schedule.scheduleJob(reminder24Hours, async () => {
-					await sendMeetingReminder(
-						group.moderator.email,
-						group.moderator.alias,
-						group.name,
-						subject24Hours,
-						24
-					);
-					if (group.members.length > 1)
-						await sendMeetingReminder(
-							group.members[0].email,
-							group.members[0].alias,
-							group.name,
-							subject24Hours,
-							24
-						);
-				});
-			} else {
-				console.log("meow");
-			}
-		}
 		schedule.scheduleJob(reminder1Hour, async () => {
 			console.log('sending 1')
 			await sendMeetingReminder(
