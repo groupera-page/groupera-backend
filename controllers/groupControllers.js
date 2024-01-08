@@ -62,7 +62,7 @@ exports.findAllForEmails = async () => {
 	// eslint-disable-next-line no-useless-catch
 	try {
 		const groups = await Group.find(
-			{ verified: true },
+			{ verified: false },
 		)
 			.populate('moderator', '_id alias email')
 			.populate('members', 'alias email')
