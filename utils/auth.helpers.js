@@ -41,7 +41,8 @@ exports.getAuthTokens = (user) => {
 	const authToken = jwt.sign(
 		{ user: userObject },
 		process.env.AUTH_TOKEN_SECRET,
-		jwtAlgorithm('60m')
+		jwtAlgorithm('10m')
+
 	)
 	const refreshToken = jwt.sign(
 		{ user: userObject },

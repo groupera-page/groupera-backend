@@ -3,7 +3,6 @@ const nodemailer = require('nodemailer')
 const {
 	nextMeeting24Hours,
 	nextMeeting1Hour,
-	groupCreate
 } = require('../lib/emailTemplates')
 
 const transporter = nodemailer.createTransport({
@@ -17,20 +16,12 @@ const transporter = nodemailer.createTransport({
 })
 
 exports.sendMeetingReminder = async (email, name, groupName, subject, time) => {
-	// const mailOptions = {
-	// 	from: `${process.env.SEND_TRANSACTIONAL_EMAILS_FROM_NAME} <${process.env.SEND_TRANSACTIONAL_EMAILS_FROM_EMAIL_PRODUCT}>`,
-	// 	to: email,
-	// 	subject: reminder === 24 ? subject24Hours : subject1Hour,
-	// 	html: reminder === 24 ? nextMeeting24Hours(name, groupName, email) : nextMeeting1Hour(name, groupName, email),
-	// }
-
 	try {
 		const info = await transporter.sendMail({
 			from: `${process.env.SEND_TRANSACTIONAL_EMAILS_FROM_NAME} <${process.env.SEND_TRANSACTIONAL_EMAILS_FROM_EMAIL_PRODUCT}>`,
 			to: email,
 			subject: subject,
 			html: time == 24 ? nextMeeting24Hours(name, groupName, email) : nextMeeting1Hour(name, groupName, email),
-			// html: nextMeeting1Hour(name, groupName, email)
 		})
 		console.log(`Email sent: ${info.response}`)
 	} catch (error) {

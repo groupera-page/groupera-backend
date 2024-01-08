@@ -14,64 +14,66 @@ currentDate.setHours(currentDate.getHours() + 1)
 const meetingScheduler = schedule.scheduleJob('0 0 * * *', async () => {
 	try {
 		const groups = await findAllForEmails()
-		const group = groups[26]
 
-		console.log(group)
-
-		const nextMeeting = getNextRecurrenceDate(
-			group.meetings[0],
-			currentDate
-		)
-
-		console.log(nextMeeting)
-
-		console.log(currentDate)
-
-		const reminder24Hours = new Date(nextMeeting)
-		reminder24Hours.setHours(reminder24Hours.getHours() - 25)
-
-		const reminder1Hour = new Date(nextMeeting)
-		reminder1Hour.setHours(reminder1Hour.getHours() - 1)
-
-		console.log(reminder24Hours)
-		console.log(reminder1Hour)
-
-		schedule.scheduleJob(reminder24Hours, async () => {
-			console.log('sending 24')
-			await sendMeetingReminder(
-				group.moderator.email,
-				group.moderator.alias,
-				group.name,
-				subject24Hours,
-				24
+		groups.forEach((group) => {
+			const nextMeeting = getNextRecurrenceDate(
+				group.meetings[0],
+				currentDate
 			)
-			if (group.members.length > 1)
-				await sendMeetingReminder(
-					group.members[0].email,
-					group.members[0].alias,
-					group.name,
-					subject24Hours,
-					24
-				)
-		})
 
-		schedule.scheduleJob(reminder1Hour, async () => {
-			console.log('sending 1')
-			await sendMeetingReminder(
-				group.moderator.email,
-				group.moderator.alias,
-				group.name,
-				subject1Hour,
-				1
-			)
-			if (group.members.length > 1)
-				await sendMeetingReminder(
-					group.members[0].email,
-					group.members[0].alias,
-					group.name,
-					subject1Hour,
-					1
-				)
+			const reminder24Hours = new Date(nextMeeting)
+			reminder24Hours.setHours(reminder24Hours.getHours() - 25)
+
+			const reminder1Hour = new Date(nextMeeting)
+			reminder1Hour.setHours(reminder1Hour.getHours() - 1)
+
+			schedule.scheduleJob(reminder24Hours, async () => {
+				if (process.env.NODE_ENV === 'development') {
+					console.log('sending 24')
+				} else {
+					await sendMeetingReminder(
+						group.moderator.email,
+						group.moderator.alias,
+						group.name,
+						subject24Hours,
+						24
+					)
+					if (group.members.length >= 1)
+						group.members.forEach(async (member) => {
+							await sendMeetingReminder(
+								member.email,
+								member.alias,
+								group.name,
+								subject24Hours,
+								24
+							)
+						})
+				}
+			})
+
+			schedule.scheduleJob(reminder1Hour, async () => {
+				if (process.env.NODE_ENV === 'development') {
+					console.log('sending 1')
+				} else {
+					await sendMeetingReminder(
+						group.moderator.email,
+						group.moderator.alias,
+						group.name,
+						subject1Hour,
+						1
+					)
+					if (group.members.length >= 1)
+						group.members.forEach(async (member) => {
+							await sendMeetingReminder(
+								member.email,
+								member.alias,
+								group.name,
+								subject1Hour,
+								1
+							)
+						})
+				}
+			})
 		})
 	} catch (error) {
 		console.error('Error fetching groups and meetings:', error)
