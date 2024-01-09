@@ -30,7 +30,7 @@ const meetingScheduler = schedule.scheduleJob('0 0 * * *', async () => {
 			console.log(currentDate)
 
 			schedule.scheduleJob(reminder24Hours, async () => {
-				if (process.env.NODE_ENV === 'development') {
+				if (process.env.NODE_ENV === 'staging') {
 					console.log('sending 24')
 				} else {
 					await sendMeetingReminder(
@@ -54,7 +54,7 @@ const meetingScheduler = schedule.scheduleJob('0 0 * * *', async () => {
 			})
 
 			schedule.scheduleJob(reminder1Hour, async () => {
-				if (process.env.NODE_ENV === 'development') {
+				if (process.env.NODE_ENV === 'staging') {
 					console.log('sending 1')
 				} else {
 					await sendMeetingReminder(
