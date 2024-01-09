@@ -1,7 +1,8 @@
-const getNextRecurrenceDate = (event, currentDate) => {
+const getNextRecurrenceDate = (event, currentDate, next) => {
 	if (event.recurrence.type === 'none') {
 		return event.startDate;
 	}
+	if (!event.recurrence) next()
 
 	let nextDate = new Date(event.startDate);
 	const addDays = (date, days) => new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
@@ -134,3 +135,5 @@ exports.findNextUpcomingMeeting = (eventsWithNextRecurrences) => {
 	// Return the first element in the sorted array
 	return sortedEvents[0];
 };
+
+module.exports = { getNextRecurrenceDate };
