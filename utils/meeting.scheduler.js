@@ -27,7 +27,7 @@ const meetingScheduler = schedule.scheduleJob('20 14 * * *', async () => {
 					await sendMeetingReminder(
 						group.moderator.email,
 						group.moderator.alias,
-						group.name
+
 					)
 					if (group.members.length >= 1)
 						group.members.forEach(async (member) => {
