@@ -1,6 +1,5 @@
 require('dotenv').config()
 const express = require('express')
-// const schedule = require('node-schedule')
 require('./db')
 
 const { noPathError, defaultError } = require('./error-handling')
