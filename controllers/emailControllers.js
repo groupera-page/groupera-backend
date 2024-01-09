@@ -100,7 +100,7 @@ exports.sendEmail = (emailType) => async (req, res, next) => {
 		})
 
 		const info = await transporter.sendMail({
-			from: `${process.env.SEND_TRANSACTIONAL_EMAILS_FROM_NAME} <${process.env.SEND_TRANSACTIONAL_EMAILS_FROM_EMAIL}>`,
+			from: `${process.env.SEND_TRANSACTIONAL_EMAILS_FROM_NAME} <${process.env.SEND_TRANSACTIONAL_EMAILS_FROM_EMAIL_VERIFICATION}>`,
 			to: `${alias} <${email}>`,
 			subject: subject,
 			html: template,
