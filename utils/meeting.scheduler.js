@@ -7,9 +7,11 @@ const { getNextRecurrenceDate } = require('./meetingRecurrenceDate')
 process.env.TZ = 'Europe/Berlin'
 let currentDate = new Date()
 
-const meetingScheduler = schedule.scheduleJob('20 14 * * *', async () => {
+const meetingScheduler = schedule.scheduleJob('32 14 * * *', async () => {
 	try {
 		const groups = await findAllForEmails()
+
+		console.log('HOWDY')
 
 		groups.forEach((group) => {
 			const nextMeeting = getNextRecurrenceDate(
