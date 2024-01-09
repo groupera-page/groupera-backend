@@ -2,14 +2,13 @@ const schedule = require('node-schedule')
 
 const { sendMeetingReminder } = require('./meeting.email.helper')
 const { findAllForEmails } = require('../controllers/groupControllers')
-const { getNextRecurrenceDate } = require('./meetingRecurrence.helpers')
+const { getNextRecurrenceDate } = require('./meetingRecurrenceDate')
 
 const subject24Hours = 'Dein Gruppen-Meeting beginnt morgen!'
 const subject1Hour = 'Dein Gruppen-Meeting beginnt in einer Stunde!'
 
 process.env.TZ = 'Europe/Berlin'
 let currentDate = new Date()
-currentDate.setHours(currentDate.getHours() + 1)
 
 const meetingScheduler = schedule.scheduleJob('0 0 * * *', async () => {
 	try {
@@ -26,6 +25,9 @@ const meetingScheduler = schedule.scheduleJob('0 0 * * *', async () => {
 
 			const reminder1Hour = new Date(nextMeeting)
 			reminder1Hour.setHours(reminder1Hour.getHours() - 1)
+
+			console.log(reminder24Hours)
+			console.log(currentDate)
 
 			schedule.scheduleJob(reminder24Hours, async () => {
 				if (process.env.NODE_ENV === 'development') {
