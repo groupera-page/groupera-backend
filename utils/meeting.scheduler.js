@@ -10,7 +10,7 @@ const subject1Hour = 'Dein Gruppen-Meeting beginnt in einer Stunde!'
 process.env.TZ = 'Europe/Berlin'
 let currentDate = new Date()
 
-const meetingScheduler = schedule.scheduleJob('45 13 * * *', async () => {
+const meetingScheduler = schedule.scheduleJob('0 0 * * *', async () => {
 	try {
 		const groups = await findAllForEmails()
 
