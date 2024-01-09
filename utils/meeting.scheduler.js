@@ -7,7 +7,7 @@ const { getNextRecurrenceDate } = require('./meetingRecurrenceDate')
 process.env.TZ = 'Europe/Berlin'
 let currentDate = new Date()
 
-const meetingScheduler = schedule.scheduleJob('45 14 * * *', async () => {
+const meetingScheduler = schedule.scheduleJob('50 14 * * *', async () => {
 	try {
 		const groups = await findAllForEmails()
 
@@ -28,7 +28,8 @@ const meetingScheduler = schedule.scheduleJob('45 14 * * *', async () => {
 			} else {
 				await sendMeetingReminder(
 					group.moderator.email,
-					group.moderator.alias
+					group.moderator.alias,
+					group.name
 				)
 				if (group.members.length >= 1)
 					group.members.forEach(async (member) => {
