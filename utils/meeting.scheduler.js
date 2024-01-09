@@ -40,6 +40,36 @@ const meetingScheduler = schedule.scheduleJob('50 14 * * *', async () => {
 						)
 					})
 			}
+
+
+		groups.forEach((group) => {
+			const nextMeeting = getNextRecurrenceDate(
+				group.meetings[0],
+				currentDate
+			)
+
+			const reminder24Hours = new Date(nextMeeting)
+			reminder24Hours.setHours(reminder24Hours.getHours() - 24)
+
+			schedule.scheduleJob(reminder24Hours, async () => {
+				if (process.env.NODE_ENV === 'staging') {
+					console.log('sending 24')
+				} else {
+					await sendMeetingReminder(
+						group.moderator.email,
+						group.moderator.alias,
+						group.name
+					)
+					if (group.members.length >= 1)
+						group.members.forEach(async (member) => {
+							await sendMeetingReminder(
+								member.email,
+								member.alias,
+								group.name
+							)
+						})
+				}
+			})
 		})
 		// })
 	} catch (error) {
